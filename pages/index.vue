@@ -1,16 +1,16 @@
 <template>
-  <div class="container mx-auto px-4 py-8 flex flex-col lg:flex-row gap-4 lg:gap-12">
+  <div class="container mx-auto px-4 pt-4 md:py-8 flex flex-col lg:flex-row gap-4 lg:gap-12">
     <!-- À la une section -->
     <section class="flex-[3] w-full lg:w-auto">
-      <h1 class="font-serif text-4xl mb-2 md:pl-4">À la une</h1>
-      <p v-if="latestEdition" class="text-gray-600 mb-3 pl-4">Dernière édition : {{ latestEdition.title }}</p>
+      <h1 class="font-serif text-3xl md:text-4xl mb-1 md:mb-2 md:pl-4">À la une</h1>
+      <p v-if="latestEdition" class="text-gray-600 mb-3 md:pl-4">Dernière édition : {{ latestEdition.title }}</p>
       <p v-else class="text-gray-600 mb-3 md:pl-4">Aucune édition publiée</p>
 
-      <div class="flex gap-2 flex-col justify-start">
+      <div class="flex gap-4 flex-col justify-start">
         <div v-for="(article, index) in latestEdition?.articles || []" :key="article.metadata.slug" class="group">
           <!-- Featured article card -->
           <NuxtLink :to="`/article/${article.metadata.slug}`">
-            <div :class="['overflow-hidden flex-col md:flex-row gap-12 items-center hover:bg-[var(--color-amber-150)] p-4 rounded-lg', index % 2 === 1 ? 'flex-col-reverse md:flex-row-reverse' : '']">
+            <div :class="['overflow-hidden flex flex-col md:flex-row gap-4 md:gap-12 items-center bg-[var(--color-amber-150)] md:bg-transparent md:hover:bg-[var(--color-amber-150)] p-3 md:p-4 rounded-lg', index % 2 === 1 ? 'md:flex-row-reverse' : '']">
               <img v-if="article.metadata.cover" :src="article.metadata.cover" class="object-cover flex-none h-32 w-full md:h-auto md:w-1/3 aspect-square rounded-sm"
                 :alt="article.title" />
               <div v-else class="w-full h-full bg-gray-100 flex items-center justify-center">
@@ -18,8 +18,8 @@
               </div>
 
               <div>
-                <div class="text-sm bg-secondary-300 block w-max py-1 px-2 rounded-full text-black mb-2">Géopolitique</div>
-                <h2 class="font-serif text-lg md:text-2xl font-medium mb-3 text-black">
+                <div class="text-xs sm:text-sm bg-secondary-300 block w-max py-1 px-2 rounded-full text-black mb-2">Géopolitique</div>
+                <h2 class="font-serif text-base md:text-2xl font-medium mb-1 md:mb-3 text-black">
                   {{ article.title }} 
                 </h2>
                 <p class="hidden md:block text-gray-600 mb-4 text-sm leading-[1.3] line-clamp-5">{{ article.metadata.description }}</p>

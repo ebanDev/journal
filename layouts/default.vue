@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-[#FCFAF8] min-h-screen flex flex-col items-center overflow-x-hidden">
+  <div class="bg-[#FCFAF8] pb-12 min-h-screen flex flex-col items-center overflow-x-hidden">
     <div class="hidden md:block">
       <Header />
     </div>

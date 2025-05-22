@@ -3,7 +3,7 @@
     <h1 class="text-3xl font-serif">La Veille</h1>
     <section>
       <!-- Send Article Form -->
-      <div class="flex flex-col bg-secondary-300 p-4 rounded-lg mb-4">
+      <div class="flex flex-col bg-secondary-300 p-3 rounded-lg mb-4">
         <span class="text-lg font-semibold pl-2">Envoyer un article</span>
         <div class="flex">
           <UInput v-model="form.url"
