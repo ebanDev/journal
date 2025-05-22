@@ -5,35 +5,36 @@
       <h2 class="font-bold text-base">Le journal des luttes de Bordeaux</h2>
     </NuxtLink>
     <div class="relative">
-      <UInput
-        class="w-96"
-        v-model="searchQuery"
-        @input="onSearch"
-        @focus="onFocus"
-        @blur="onBlur"
-        placeholder="Rechercher..."
-        icon="tabler-search"
-        variant="outline"
-      />
+      <UInput class="w-96" v-model="searchQuery" @input="onSearch" @focus="onFocus" @blur="onBlur"
+        placeholder="Rechercher..." icon="mingcute-search-line" variant="outline" />
       <transition name="fade">
-        <div v-if="showResults" class="absolute bg-white shadow rounded-lg w-full max-h-60 overflow-auto z-10" @mouseover="isResultsHovered = true" @mouseleave="isResultsHovered = false">
+        <div v-if="showResults" class="absolute bg-white shadow rounded-lg w-full max-h-60 overflow-auto z-10"
+          @mouseover="isResultsHovered = true" @mouseleave="isResultsHovered = false">
           <ul>
             <li v-for="(item, idx) in articles" :key="idx" class="px-2 py-2 hover:bg-secondary-200 cursor-pointer">
               <NuxtLink :to="`/article/${item.metadata.slug}`" class="flex items-center gap-4">
-                <img v-if="item.metadata.cover" :src="item.metadata.cover" alt="" class="w-16 h-16 object-cover rounded-lg"/>
+                <img v-if="item.metadata.cover" :src="item.metadata.cover" alt=""
+                  class="w-16 h-16 object-cover rounded-lg" />
                 <div>
                   <h3 class="text-base font-semibold">{{ item.title }}</h3>
                 </div>
               </NuxtLink>
             </li>
+            <NuxtLink :to="'/search?q=' + encodeURIComponent(searchQuery)"
+              class="px-2 py-2 hover:bg-secondary-200 cursor-pointer flex items-center gap-4">
+              <span class="text-sm text-gray-500 flex items-center justify-center gap-1 w-full">
+                <Icon name="mingcute-add-line" class="text-gray-400" />
+                Tous les résultats
+              </span>
+            </NuxtLink>
           </ul>
         </div>
       </transition>
     </div>
     <div class="flex gap-2 items-center">
-      <UButton label="Tous les articles" icon="tabler-news" href="/articles" color="secondary" size="md"/>
-      <UButton label="La veille" icon="tabler-radar-2" href="/la-veille" color="secondary" size="md"/>
-      <UButton :label="userName" icon="tabler-user-circle" href="/internal" size="md" />
+      <UButton label="Tous les articles" icon="mingcute-news-line" href="/articles" color="secondary" size="md" />
+      <UButton label="La veille" icon="mingcute-radar-line" href="/la-veille" color="secondary" size="md" />
+      <UButton :label="userName" icon="mingcute-user-4-line" href="/internal" size="md" />
     </div>
   </header>
 </template>
@@ -71,19 +72,22 @@ const userName = ref('')
 
 if (user?.value?.email) {
   const { data } = await useSupabaseClient()
-      .from('members')
-      .select('full_name')
-      .eq('email', user.value.email)
-      .single()
+    .from('members')
+    .select('full_name')
+    .eq('email', user.value.email)
+    .single()
   userName.value = data?.full_name
 }
 </script>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
-.fade-enter-from, .fade-leave-to {
+
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
   transform: translateY(-10px);
 }

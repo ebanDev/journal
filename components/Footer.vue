@@ -1,16 +1,18 @@
 <template>
-  <nav class="fixed bottom-0 left-0 right-0 bg-[#FFFDFD] shadow-t py-2 flex justify-around">
+  <nav class="fixed bottom-0 left-0 right-0 bg-[#FFFDFD] shadow-t py-1 flex justify-around items-center">
     <NuxtLink
       v-for="item in navItems"
       :key="item.label"
       :to="item.href"
-      class="flex flex-col items-center p-2 rounded transition-colors duration-200"
-      :class="item.active ? 'text-primary-700 bg-primary-50' : 'text-gray-600 bg-[#FFFDFD]'"
+      class="flex flex-col items-center p-2 rounded transition-colors duration-200 bg-[#FFFDFD] w-18"
+      :class="item.active ? 'text-primary-700' : 'text-gray-600'"
     >
-      <Icon
-        :name="item.icon"
-        class="text-2xl mb-1 transition-colors duration-200"
+      <div class="rounded-full w-full flex items-center justify-center mb-1 py-1" :class="item.active ? 'bg-red-50' : ''">
+        <Icon
+        :name="item.active ? item.iconActive : item.icon"
+        class="text-2xl transition-colors duration-200"
       />
+      </div>
       <span class="text-xs font-semibold transition-colors duration-200">
         {{ item.label }}
       </span>
@@ -30,27 +32,32 @@ const currentPath = computed(() => useRoute().path);
 
 const navItems = computed(() => [{
   href: '/',
-  icon: 'tabler-home',
+  icon: 'mingcute-home-3-line',
+  iconActive: 'mingcute-home-3-fill',
   label: 'Accueil',
   active: currentPath.value == '/'
 }, {
   href: '/articles',
-  icon: 'tabler-news',
+  icon: 'mingcute-news-line',
+  iconActive: 'mingcute-news-fill',
   label: 'Articles',
   active: currentPath.value == '/articles' || currentPath.value.startsWith('/article/')
 }, {
   href: '/la-veille',
-  icon: 'tabler-radar-2',
+  icon: 'mingcute-radar-line',
+  iconActive: 'mingcute-radar-fill',
   label: 'La veille',
   active: currentPath.value == '/la-veille'
 }, {
   href: '/search',
-  icon: 'tabler-search',
+  icon: 'mingcute-search-line',
+  iconActive: 'mingcute-search-3-fill',
   label: 'Recherche',
   active: currentPath.value == '/search'
 }, {
   href: '/internal',
-  icon: 'tabler-user-circle',
+  icon: 'mingcute-user-4-line',
+  iconActive: 'mingcute-user-4-fill',
   label: 'Compte',
   active: currentPath.value == '/internal' || currentPath.value.startsWith('/internal/')
 }])
