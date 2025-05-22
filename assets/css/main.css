@@ -1,0 +1,35 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+@plugin '@tailwindcss/typography';
+
+@theme {
+  --font-sans: 'Sen', sans-serif;
+  --font-serif: 'Gravitas One', serif; 
+}
+
+:root {
+  --color-red-50: #fde3e2;
+  --color-red-100: #fcc8c5;
+  --color-red-200: #f8918b;
+  --color-red-300: #f55a51;
+  --color-red-400: #f22217;
+  --color-red-500: #c0150b;
+  --color-red-600: #9a1009;
+  --color-red-700: #740c07;
+  --color-red-800: #4d0804;
+  --color-red-900: #270402;
+  --color-red-950: #130201;
+
+  --color-amber-50: #fcfaf8;
+  --color-amber-100: #fbf8f4;
+  --color-amber-150: #f8f3ed;
+  --color-amber-200: #f5eee5;
+  --color-amber-300: #f1e7da;
+  --color-amber-400: #dfc8aa;
+  --color-amber-500: #cda97a;
+  --color-amber-600: #ba8a4a;
+  --color-amber-700: #906937;
+  --color-amber-800: #604624;
+  --color-amber-900: #302312;
+  --color-amber-950: #161008;
+}

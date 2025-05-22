@@ -1,0 +1,45 @@
+{
+  "name": "nuxt-app",
+  "dependencies": {
+    "@nuxt/fonts": "0.11.1",
+    "@nuxt/icon": "1.12.0",
+    "@nuxt/image": "1.10.0",
+    "@nuxt/scripts": "0.11.5",
+    "@nuxt/ui": "3.0.2",
+    "@nuxtjs/supabase": "1.5.0",
+    "@tailwindcss/vite": "^4.1.7",
+    "@tiptap/extension-character-count": "^2.12.0",
+    "@tiptap/extension-placeholder": "^2.12.0",
+    "@tiptap/starter-kit": "^2.12.0",
+    "@tiptap/vue-3": "^2.12.0",
+    "@unhead/vue": "^2.0.9",
+    "cheerio": "^1.0.0",
+    "lodash": "^4.17.21",
+    "nuxt": "^3.17.4",
+    "supabase": "^2.23.4",
+    "supabase-error-translator-js": "^2.1.0",
+    "tailwindcss": "^4.1.7",
+    "tiptap-markdown": "^0.8.10",
+    "typescript": "^5.8.3",
+    "vue": "^3.5.14",
+    "vue-router": "^4.5.1"
+  },
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@iconify-json/tabler": "^1.2.18",
+    "@tailwindcss/typography": "^0.5.16",
+    "@types/lodash-es": "^4.17.12"
+  },
+  "trustedDependencies": [
+    "@parcel/watcher",
+    "@tailwindcss/oxide"
+  ]
+}

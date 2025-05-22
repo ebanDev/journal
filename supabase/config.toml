@@ -1,0 +1,32 @@
+project_id = "journal"
+
+[db]
+  migrations = "supabase/migrations"
+
+[auth]
+  # Disable open signups so only invites work
+  site_url = "http://localhost:3000"
+  additional_redirect_urls = [
+    "http://127.0.1:3000/**",
+    "http://localhost:3000/**"
+  ]
+  enable_signup = false
+  [auth.email]
+    enable_signup = true
+    double_confirm_changes = true
+    secure_password_change = false
+    max_frequency = "10s"
+    otp_length = 6
+    otp_expiry = 3600
+    [auth.email.template.magic_link]
+      subject = "Se connecter à Contradiction·s"
+      content_path = "supabase/templates/magic-link.html"
+
+[functions.send-invite]
+verify_jwt = false
+
+[functions.helloasso-webhook]
+verify_jwt = false
+
+[realtime]
+enabled = true
