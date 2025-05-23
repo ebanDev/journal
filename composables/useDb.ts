@@ -49,14 +49,16 @@ export function useDb() {
   async function getArticles(issueId?: string) {
     let query = supabase
       .from('articles')
-      .select('*, article_categories:article_categories(category_id, categories(name))')
+      .select('*, article_categories:article_categories(category_id, categories(name, icon))')
     if (issueId) query = query.eq('issue_id', issueId)
     const { data, error } = await query
     if (error) throw error
-    // Attach categories as array of names
+    // Attach categories as array of objects { name, icon }
     return (data || []).map((a: any) => ({
       ...a,
-      categories: (a.article_categories || []).map((ac: any) => ac.categories?.name).filter(Boolean)
+      categories: (a.article_categories || [])
+        .map((ac: any) => ac.categories && { name: ac.categories.name, icon: ac.categories.icon })
+        .filter(Boolean)
     }))
   }
 

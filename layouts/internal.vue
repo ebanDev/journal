@@ -27,6 +27,7 @@ const isAdmin = computed(() => member.value?.role === 'admin')
 // Base navigation items
 const baseItems: NavigationMenuItem[] = [
   { label: 'Articles', icon: 'mingcute-news-line', to: '/internal/articles' },
+  { label: 'Catégories', icon: 'mingcute-folder-2-line', to: '/internal/categories' },
   { label: 'La Veille', icon: 'mingcute-radar-line', to: '/internal/laveille' },
   { label: 'Profil', icon: 'mingcute-user-1-line', to: '/internal/profile' },
 ]

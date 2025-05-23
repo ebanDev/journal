@@ -21,8 +21,9 @@
 
               <div class="p-4">
                 <div v-if="article.categories && article.categories.length" class="flex flex-wrap gap-2 mb-2">
-                  <span v-for="cat in article.categories" :key="cat"
-                    class="text-xs sm:text-sm bg-secondary-300 py-1 px-2 rounded-full text-black">{{ cat }}</span>
+                  <UBadge v-for="cat in article.categories" :key="cat.name"
+                    color="secondary"
+                    :label="cat.name" :icon="cat.icon ? 'mingcute:' + cat.icon : undefined" />
                 </div>
                 <h2 class="font-serif text-base md:text-2xl font-medium mb-1 md:mb-3 text-black">
                   {{ article.title }}
@@ -83,8 +84,9 @@
               class="object-cover w-full h-40 rounded-t-lg" :alt="article.title" />
             <div class="p-3">
               <div v-if="article.categories && article.categories.length" class="flex flex-wrap gap-2 mb-1">
-                <span v-for="cat in article.categories" :key="cat"
-                  class="text-xs bg-secondary-300 py-1 px-2 rounded-full text-black">{{ cat }}</span>
+                <UBadge v-for="cat in article.categories" :key="cat.name"
+                  color="secondary"
+                  :label="cat.name" :icon="cat.icon ? 'mingcute:' + cat.icon : undefined" />
               </div>
               <h3 class="font-extrabold text-lg mb-1 text-black">{{ article.title }}</h3>
               <p class="text-gray-600 text-sm line-clamp-3">{{ article.description }}</p>
@@ -96,12 +98,22 @@
   </section>
   <section class="container mx-auto mt-10 p-4">
     <h1 class="font-serif text-3xl md:text-4xl mb-8 text-center">Catégories</h1>
-    <!-- a horizontal scrollable card list -->
-    <div class="flex overflow-x-auto gap-4">
-      <NuxtLink v-for="cat in categories" :key="cat.id" :to="`/articles?category=${cat.slug}`"
-        class="bg-secondary-100 hover:bg-[var(--color-amber-200)] transition-colors rounded-lg p-3 whitespace-nowrap">
-        {{ cat.name }}
-      </NuxtLink>
+    <div class="relative">
+      <div class="flex gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4">
+        <NuxtLink v-for="cat in categories" :key="cat.id" :to="`/articles?category=${cat.slug}`"
+          class="group rounded-lg min-w-[260px] max-w-xs h-64 flex flex-col items-center justify-between shadow-sm snap-center relative overflow-hidden">
+          <div v-if="cat.cover" class="absolute inset-0 w-full h-full">
+            <img :src="cat.cover" :alt="cat.name" class="object-cover w-full h-full transition-transform group-hover:scale-105 duration-200" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+          </div>
+          <div class="absolute bottom-0 left-0 right-0 flex flex-col items-center gap-2 py-4 text-white z-10">
+            <div class="flex items-center gap-2 text-xl">
+              <Icon :name="'mingcute:' + cat.icon" />
+              <span class="font-bold text-center">{{ cat.name }}</span>
+            </div>
+          </div>
+        </NuxtLink>
+      </div>
     </div>
   </section>
   <section class="container mx-auto mt-10 p-4 pb-12">
@@ -109,13 +121,13 @@
     <!-- A swiper --->
     <ClientOnly>
       <swiper-container :slidesPerView="'auto'" :centeredSlides="true"
-        :grabCursor="true" :effect="'coverflow'"
+        :grabCursor="true" :effect="'coverflow'" :initialSlide="1"
         :coverflowEffect="{ rotate: 0, stretch: 0, depth: 100, modifier: 1, scale: .9, slideShadows: true }"
         >
-        <swiper-slide v-for="issue in issues" :key="issue.id" class="flex justify-center w-auto h-128 max-h-auto max-w-[80%]">
+        <swiper-slide v-for="issue in issues" :key="issue.id" class="flex justify-center w-auto max-w-[80%] h-auto">
           <NuxtLink :to="`/issues/${issue.slug}`"
-            class="bg-secondary-100 hover:bg-[var(--color-amber-200)] transition-colors rounded-lg p-3 w-auto h-full">
-            <img v-if="issue.cover" :src="issue.cover" class="object-cover w-auto h-full rounded-t-lg"
+            class="bg-secondary-100 hover:bg-[var(--color-amber-200)] transition-colors rounded-lg p-3 h-auto">
+            <img v-if="issue.cover" :src="issue.cover" class="object-contain w-auto h-auto max-w-full max-h-128 rounded-t-lg"
               :alt="issue.title" />
           </NuxtLink>
         </swiper-slide>

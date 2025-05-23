@@ -16,7 +16,9 @@ CREATE TABLE public.articles (
 -- New categories table
 CREATE TABLE public.categories (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL UNIQUE
+  name TEXT NOT NULL UNIQUE,
+  icon TEXT,
+  cover TEXT
 );
 
 -- Join table for many-to-many

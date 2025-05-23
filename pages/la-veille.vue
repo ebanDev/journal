@@ -43,7 +43,7 @@
           <NuxtLink :to="item.url" class="flex-1">
             <div class="flex justify-between items-center">
               <h3 class="text-lg font-medium">{{ item.title }}</h3>
-              <span class="text-sm text-gray-500">{{ item.type }}</span>
+              <UBadge :label="item.type" color="secondary" />
             </div>
             <p v-if="item.description" class="text-gray-600 mt-1 text-sm">{{ item.description }}</p>
           </NuxtLink>
