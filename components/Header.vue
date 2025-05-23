@@ -12,8 +12,8 @@
           @mouseover="isResultsHovered = true" @mouseleave="isResultsHovered = false">
           <ul>
             <li v-for="(item, idx) in articles" :key="idx" class="px-2 py-2 hover:bg-secondary-200 cursor-pointer">
-              <NuxtLink :to="`/article/${item.metadata.slug}`" class="flex items-center gap-4">
-                <img v-if="item.metadata.cover" :src="item.metadata.cover" alt=""
+              <NuxtLink :to="`/articles/${item.slug}`" class="flex items-center gap-4">
+                <img v-if="item.cover" :src="item.cover" alt=""
                   class="w-16 h-16 object-cover rounded-lg" />
                 <div>
                   <h3 class="text-base font-semibold">{{ item.title }}</h3>
