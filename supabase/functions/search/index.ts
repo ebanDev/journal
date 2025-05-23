@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
       embedding: JSON.stringify(embedding),
       match_threshold: 0.78,
     })
-    .select("id, title, metadata")
+    .select("id, title, description, slug")
     .limit(5);
   if (error) {
     return Response.json(error);

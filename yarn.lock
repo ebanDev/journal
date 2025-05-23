@@ -796,7 +796,7 @@
   optionalDependencies:
     ipx "^2.1.0"
 
-"@nuxt/kit@^3.13.2", "@nuxt/kit@^3.15.4", "@nuxt/kit@^3.16.0", "@nuxt/kit@^3.16.1", "@nuxt/kit@^3.16.2", "@nuxt/kit@^3.17.3", "@nuxt/kit@^3.2.2", "@nuxt/kit@3.17.4":
+"@nuxt/kit@^3.13.2", "@nuxt/kit@^3.15.4", "@nuxt/kit@^3.16.0", "@nuxt/kit@^3.16.1", "@nuxt/kit@^3.16.2", "@nuxt/kit@^3.17.2", "@nuxt/kit@^3.17.3", "@nuxt/kit@^3.2.2", "@nuxt/kit@3.17.4":
   version "3.17.4"
   resolved "https://registry.npmjs.org/@nuxt/kit/-/kit-3.17.4.tgz"
   integrity sha512-l+hY8sy2XFfg3PigZj+PTu6+KIJzmbACTRimn1ew/gtCz+F38f6KTF4sMRTN5CUxiB8TRENgEonASmkAWfpO9Q==
@@ -988,6 +988,11 @@
   resolved "https://registry.npmjs.org/@oxc-parser/binding-linux-x64-gnu/-/binding-linux-x64-gnu-0.71.0.tgz"
   integrity sha512-steSQTwv3W+/hpES4/9E3vNohou1FXJLNWLDbYHDaBI9gZdYJp6zwALC8EShCz0NoQvCu4THD3IBsTBHvFBNyw==
 
+"@oxc-parser/binding-linux-x64-musl@0.71.0":
+  version "0.71.0"
+  resolved "https://registry.npmjs.org/@oxc-parser/binding-linux-x64-musl/-/binding-linux-x64-musl-0.71.0.tgz"
+  integrity sha512-mV8j/haQBZRU2QnwZe0UIpnhpPBL9dFk1tgNVSH9tV7cV4xUZPn7pFDqMriAmpD7GLfmxbZMInDkujokd63M7Q==
+
 "@oxc-project/types@^0.71.0":
   version "0.71.0"
   resolved "https://registry.npmjs.org/@oxc-project/types/-/types-0.71.0.tgz"
@@ -1158,6 +1163,11 @@
   resolved "https://registry.npmjs.org/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.41.0.tgz"
   integrity sha512-XMLeKjyH8NsEDCRptf6LO8lJk23o9wvB+dJwcXMaH6ZQbbkHu2dbGIUindbMtRN6ux1xKi16iXWu6q9mu7gDhQ==
 
+"@rollup/rollup-linux-x64-musl@4.41.0":
+  version "4.41.0"
+  resolved "https://registry.npmjs.org/@rollup/rollup-linux-x64-musl/-/rollup-linux-x64-musl-4.41.0.tgz"
+  integrity sha512-m/P7LycHZTvSQeXhFmgmdqEiTqSV80zn6xHaQ1JSqwCtD1YGtwEK515Qmy9DcB2HK4dOUVypQxvhVSy06cJPEg==
+
 "@sindresorhus/is@^7.0.1":
   version "7.0.1"
   resolved "https://registry.npmjs.org/@sindresorhus/is/-/is-7.0.1.tgz"
@@ -1279,8 +1289,13 @@
   resolved "https://registry.npmjs.org/@tailwindcss/oxide-linux-x64-gnu/-/oxide-linux-x64-gnu-4.1.7.tgz"
   integrity sha512-HMs+Va+ZR3gC3mLZE00gXxtBo3JoSQxtu9lobbZd+DmfkIxR54NO7Z+UQNPsa0P/ITn1TevtFxXTpsRU7qEvWg==
 
-"@tailwindcss/oxide-linux-x64-musl@4.1.3", "@tailwindcss/oxide-linux-x64-musl@4.1.7":
+"@tailwindcss/oxide-linux-x64-musl@4.1.3":
   version "4.1.3"
+
+"@tailwindcss/oxide-linux-x64-musl@4.1.7":
+  version "4.1.7"
+  resolved "https://registry.npmjs.org/@tailwindcss/oxide-linux-x64-musl/-/oxide-linux-x64-musl-4.1.7.tgz"
+  integrity sha512-MHZ6jyNlutdHH8rd+YTdr3QbXrHXqwIhHw9e7yXEBcQdluGwhpQY2Eku8UZK6ReLaWtQ4gijIv5QoM5eE+qlsA==
 
 "@tailwindcss/oxide@4.1.3":
   version "4.1.3"
@@ -2033,6 +2048,31 @@
     "@whatwg-node/fetch" "^0.10.5"
     "@whatwg-node/promise-helpers" "^1.2.2"
     tslib "^2.6.3"
+
+"@yeger/debounce@2.0.12":
+  version "2.0.12"
+  resolved "https://registry.npmjs.org/@yeger/debounce/-/debounce-2.0.12.tgz"
+  integrity sha512-codFun59TrOW9a9g80VDCOlRsP77+hb/DT4aXXxROpCbz2OrdMZAemkzM69c4RhwUG3pTkztiqNEbsSRqSuxBg==
+
+"@yeger/vue-lib-adapter@2.0.12":
+  version "2.0.12"
+  resolved "https://registry.npmjs.org/@yeger/vue-lib-adapter/-/vue-lib-adapter-2.0.12.tgz"
+  integrity sha512-bz0j+pdpSH4oo8dVw+Hoxdy/485hDVz2CtYw5k7cCp1pukeF7lyWu/f4zJW0Z4CVF2XnIm07Yw5KjGgbR7QY6g==
+
+"@yeger/vue-masonry-wall-core@5.0.15":
+  version "5.0.15"
+  resolved "https://registry.npmjs.org/@yeger/vue-masonry-wall-core/-/vue-masonry-wall-core-5.0.15.tgz"
+  integrity sha512-w3jS1ckI+7FPgY47BI4Lsj46rOx7wE+WeXdZjPV68Sp6AUtI4Za9Fhu1aLkZLMjP3uh98BIEluhlxRngnCMtiQ==
+  dependencies:
+    "@yeger/debounce" "2.0.12"
+    "@yeger/vue-lib-adapter" "2.0.12"
+
+"@yeger/vue-masonry-wall@^5.0.18":
+  version "5.0.18"
+  resolved "https://registry.npmjs.org/@yeger/vue-masonry-wall/-/vue-masonry-wall-5.0.18.tgz"
+  integrity sha512-ofrisCxScdiknDU+Kvt79BLSI/z0v9m4tqJ7Am+tocpkeNHml7zIo9yHRZZg/m+uAVhRP2xlYw/kVsdh7m0Q9A==
+  dependencies:
+    "@yeger/vue-masonry-wall-core" "5.0.15"
 
 abbrev@^3.0.0:
   version "3.0.1"
@@ -4469,10 +4509,15 @@ lightningcss-linux-x64-gnu@1.30.1:
   resolved "https://registry.npmjs.org/lightningcss-linux-x64-gnu/-/lightningcss-linux-x64-gnu-1.30.1.tgz"
   integrity sha512-piWx3z4wN8J8z3+O5kO74+yr6ze/dKmPnI7vLqfSqI8bccaTGY5xiSGVIJBDd5K5BHlvVLpUB3S2YCfelyJ1bw==
 
-lightningcss-linux-x64-musl@1.29.2, lightningcss-linux-x64-musl@1.30.1:
+lightningcss-linux-x64-musl@1.29.2:
   version "1.29.2"
   resolved "https://registry.npmjs.org/lightningcss-linux-x64-musl/-/lightningcss-linux-x64-musl-1.29.2.tgz"
   integrity sha512-rMpz2yawkgGT8RULc5S4WiZopVMOFWjiItBT7aSfDX4NQav6M44rhn5hjtkKzB+wMTRlLLqxkeYEtQ3dd9696w==
+
+lightningcss-linux-x64-musl@1.30.1:
+  version "1.30.1"
+  resolved "https://registry.npmjs.org/lightningcss-linux-x64-musl/-/lightningcss-linux-x64-musl-1.30.1.tgz"
+  integrity sha512-rRomAK7eIkL+tHY0YPxbc5Dra2gXlI63HL+v1Pdi1a3sC+tJTcFrHX+E86sulgAXeI7rSzDYhPSeHHjqFhqfeQ==
 
 lightningcss@^1.21.0, lightningcss@1.29.2:
   version "1.29.2"
@@ -5203,6 +5248,14 @@ nth-check@^2.0.1:
   integrity sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==
   dependencies:
     boolbase "^1.0.0"
+
+nuxt-swiper@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.npmjs.org/nuxt-swiper/-/nuxt-swiper-2.0.1.tgz"
+  integrity sha512-mUAzuGqQHcsqJa1p5y/Hafvurn62o6njHq8DcwQErourkpJpv7z/SnnT0ezXMr7YvDPNg22ayEKGdHkGXXOxMQ==
+  dependencies:
+    "@nuxt/kit" "^3.17.2"
+    swiper "^11.2.6"
 
 nuxt@^3.16.0, nuxt@^3.17.4:
   version "3.17.4"
@@ -6886,6 +6939,11 @@ svgo@^3.2.0, svgo@^3.3.2:
     css-what "^6.1.0"
     csso "^5.0.5"
     picocolors "^1.0.0"
+
+swiper@^11.2.6:
+  version "11.2.7"
+  resolved "https://registry.npmjs.org/swiper/-/swiper-11.2.7.tgz"
+  integrity sha512-oPJCwdcjFMw3SoBM7AdB1RJzjT7JaE4Mg7TWceTmJ/i2OtF8L01Ct+5eOf48nG3trgR0wXFekWdfnTdl0eg6Pg==
 
 system-architecture@^0.1.0:
   version "0.1.0"
