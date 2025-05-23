@@ -35,6 +35,17 @@
             </div>
           </NuxtLink>
         </div>
+              <!-- Special card for the issue (mobile only, after 'à la une') -->
+      <div class="block md:hidden mb-4">
+        <NuxtLink v-if="latestEdition" :to="`/issues/${latestEdition.slug}`"
+          class="flex items-center gap-3 bg-primary-600 rounded-lg p-4 shadow transition-colors text-white">
+          <img v-if="latestEdition.cover" :src="latestEdition.cover" class="w-16 h-16 object-cover rounded-md" :alt="latestEdition.title" />
+          <div>
+            <div class="font-bold text-lg">Voir l’édition complète</div>
+            <div class="text-sm text-gray-100 line-clamp-2">{{ latestEdition.title }}</div>
+          </div>
+        </NuxtLink>
+      </div>
       </div>
     </section>
 
@@ -44,7 +55,7 @@
     <!-- La veille section -->
     <section class="flex-[1] w-full lg:flex-[1] lg:w-auto">
       <div class="flex items-center justify-between mb-3">
-        <h2 class="font-serif text-2xl">La veille</h2>
+        <h2 class="font-serif text-3xl md:text-2xl">La veille</h2>
         <NuxtLink to="/la-veille" class="text-sm hover:underline">Voir tout</NuxtLink>
       </div>
       <p class="text-gray-600 mb-6">Une sélection de contenus d'autres médias à lire, à écouter, à suivre.</p>
@@ -54,15 +65,13 @@
           <NuxtLink :to="item.url" target="_blank"
             class="block hover:bg-[var(--color-amber-150)] transition-colors rounded-lg">
             <div class="flex items-center gap-2">
-              <div class="w-28 h-28 rounded-lg bg-gray-100 flex shrink-0 items-center justify-center">
+              <div class="size-20 md:size-28 rounded-lg bg-gray-100 flex shrink-0 items-center justify-center">
                 <img v-if="item.cover" :src="item.cover" class="object-cover rounded-lg w-full h-full"
                   :alt="item.title" />
                 <span v-else class="text-gray-400">No image</span>
               </div>
               <div class="flex flex-col gap-1 p-2">
-                <span class="text-xs bg-secondary-300 block w-max py-1 px-2 rounded-full text-black">
-                  {{ item.type }}
-                </span>
+                <UBadge v-if="item.type" color="secondary" :label="item.type" class="w-max" />
                 <h3 class="text-lg font-bold text-black line-clamp-2">{{ item.title }}</h3>
                 <p class="text-gray-600 text-sm line-clamp-2">{{ item.source }}</p>
               </div>
@@ -74,8 +83,8 @@
   </div>
 
   <!-- Other articles section below -->
-  <section class="container mx-auto mt-10 p-4">
-    <h1 class="font-serif text-3xl md:text-4xl mb-8 text-center">Autres articles</h1>
+  <section class="container mx-auto mt-10 p-4 hidden md:block">
+    <h1 class="font-serif text-3xl md:text-4xl mb-8 md:text-center">Autres articles</h1>
     <masonry-wall :items="limitedOtherArticles" :column-width="300" :gap="16">
       <template #default="{ item: article, index: idx }">
         <NuxtLink :to="`/articles/${article.slug}`" class="group">
@@ -97,7 +106,7 @@
     </masonry-wall>
   </section>
   <section class="container mx-auto mt-10 p-4">
-    <h1 class="font-serif text-3xl md:text-4xl mb-8 text-center">Catégories</h1>
+    <h1 class="font-serif text-3xl md:text-4xl mb-8 md:text-center">Catégories</h1>
     <div class="relative">
       <div class="flex gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4">
         <NuxtLink v-for="cat in categories" :key="cat.id" :to="`/articles?category=${cat.slug}`"
@@ -117,14 +126,14 @@
     </div>
   </section>
   <section class="container mx-auto mt-10 p-4 pb-12">
-    <h2 class="font-serif text-3xl md:text-4xl mb-8 text-center">Éditions</h2>
+    <h2 class="font-serif text-3xl md:text-4xl mb-8 md:text-center">Éditions</h2>
     <!-- A swiper --->
     <ClientOnly>
       <swiper-container :slidesPerView="'auto'" :centeredSlides="true"
         :grabCursor="true" :effect="'coverflow'" :initialSlide="1"
         :coverflowEffect="{ rotate: 0, stretch: 0, depth: 100, modifier: 1, scale: .9, slideShadows: true }"
         >
-        <swiper-slide v-for="issue in issues" :key="issue.id" class="flex justify-center w-auto max-w-[80%] h-auto">
+        <swiper-slide v-for="issue in issues" :key="issue.id" class="flex justify-center w-auto max-w-[70%] h-auto">
           <NuxtLink :to="`/issues/${issue.slug}`"
             class="bg-secondary-100 hover:bg-[var(--color-amber-200)] transition-colors rounded-lg p-3 h-auto">
             <img v-if="issue.cover" :src="issue.cover" class="object-contain w-auto h-auto max-w-full max-h-128 rounded-t-lg"
