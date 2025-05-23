@@ -6,24 +6,28 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useSupabaseClient, useSupabaseUser } from '#imports'
+import { useRouter, useRoute } from 'vue-router'
+import { useSupabaseUser } from '#imports'
+import { useDb } from '~/composables/useDb'
 
-const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 const router = useRouter()
+const route = useRoute()
+const { createNewArticle } = useDb()
+const editionId = route.query.issue as string | undefined
 
 onMounted(async () => {
   if (!user.value) return router.push('/login')
-  const { data, error } = await supabase
-    .from('articles')
-    .insert({ title: '', content: '', author_id: user.value.id, draft: true })
-    .select('id')
-    .single()
-  if (error) {
+  try {
+    const article = await createNewArticle({
+      title: '',
+      content: '',
+      author_id: user.value.id,
+      issue_id: editionId,
+    })
+    router.replace(`/internal/articles/${article.id}`)
+  } catch (error) {
     console.error(error)
-    return
   }
-  router.replace(`/internal/articles/${data.id}`)
 })
 </script>

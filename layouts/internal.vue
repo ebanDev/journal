@@ -26,14 +26,14 @@ const isAdmin = computed(() => member.value?.role === 'admin')
 
 // Base navigation items
 const baseItems: NavigationMenuItem[] = [
-  { label: 'Articles', icon: 'tabler-news', to: '/internal/articles' },
-  { label: 'La Veille', icon: 'tabler-radar-2', to: '/internal/laveille' },
-  { label: 'Profil', icon: 'tabler-user', to: '/internal/profile' },
+  { label: 'Articles', icon: 'mingcute-news-line', to: '/internal/articles' },
+  { label: 'La Veille', icon: 'mingcute-radar-line', to: '/internal/laveille' },
+  { label: 'Profil', icon: 'mingcute-user-1-line', to: '/internal/profile' },
 ]
 
 // Add Users panel for admins
 if (isAdmin.value) {
-  baseItems.push({ label: 'Utilisateurs', icon: 'tabler-users', to: '/internal/users' })
+  baseItems.push({ label: 'Utilisateurs', icon: 'mingcute-group-3-line', to: '/internal/users' })
 }
 
 const items = ref<NavigationMenuItem[][]>([ baseItems ])

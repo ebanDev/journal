@@ -4,74 +4,38 @@
     <div :class="['flex-1 px-8 py-6 transition-all', isPanelOpen ? 'mr-80' : 'mx-auto']">
       <!-- Floating Actions -->
       <div class="fixed top-4 right-4 flex gap-2 z-20">
-        <UButton
-          icon="i-tabler-dots"
-          variant="ghost"
-          color="neutral"
-          @click="isPanelOpen = !isPanelOpen"
-          :title="isPanelOpen ? 'Hide properties' : 'Show properties'"
-        />
-        <UButton
-          :icon="saved.icon"
-          :color="saved.color"
-          variant="ghost"
-          :title="saved.text"
-        />
+        <UButton v-if="saveState === 'loading'" icon="i-mingcute-sandglass-line" variant="ghost" color="neutral"
+          title="Sauvegarde en cours" />
+        <UButton v-else-if="saveState === 'error'" icon="mingcute-warning-line" variant="ghost" color="error"
+          title="Erreur lors de la sauvegarde" />
+        <UButton v-else icon="i-mingcute-checkbox-line" variant="ghost" color="neutral" title="Sauvegardé" />
+        <UButton icon="mingcute-settings-2-line" variant="ghost" color="neutral" @click="isPanelOpen = !isPanelOpen"
+          :title="isPanelOpen ? 'Masquer les propriétés' : 'Afficher les propriétés'" />
       </div>
 
       <!-- Title -->
-      <textarea
-        v-model="title"
-        placeholder="Titre de l´article..."
-        ref="titleRef"
-        @input="autoResize"
-        rows="1"
-        class="w-full text-4xl font-extrabold bg-transparent border-none focus:outline-none my-4 resize-none overflow-hidden whitespace-pre-line break-words"
-      />
+      <textarea v-model="title" placeholder="Titre de l´article..." ref="titleRef" @input="autoResize" rows="1"
+        class="w-full text-4xl font-extrabold bg-transparent border-none focus:outline-none my-4 resize-none overflow-hidden whitespace-pre-line break-words" />
 
       <!-- Bubble Menu -->
-      <BubbleMenu
-        v-if="editor"
-        :editor="editor"
-        :tippy-options="{ duration: 100 }"
-        class="bg-white rounded-lg shadow p-1 flex gap-1"
-      >
-        <UButton
-          v-for="b in buttons"
-          :key="b.icon"
-          :icon="b.icon"
-          size="xs"
-          variant="ghost"
-          color="neutral"
-          :class="b.active() ? 'bg-amber-100 text-amber-700' : ''"
-          @click="b.command"
-          :title="b.title"
-        />
+      <BubbleMenu v-if="editor" :editor="editor" :tippy-options="{ duration: 100 }"
+        class="bg-white rounded-lg shadow p-1 flex gap-1">
+        <UButton v-for="b in buttons" :key="b.icon" :icon="b.icon" size="xs" variant="ghost" color="neutral"
+          :class="b.active() ? 'bg-amber-100 text-amber-700' : ''" @click="b.command" :title="b.title" />
       </BubbleMenu>
 
       <!-- Content -->
-      <EditorContent
-        :editor="editor"
+      <EditorContent :editor="editor"
         class="prose prose-headings:text-stone-700 prose-h1:text-3xl prose-h2:font-extrabold max-w-full w-[800px] min-h-full"
-        @click="editor.value?.chain().focus().run()"
-      />
+        @click="editor.value?.chain().focus().run()" />
     </div>
 
     <!-- Properties Panel -->
     <transition name="slide">
-      <div
-        v-if="isPanelOpen"
-        class="fixed right-0 top-0 h-full w-80 bg-secondary-50 shadow p-4 flex flex-col z-30"
-      >
+      <div v-if="isPanelOpen" class="fixed right-0 top-0 h-full w-80 bg-secondary-50 shadow p-4 flex flex-col z-30">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-semibold">Propriétés</h3>
-          <UButton
-            icon="i-tabler-x"
-            color="neutral"
-            size="xs"
-            variant="ghost"
-            @click="isPanelOpen = false"
-          />
+          <UButton icon="i-tabler-x" color="neutral" size="xs" variant="ghost" @click="isPanelOpen = false" />
         </div>
 
         <!-- Tabs -->
@@ -99,6 +63,22 @@
             <UTextarea v-model="meta.description" placeholder="Courte description..." class="w-full resize-none" />
           </UFormField>
 
+          <UFormField label="Catégories">
+            <USelectMenu
+              v-model="selectedCategories"
+              create-item
+              :items="categories"
+              multiple
+              placeholder="Ajouter des catégories..."
+              class="w-full"
+              @create="onCreateCategory"
+            />
+          </UFormField>
+
+          <UFormField label="À la une">
+            <USwitch v-model="meta.featured" />
+          </UFormField>
+
           <div>
             <span class="font-medium">Mots&nbsp;: </span>{{ wordCount }}
           </div>
@@ -108,7 +88,11 @@
         </div>
 
         <div class="mt-auto space-y-2">
-          <UButton block color="primary" @click="publish">Sauvegarder</UButton>
+          <UButton block color="primary" @click="publish" :loading="saveState === 'loading'"
+            :icon="saveState === 'success' ? 'i-mingcute-checkbox-line' : 'i-mingcute-save-2-line'">
+            <template v-if="saveState === 'success'">Sauvegardé</template>
+            <template v-else>Sauvegarder</template>
+          </UButton>
           <UButton block variant="ghost" @click="goBack">Retour à la liste</UButton>
         </div>
       </div>
@@ -125,6 +109,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import CharacterCount from '@tiptap/extension-character-count'
 import debounce from 'lodash/debounce'
+import { useDb } from '~/composables/useDb'
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
@@ -132,6 +117,7 @@ const router = useRouter()
 const route = useRoute()
 const toast = useToast()
 const id = String(route.params.id)
+const { getCategories, setArticleCategories, getArticleCategories } = useDb()
 
 // State
 const title = ref('')
@@ -146,19 +132,26 @@ const editor = useEditor({
   autofocus: 'end',
   onUpdate: () => debouncedSave()
 })
-const meta = reactive({ slug: '', cover: '', description: '', category: '' })
+const meta = reactive({ slug: '', cover: '', description: '', featured: false })
 const categories = ref<string[]>([])
+const selectedCategories = ref<string[]>([])
+
+function onCreateCategory(item: string) {
+  if (!categories.value.includes(item)) {
+    categories.value.push(item)
+  }
+  if (!selectedCategories.value.includes(item)) {
+    selectedCategories.value.push(item)
+  }
+}
+
 const isPanelOpen = ref(false)
 const lastSavedDate = ref<Date | null>(null)
+const saveState = ref<'default' | 'loading' | 'success' | 'error'>('default')
 
 // Computed
 const lastSaved = computed(
   () => (lastSavedDate.value ? lastSavedDate.value.toLocaleString() : 'Jamais')
-)
-const saved = computed(() =>
-  lastSavedDate.value
-    ? { text: 'Saved', icon: 'i-tabler-circle-check', color: 'neutral' }
-    : { text: 'Not saved', icon: 'i-tabler-alert-circle', color: 'error' }
 )
 const wordCount = computed(
   () => editor.value?.getText().split(/\s+/).filter((w) => w).length || 0
@@ -166,8 +159,8 @@ const wordCount = computed(
 
 // Tabs definition
 const tabItems = [
-  { label: 'Brouillon', icon: 'i-tabler-pencil'},
-  { label: 'Prêt', icon: 'i-tabler-check' }
+  { label: 'Brouillon', icon: 'i-mingcute-edit-line' },
+  { label: 'Prêt', icon: 'i-mingcute-checkbox-line' }
 ]
 
 // default tabs based on draft
@@ -175,16 +168,16 @@ const activeTab = ref('0')
 
 // Format buttons
 const buttons = [
-  { icon: 'tabler-h-1',    command: () => editor.value?.chain().focus().toggleHeading({ level: 1 }).run(), active: () => editor.value?.isActive('heading', { level: 1 }) ?? false, title: 'H1' },
-  { icon: 'tabler-h-2',    command: () => editor.value?.chain().focus().toggleHeading({ level: 2 }).run(), active: () => editor.value?.isActive('heading', { level: 2 }) ?? false, title: 'H2' },
-  { icon: 'tabler-h-3',    command: () => editor.value?.chain().focus().toggleHeading({ level: 3 }).run(), active: () => editor.value?.isActive('heading', { level: 3 }) ?? false, title: 'H3' },
-  { icon: 'tabler-code',   command: () => editor.value?.chain().focus().toggleCodeBlock().run(), active: () => editor.value?.isActive('codeBlock') ?? false, title: 'Code' },
-  { icon: 'tabler-bold',   command: () => editor.value?.chain().focus().toggleBold().run(), active: () => editor.value?.isActive('bold') ?? false, title: 'Gras' },
-  { icon: 'tabler-italic', command: () => editor.value?.chain().focus().toggleItalic().run(), active: () => editor.value?.isActive('italic') ?? false, title: 'Italique' },
-  { icon: 'tabler-strikethrough', command: () => editor.value?.chain().focus().toggleStrike().run(), active: () => editor.value?.isActive('strike') ?? false, title: 'Barré' },
-  { icon: 'tabler-list',   command: () => editor.value?.chain().focus().toggleBulletList().run(), active: () => editor.value?.isActive('bulletList') ?? false, title: 'Liste puces' },
-  { icon: 'tabler-list-numbers', command: () => editor.value?.chain().focus().toggleOrderedList().run(), active: () => editor.value?.isActive('orderedList') ?? false, title: 'Liste numérotée' },
-  { icon: 'tabler-quote',  command: () => editor.value?.chain().focus().toggleBlockquote().run(), active: () => editor.value?.isActive('blockquote') ?? false, title: 'Citation' }
+  { icon: 'i-mingcute-heading-1-line', command: () => editor.value?.chain().focus().toggleHeading({ level: 1 }).run(), active: () => editor.value?.isActive('heading', { level: 1 }) ?? false, title: 'H1' },
+  { icon: 'i-mingcute-heading-2-line', command: () => editor.value?.chain().focus().toggleHeading({ level: 2 }).run(), active: () => editor.value?.isActive('heading', { level: 2 }) ?? false, title: 'H2' },
+  { icon: 'i-mingcute-heading-3-line', command: () => editor.value?.chain().focus().toggleHeading({ level: 3 }).run(), active: () => editor.value?.isActive('heading', { level: 3 }) ?? false, title: 'H3' },
+  { icon: 'i-mingcute-code-line', command: () => editor.value?.chain().focus().toggleCodeBlock().run(), active: () => editor.value?.isActive('codeBlock') ?? false, title: 'Code' },
+  { icon: 'i-mingcute-bold-line', command: () => editor.value?.chain().focus().toggleBold().run(), active: () => editor.value?.isActive('bold') ?? false, title: 'Gras' },
+  { icon: 'i-mingcute-italic-line', command: () => editor.value?.chain().focus().toggleItalic().run(), active: () => editor.value?.isActive('italic') ?? false, title: 'Italique' },
+  { icon: 'i-mingcute-strikethrough-line', command: () => editor.value?.chain().focus().toggleStrike().run(), active: () => editor.value?.isActive('strike') ?? false, title: 'Barré' },
+  { icon: 'i-mingcute-list-check-line', command: () => editor.value?.chain().focus().toggleBulletList().run(), active: () => editor.value?.isActive('bulletList') ?? false, title: 'Liste puces' },
+  { icon: 'i-mingcute-list-ordered-line', command: () => editor.value?.chain().focus().toggleOrderedList().run(), active: () => editor.value?.isActive('orderedList') ?? false, title: 'Liste numérotée' },
+  { icon: 'i-mingcute-quote-right-line', command: () => editor.value?.chain().focus().toggleBlockquote().run(), active: () => editor.value?.isActive('blockquote') ?? false, title: 'Citation' }
 ]
 
 // Helpers & CRUD
@@ -197,34 +190,49 @@ const autoResize = () =>
   })
 
 const save = async (opts: { silent?: boolean } = {}) => {
+  saveState.value = 'loading'
   const payload: any = {
     title: title.value,
     content: editor.value?.getHTML(),
     draft: activeTab.value === '0',
-    metadata: meta
+    slug: meta.slug,
+    cover: meta.cover,
+    description: meta.description,
+    featured: meta.featured
   }
   if (activeTab.value === '1') payload.published_at = new Date().toISOString()
   const { error } = await supabase.from('articles').update(payload).eq('id', id)
-  if (error) return toast.error('Save failed')
+  if (error) {
+    saveState.value = 'error'
+    return toast.error('Save failed')
+  }
+  await setArticleCategories(id, selectedCategories.value)
   lastSavedDate.value = new Date()
+  saveState.value = 'success'
+  setTimeout(() => { saveState.value = 'default' }, 2000)
   if (!opts.silent) toast.success('Sauvegardé')
 }
 const debouncedSave = debounce(() => save({ silent: true }), 2000)
 
 const fetchData = async () => {
   if (!user.value) return router.push('/login')
-  const { data: all } = await supabase.from('articles').select('metadata')
-  categories.value = Array.from(new Set(all.map((a) => a.metadata?.category).filter(Boolean)))
-
-  const { data, error } = await supabase.from('articles').
-    select('title,content,draft,published_at,metadata').eq('id', id).single()
+  // Fetch all categories
+  categories.value = (await getCategories())?.map((c: any) => c.name) || []
+  // Fetch article data
+  const { data, error } = await supabase.from('articles')
+    .select('title,content,draft,published_at,slug,cover,description,featured')
+    .eq('id', id)
+    .single()
   if (error) return toast.error('Load failed')
-
   title.value = data.title
   editor.value?.commands.setContent(data.content)
-  Object.assign(meta, data.metadata || {})
+  meta.slug = data.slug || ''
+  meta.cover = data.cover || ''
+  meta.description = data.description || ''
+  meta.featured = data.featured || false
   lastSavedDate.value = data.published_at ? new Date(data.published_at) : null
   activeTab.value = data.draft ? '0' : '1'
+  selectedCategories.value = await getArticleCategories(id)
   autoResize()
 }
 
@@ -242,7 +250,7 @@ const handleFileUpload = async (event: Event) => {
   if (!file) return
 
   const { data, error } = await supabase.storage.from('covers').upload(`public/${file.name}`, file)
-  if (error) return toast.add({title: "Le téléchargement de l'image a échoué", color: 'error', icon: 'tabler-x', description: error.message})
+  if (error) return toast.add({ title: "Le téléchargement de l'image a échoué", color: 'error', icon: 'tabler-x', description: error.message })
 
   const { data: coverData } = supabase.storage.from('covers').getPublicUrl(data.path)
   meta.cover = coverData.publicUrl
@@ -258,6 +266,7 @@ onMounted(fetchData)
 .slide-leave-active {
   transition: transform .3s
 }
+
 .slide-enter-from,
 .slide-leave-to {
   transform: translateX(100%)

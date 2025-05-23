@@ -7,12 +7,34 @@ CREATE TABLE public.articles (
                REFERENCES auth.users(id) ON DELETE SET NULL,
   published_at TIMESTAMPTZ,
   draft        BOOLEAN    NOT NULL DEFAULT true,
-  metadata     JSONB      DEFAULT '{}'::jsonb
+  slug         TEXT,
+  cover        TEXT,
+  description  TEXT,
+  featured     BOOLEAN    NOT NULL DEFAULT false
+);
+
+-- New categories table
+CREATE TABLE public.categories (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL UNIQUE
+);
+
+-- Join table for many-to-many
+CREATE TABLE public.article_categories (
+  article_id UUID REFERENCES public.articles(id) ON DELETE CASCADE,
+  category_id UUID REFERENCES public.categories(id) ON DELETE CASCADE,
+  PRIMARY KEY (article_id, category_id)
 );
 
 -- 2. Enable Row‑Level Security
 ALTER TABLE public.articles
   ENABLE ROW LEVEL SECURITY;
+
+-- Enable RLS
+ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
+
+-- Enable RLS for article_categories
+ALTER TABLE public.article_categories ENABLE ROW LEVEL SECURITY;
 
 -- 3. Helper function to read the existing draft flag (bypasses RLS)
 CREATE OR REPLACE FUNCTION public.get_article_draft(aid UUID)
@@ -63,5 +85,53 @@ CREATE POLICY "Admins full access to articles"
     public.has_role(auth.uid(), 'admin')
   )
   WITH CHECK (
+    public.has_role(auth.uid(), 'admin')
+  );
+
+-- RLS: Anyone can select categories
+CREATE POLICY "Select categories" ON public.categories
+  FOR SELECT USING (true);
+
+-- RLS: Only editors and admins can insert
+CREATE POLICY "Insert categories as editor or admin" ON public.categories
+  FOR INSERT WITH CHECK (
+    public.has_role(auth.uid(), 'editor') OR public.has_role(auth.uid(), 'admin')
+  );
+
+-- RLS: Only editors and admins can update
+CREATE POLICY "Update categories as editor or admin" ON public.categories
+  FOR UPDATE USING (
+    public.has_role(auth.uid(), 'editor') OR public.has_role(auth.uid(), 'admin')
+  ) WITH CHECK (
+    public.has_role(auth.uid(), 'editor') OR public.has_role(auth.uid(), 'admin')
+  );
+
+-- RLS: Only admins can delete
+CREATE POLICY "Delete categories as admin" ON public.categories
+  FOR DELETE USING (
+    public.has_role(auth.uid(), 'admin')
+  );
+
+-- Anyone can select article_categories (for public reading)
+CREATE POLICY "Select article_categories" ON public.article_categories
+  FOR SELECT USING (true);
+
+-- Only editors and admins can insert
+CREATE POLICY "Insert article_categories as editor or admin" ON public.article_categories
+  FOR INSERT WITH CHECK (
+    public.has_role(auth.uid(), 'editor') OR public.has_role(auth.uid(), 'admin')
+  );
+
+-- Only editors and admins can update
+CREATE POLICY "Update article_categories as editor or admin" ON public.article_categories
+  FOR UPDATE USING (
+    public.has_role(auth.uid(), 'editor') OR public.has_role(auth.uid(), 'admin')
+  ) WITH CHECK (
+    public.has_role(auth.uid(), 'editor') OR public.has_role(auth.uid(), 'admin')
+  );
+
+-- Only admins can delete
+CREATE POLICY "Delete article_categories as admin" ON public.article_categories
+  FOR DELETE USING (
     public.has_role(auth.uid(), 'admin')
   );

@@ -8,6 +8,7 @@ CREATE TABLE public.issues (
   status        TEXT        NOT NULL DEFAULT 'draft', -- draft | ready | published
   is_special    BOOLEAN     DEFAULT false,
   published_at  TIMESTAMPTZ,
+  cover         TEXT,
   created_at    TIMESTAMPTZ DEFAULT now()
 );
 

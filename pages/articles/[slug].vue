@@ -1,15 +1,15 @@
 <template>
-  <div class="max-w-3xl mx-auto py-8">
+  <div class="max-w-3xl mx-auto py-8 px-4">
     <div v-if="article">
       <h1 class="font-serif text-4xl mb-4">{{ article.title }}</h1>
       <p class="text-gray-500 mb-6">{{ formatDate(article.published_at) }}</p>
 
-      <div v-if="article.metadata.cover" class="mb-6">
-        <img :src="article.metadata.cover" alt="Cover" class="w-full rounded" />
+      <div v-if="article.cover" class="mb-6">
+        <img :src="article.cover" alt="Cover" class="w-full rounded" />
       </div>
 
-      <p v-if="article.metadata.description" class="text-gray-600 mb-6">
-        {{ article.metadata.description }}
+      <p v-if="article.description" class="text-gray-600 mb-6">
+        {{ article.description }}
       </p>
 
       <div class="prose max-w-none" v-html="article.content"></div>
@@ -35,7 +35,11 @@ interface Article {
   title: string
   content: string
   published_at: string
-  metadata: { slug: string; cover?: string; description?: string }
+  cover?: string
+  description?: string
+  categories?: string[]
+  draft?: boolean
+  slug?: string
 }
 
 const article = ref<Article | null>(null)
@@ -45,9 +49,9 @@ const formatDate = (date: string) => new Date(date).toLocaleDateString()
 const fetchArticle = async () => {
   const { data, error } = await supabase
     .from('articles')
-    .select('title,content,published_at,metadata')
+    .select('title,content,published_at,cover,description')
     .eq('draft', false)
-    .eq('metadata->>slug', slug)
+    .eq('slug', slug)
     .single()
 
   if (error || !data) {
