@@ -94,9 +94,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
-import type { RealtimeChannel } from '@supabase/supabase-js'
-import { useSupabaseClient, useSupabaseUser } from '#imports'
+const toast = useToast()
 
 interface VeilleEntry {
   id: string
@@ -247,12 +245,35 @@ async function submitEntry() {
   }
   submitting.value = false
   openSubmitModal.value = false
+  if (submitError.value) {
+    toast.add({
+      title: 'Erreur',
+      color: 'error',
+      description: submitError.value,
+      icon: 'mingcute-alert-line',
+    })
+  } else {
+    toast.add({
+      title: 'Article soumis',
+      color: 'success',
+      description: 'Votre article a été soumis avec succès. Il sera examiné par notre équipe.',
+      icon: 'mingcute-check-line',
+    })
+  }
 }
 
 let veilleChannel: RealtimeChannel
 let votesChannel: RealtimeChannel
 async function vote(id: string) {
-  if (!user.value?.id) return
+  if (!user.value?.id) {
+    toast.add({
+      title: 'Erreur',
+      color: 'error',
+      description: 'Vous devez être connecté pour voter.',
+      icon: 'mingcute-alert-line',
+    })
+    return
+  }
 
   const isVoted = votedIds.value.has(id)
   // optimistic update

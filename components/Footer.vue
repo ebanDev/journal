@@ -59,6 +59,6 @@ const navItems = computed(() => [{
   icon: 'mingcute-user-4-line',
   iconActive: 'mingcute-user-4-fill',
   label: 'Compte',
-  active: currentPath.value == '/internal' || currentPath.value.startsWith('/internal/')
+  active: currentPath.value == '/internal' || currentPath.value.startsWith('/internal/') || currentPath.value == '/login'
 }])
 </script>
