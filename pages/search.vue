@@ -37,7 +37,7 @@ const searchQuery = ref('')
 const articles = ref<any[]>([])
 const searched = ref(false)
 const route = useRoute()
-const searchInput = ref(null)
+const searchInput = useTemplateRef('searchInput')
 
 onMounted(() => {
   const query = route.query.q
@@ -45,7 +45,7 @@ onMounted(() => {
     searchQuery.value = decodeURIComponent(query as string)
     onSearch()
   } else {
-    searchInput.value.focus()
+    searchInput.value?.inputRef?.focus()
   }
 })
 
