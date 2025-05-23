@@ -84,6 +84,22 @@ export function useDb() {
     return data
   }
 
+  // Get a single article by slug (with categories)
+  async function getArticleBySlug(slug: string) {
+    const { data, error } = await supabase
+      .from('articles')
+      .select('*, article_categories:article_categories(category_id, categories(name, icon))')
+      .eq('slug', slug)
+      .single()
+    if (error) throw error
+    return {
+      ...data,
+      categories: (data.article_categories || [])
+        .map((ac: any) => ac.categories && { name: ac.categories.name, icon: ac.categories.icon })
+        .filter(Boolean)
+    }
+  }
+
   // Delete an issue by id
   async function deleteIssueById(id: string) {
     const { error } = await supabase
@@ -151,6 +167,7 @@ export function useDb() {
     getArticles,
     getIssueById,
     getArticleById,
+    getArticleBySlug,
     deleteIssueById,
     deleteArticleById,
     getCategories,
