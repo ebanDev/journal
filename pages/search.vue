@@ -8,6 +8,7 @@
       placeholder="Rechercher..."
       icon="tabler-search"
       variant="outline"
+      ref="searchInput"
     />
     <div v-if="articles.length" class="space-y-2">
       <div v-for="item in articles" :key="item.slug">
@@ -36,12 +37,15 @@ const searchQuery = ref('')
 const articles = ref<any[]>([])
 const searched = ref(false)
 const route = useRoute()
+const searchInput = ref(null)
 
 onMounted(() => {
   const query = route.query.q
   if (query) {
     searchQuery.value = decodeURIComponent(query as string)
     onSearch()
+  } else {
+    searchInput.value.focus()
   }
 })
 
