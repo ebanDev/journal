@@ -1,5 +1,5 @@
 <template>
-  <div class="container max-w-3xl mx-auto px-4 py-8">
+  <div class="container max-w-3xl mx-auto p-4">
     <h1 class="font-serif text-3xl md:text-4xl mb-4">Recherche</h1>
     <UInput
       class="w-full mb-4"
