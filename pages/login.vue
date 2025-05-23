@@ -82,7 +82,7 @@ onMounted(async () => {
 })
 </script>
 <template>
-  <div class="flex flex-col h-full mt-20">
+  <div class="flex flex-col h-full p-4 md:py-8">
     <h1 class="font-serif text-3xl">Se connecter</h1>
     <p class="text-gray-600 mb-6 max-w-lg mt-2">Veuillez entrer votre adresse e-mail pour vous connecter. Celle-ci doit
       être identique à celle utilisée lors de votre adhésion, en cas de problème contacter <a

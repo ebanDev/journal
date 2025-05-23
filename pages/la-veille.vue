@@ -1,5 +1,5 @@
 <template>
-  <div class="container max-w-4xl mx-auto px-4 py-8 space-y-8">
+  <div class="container max-w-4xl mx-auto p-4 space-y-8">
     <h1 class="text-3xl font-serif">La Veille</h1>
     <section>
       <!-- Send Article Form -->

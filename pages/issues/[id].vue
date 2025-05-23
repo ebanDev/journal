@@ -22,7 +22,9 @@
             <img v-if="article.cover" :src="article.cover" class="object-cover w-full h-32 rounded-t-lg" :alt="article.title" />
             <div class="p-3">
               <div v-if="article.categories && article.categories.length" class="flex flex-wrap gap-2 mb-1">
-                <span v-for="cat in article.categories" :key="cat" class="text-xs bg-secondary-300 py-1 px-2 rounded-full text-black">{{ cat }}</span>
+                <UBadge v-for="cat in article.categories" :key="cat.name"
+                  color="secondary"
+                  :label="cat.name" :icon="cat.icon ? 'mingcute:' + cat.icon : undefined" />
               </div>
               <h3 class="font-serif text-lg font-medium mb-1 text-black">{{ article.title }}</h3>
               <p class="text-gray-600 text-sm line-clamp-3">{{ article.description }}</p>
