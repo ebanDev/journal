@@ -1,7 +1,7 @@
 <template>
   <header class="flex justify-between px-8 w-screen items-center py-4 bg-[#FFFDFD]">
     <NuxtLink to="/">
-      <h1 class="font-serif text-3xl">Contradiction·s</h1>
+      <h1 class="font-serif text-3xl">Contradiction<span class="text-primary-600">·</span>s</h1>
       <h2 class="font-bold text-base">Le journal des luttes de Bordeaux</h2>
     </NuxtLink>
     <div class="relative">
