@@ -130,7 +130,9 @@
     <!-- A swiper --->
     <ClientOnly>
       <swiper-container :slidesPerView="'auto'" :centeredSlides="true"
-        :grabCursor="true" :effect="'coverflow'" :initialSlide="1"
+        :grabCursor="true" :effect="'coverflow'" :initialSlide="1" 
+        :mousewheel="{ enabled: true }"
+        :autoplay="{ delay: 2000, pauseOnMouseEnter: true }"
         :coverflowEffect="{ rotate: 0, stretch: 0, depth: 100, modifier: 1, scale: .9, slideShadows: true }"
         >
         <swiper-slide v-for="issue in issues" :key="issue.id" class="flex justify-center w-auto max-w-[70%] h-auto">

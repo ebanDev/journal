@@ -7,12 +7,12 @@
       <UPlaceholder class="h-6 w-1/2 mb-4" />
     </div>
     <div v-else-if="issue">
-      <div class="flex flex-col items-center md:flex-row gap-8 mb-12">
-        <img v-if="issue.cover" :src="issue.cover" class="w-full md:w-auto max-h-64 rounded-lg shadow" :alt="issue.title" />
-        <div class="flex-1">
-          <h1 class="font-serif text-3xl md:text-4xl mb-2">{{ issue.title }}</h1>
-          <div class="text-gray-500 mb-4">{{ formatDate(issue.published_at) }}</div>
-          <p class="text-gray-700">{{ issue.description }}</p>
+      <div class="flex flex-col-reverse items-center md:flex-row md:gap-8 gap-4 mb-12">
+        <img v-if="issue.cover" :src="issue.cover" class="w-full md:w-auto md:max-h-112 rounded-lg shadow" :alt="issue.title" />
+        <div class="flex-1 w-full">
+          <h1 class="font-serif text-center md:text-left text-4xl md:text-4xl mb-2">{{ issue.title }}</h1>
+          <div class="text-gray-500 hidden md:block mb-4">{{ formatDate(issue.published_at) }}</div>
+          <p class="text-gray-700 hidden md:block">{{ issue.description }}</p>
         </div>
       </div>
       <h2 class="font-serif text-2xl mb-4">Articles de l'édition</h2>
