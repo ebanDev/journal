@@ -1,6 +1,6 @@
 <template>
   <nav class="fixed bottom-0 left-0 right-0 bg-[#FFFDFD] shadow-t py-3 flex gap-1 justify-center z-50 flex-col items-center">
-    <h1 class="text-sm font-serif text-gray-600">Contradiction<span class="bg-primary-50">·</span>s</h1>
+    <h1 class="text-sm font-serif text-gray-600">Contradiction<span class="text-primary-50">·</span>s</h1>
     <div class="flex justify-around items-center w-full">
       <NuxtLink
       v-for="item in navItems"
