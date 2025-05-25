@@ -125,8 +125,8 @@
       </div>
     </div>
   </section>
-  <section class="container mx-auto mt-10 p-4 pb-12">
-    <h2 class="font-serif text-3xl md:text-4xl mb-8 md:text-center">Éditions</h2>
+  <section class="w-screen mt-10 pt-4 pb-12">
+    <h2 class="font-serif text-3xl md:text-4xl mb-8 md:text-center px-4">Éditions</h2>
     <!-- A swiper --->
     <ClientOnly>
       <swiper-container :slidesPerView="'auto'" :centeredSlides="true"
