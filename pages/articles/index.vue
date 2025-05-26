@@ -51,7 +51,7 @@
             <div class="mt-4" v-if="activeTab === '0'">
               <ul class="grid grid-cols-2 gap-2">
                 <li v-for="category in categories" :key="category.id" class="group relative w-full h-full aspect-square"
-                  @click="toggleFilter({ type: 'category', id: category.id, label: category.name }); drawerOpen = false">
+                  @click="toggleFilter({ type: 'category', id: category.id, label: category.name })">
                   <img :src="category.cover" alt="Category Image"
                     class="w-full h-auto aspect-square object-cover rounded-lg mb-2 absolute inset-0" />
                   <div class="absolute inset-0 opacity-75 bg-black group-hover:opacity-60 rounded-lg transition-all duration-150 pointer-events-none"
@@ -65,7 +65,7 @@
             <div class="mt-4" v-else>
               <ul class="space-y-2">
                 <li v-for="issue in issues" :key="issue.id" class="flex items-center"
-                  @click="toggleFilter({ type: 'issue', id: issue.id, label: issue.title }); drawerOpen = false">
+                  @click="toggleFilter({ type: 'issue', id: issue.id, label: issue.title })">
                   <div
                     class="flex items-center gap-2 p-2 bg-white rounded-lg shadow hover:bg-secondary-100 w-full cursor-pointer transition-all duration-150"
                     :class="{ '!bg-primary-500 !text-white': filters.some(f => f.type === 'issue' && f.id === issue.id) }">
