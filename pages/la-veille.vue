@@ -29,7 +29,7 @@
             { label: 'Date', value: 'date' }
           ]"
           placeholder="Trier" class="w-40" icon="tabler-arrows-sort" />
-      </div>
+      </div>UModal
 
       <div v-if="entries.length">
         <div v-for="item in displayedEntries" :key="item.id" class="flex items-start p-4 rounded-lg bg-white shadow mb-4">
@@ -53,7 +53,7 @@
     </section>
   </div>
 
-  <UModal v-model:open="openSubmitModal" title="Envoyer un article" :loading="fetchingMetadata">
+  <component v-model:open="openSubmitModal" title="Envoyer un article" :loading="fetchingMetadata" :is="isMobile ? UDrawer : UModal">
     <template #body>
       <div class="flex flex-col">
         <UFormField label="Titre" class="w-full">
@@ -87,13 +87,14 @@
       </div>
     </template>
     <template #footer>
-      <UButton label="Submit" @click="submitEntry" :loading="submitting" />
-      <UButton label="Cancel" @click="fetchingMetadata = false" color="secondary" />
+      <UButton label="Submit" @click="submitEntry" :loading="submitting" class="justify-center" />
+      <UButton label="Cancel" @click="fetchingMetadata = false" color="secondary" class="justify-center" />
     </template>
-  </UModal>
+  </component>
 </template>
 
 <script setup lang="ts">
+import {UModal, UDrawer} from '#components'
 const toast = useToast()
 
 interface VeilleEntry {
@@ -130,6 +131,7 @@ const votedIds = ref<Set<string>>(new Set())
 const openSubmitModal = ref(false)
 const filter = ref('last7days')
 const sort = ref('votes')
+const isMobile = ref(false)
 
 const filteredEntries = computed(() => {
   const now = new Date()
@@ -326,6 +328,7 @@ async function submitArticle() {
 }
 
 onMounted(() => {
+  isMobile.value = window.innerWidth < 768
   fetchEntries()
   // subscribe to new approved entries
   veilleChannel = supabase
