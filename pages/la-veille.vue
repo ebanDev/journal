@@ -40,7 +40,7 @@
             <span class="mt-1 text-sm">{{ item.voteCount }}</span>
           </div>
           <!-- content -->
-          <NuxtLink :to="item.url" class="flex-1">
+          <NuxtLink :to="item.url" target="_blank" class="flex-1">
             <div class="flex justify-between items-center">
               <h3 class="text-lg font-medium">{{ item.title }}</h3>
               <UBadge :label="item.type" color="secondary" />
@@ -66,7 +66,7 @@
               icon="tabler-refresh" :disabled="!form.url" variant="outline" />
           </div>
         </UFormField>
-        <UFormField label="Description" class="w-full">
+        <UFormField label="Description" class="w-full" description="Un très court résumé de l'article.">
           <UTextarea v-model="form.description" placeholder="Description" class="mb-2 w-full" icon="tabler-align-left" />
         </UFormField>
         <UFormField label="Type" class="w-full">

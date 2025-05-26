@@ -10,7 +10,7 @@ const translateErrorCode = (errorCode: string) => {
     case 'invalid_email':
       return 'L\'adresse e-mail fournie est invalide.'
     case 'user_not_found':
-      return 'Aucun utilisateur trouvé avec cette adresse e-mail. Veuillez utiliser l\'adresse e-mail que vous avez utilisée lors de votre adhésion.'
+      return 'Aucun·e utilisateur·ice trouvé·e avec cette adresse e-mail. Veuillez utiliser l\'adresse e-mail que vous avez utilisée lors de votre adhésion.'
     default:
       return 'Une erreur inconnue est survenue.'
   }
@@ -46,8 +46,8 @@ onMounted(async () => {
 
   if (user.value) {
     toast.add({
-      title: 'Déjà connecté',
-      description: 'Vous êtes déjà connecté.',
+      title: 'Déjà connecté·e',
+      description: 'Vous êtes déjà connecté·e.',
       icon: 'tabler:check',
       color: 'success',
     })
@@ -71,7 +71,7 @@ onMounted(async () => {
     } else {
       toast.add({
         title: 'Connexion réussie',
-        description: 'Vous êtes maintenant connecté.',
+        description: 'Vous êtes maintenant connecté·e.',
         icon: 'tabler:check',
         color: 'success',
       })
