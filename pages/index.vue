@@ -85,31 +85,14 @@
   <!-- Other articles section below -->
   <section class="container mx-auto mt-10 p-4 hidden md:block">
     <h1 class="font-serif text-3xl md:text-4xl mb-8 md:text-center">Autres articles</h1>
-    <masonry-wall :items="limitedOtherArticles" :column-width="300" :gap="16">
-      <template #default="{ item: article, index: idx }">
-        <NuxtLink :to="`/articles/${article.slug}`" class="group">
-          <div class="bg-secondary-100 hover:bg-[var(--color-amber-200)] transition-colors rounded-lg">
-            <img v-if="idx % 2 === 0 && article.cover" :src="article.cover"
-              class="object-cover w-full h-40 rounded-t-lg" :alt="article.title" />
-            <div class="p-3">
-              <div v-if="article.categories && article.categories.length" class="flex flex-wrap gap-2 mb-1">
-                <UBadge v-for="cat in article.categories" :key="cat.name"
-                  color="secondary"
-                  :label="cat.name" :icon="cat.icon ? 'mingcute:' + cat.icon : undefined" />
-              </div>
-              <h3 class="font-extrabold text-lg mb-1 text-black">{{ article.title }}</h3>
-              <p class="text-gray-600 text-sm line-clamp-3">{{ article.description }}</p>
-            </div>
-          </div>
-        </NuxtLink>
-      </template>
-    </masonry-wall>
+    <ArticlesWall :articles="limitedOtherArticles" :width="300" :gap="16" :coverFrequency="2" />
   </section>
+
   <section class="container mx-auto mt-10 p-4">
     <h1 class="font-serif text-3xl md:text-4xl mb-8 md:text-center">Catégories</h1>
     <div class="relative">
       <div class="flex gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4">
-        <NuxtLink v-for="cat in categories" :key="cat.id" :to="`/articles?category=${cat.slug}`"
+        <NuxtLink v-for="cat in categories" :key="cat.id" :to="`/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`"
           class="group rounded-lg min-w-[260px] max-w-xs h-64 flex flex-col items-center justify-between shadow-sm snap-center relative overflow-hidden">
           <div v-if="cat.cover" class="absolute inset-0 w-full h-full">
             <img :src="cat.cover" :alt="cat.name" class="object-cover w-full h-full transition-transform group-hover:scale-105 duration-200" />
@@ -125,6 +108,7 @@
       </div>
     </div>
   </section>
+
   <section class="w-screen mt-10 pt-4 pb-12">
     <h2 class="font-serif text-3xl md:text-4xl mb-8 md:text-center px-4">Éditions</h2>
     <!-- A swiper --->
@@ -193,7 +177,7 @@ const { data: latestEdition, refresh: refreshEdition } = await useAsyncData<Edit
   if (!published.length) return null
   const editionId = published[0].id
   // Fetch articles with new schema fields
-  published[0].articles = await getArticles(editionId)
+  published[0].articles = await getArticles([{ type: 'issue', id: editionId }]) as Article[]
   return published[0] as Edition
 })
 

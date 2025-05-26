@@ -45,12 +45,38 @@ export function useDb() {
     return data
   }
 
-  // Get all articles (optionally by issue) with categories
-  async function getArticles(issueId?: string) {
+  // Get all articles (optionally filtered) with categories
+  async function getArticles(filters?: Array<{ type: string, id: string }>) {
     let query = supabase
       .from('articles')
       .select('*, article_categories:article_categories(category_id, categories(name, icon))')
-    if (issueId) query = query.eq('issue_id', issueId)
+
+    if (filters && filters.length) {
+      const issueFilter = filters.filter(f => f.type === 'issue').map(f => f.id)
+      const categoryFilter = filters.filter(f => f.type === 'category').map(f => f.id)
+      let articleIds: string[] | undefined = undefined
+      if (categoryFilter.length) {
+        // Get all article IDs that have any of the selected categories (OR logic within type)
+        const { data: articleCatRows, error: catError } = await supabase
+          .from('article_categories')
+          .select('article_id')
+          .in('category_id', categoryFilter)
+        if (catError) throw catError
+        articleIds = (articleCatRows || []).map((row: any) => row.article_id)
+        if (!articleIds.length) return []
+      }
+      if (issueFilter.length && articleIds) {
+        // AND logic between types: articles in (category1 OR category2) AND (issue3 OR issue4)
+        query = query.in('id', articleIds).in('issue_id', issueFilter)
+      } else if (issueFilter.length) {
+        query = query.in('issue_id', issueFilter)
+      } else if (articleIds) {
+        query = query.in('id', articleIds)
+      } else {
+        // No matching articles
+        return []
+      }
+    }
     const { data, error } = await query
     if (error) throw error
     // Attach categories as array of objects { name, icon }

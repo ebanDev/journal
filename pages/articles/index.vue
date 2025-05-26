@@ -1,90 +1,159 @@
 <template>
-  <div class="container mx-auto py-4 px-4">
-    <div v-if="pending">
-      <div class="space-y-4">
-        <UPlaceholder class="h-6 w-1/3" />
-        <div class="space-y-6">
-          <UPlaceholder class="h-8 w-1/4" />
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            <UPlaceholder class="h-40" />
-            <UPlaceholder class="h-40" />
-            <UPlaceholder class="h-40" />
-          </div>
-        </div>
+  <div class="container mx-auto p-4 space-y-4">
+    <h1 class="text-3xl font-serif">Les articles</h1>
+    <div class="flex md:flex-row flex-col gap-4">
+      <!-- Mobile: Button to open filters drawer -->
+      <div class="block md:hidden mb-4 w-full">
+        <UButton label="Filtrer" icon="mingcute-filter-line" @click="drawerOpen = true" size="lg" class="w-full justify-center" />
       </div>
-    </div>
-    <div v-else>
-      <div v-if="editionsWithArticles.length">
-        <section v-for="edition in editionsWithArticles" :key="edition.id" class="mb-12">
-          <div class="flex items-center gap-4 mb-2">
-            <h2 class="font-serif text-2xl">{{ edition.title }}</h2>
-            <span v-if="edition.published_at" class="text-xs text-gray-500">Publié : {{ formatDate(edition.published_at) }}</span>
-          </div>
-          <p class="text-gray-600 mb-4">{{ edition.description }}</p>
-          <div v-if="edition.articles && edition.articles.length" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <NuxtLink v-for="article in edition.articles" :key="article.slug" :to="`/articles/${article.slug}`">
-              <div class="flex flex-col bg-white rounded-lg shadow hover:bg-[var(--color-amber-100)] transition-colors">
-                <img v-if="article.cover" :src="article.cover" class="object-cover w-full h-32 rounded-t-lg" :alt="article.title" />
-                <div class="p-3">
-                  <div v-if="article.categories && article.categories.length" class="flex flex-wrap gap-2 mb-1">
-                    <UBadge v-for="cat in article.categories" :key="cat.name"
-                      color="secondary"
-                      :label="cat.name" :icon="cat.icon ? 'mingcute:' + cat.icon : undefined" />
-                  </div>
-                  <h3 class="font-serif text-lg font-medium mb-1 text-black">{{ article.title }}</h3>
-                  <p class="text-gray-600 text-sm line-clamp-3">{{ article.description }}</p>
-                  <div class="text-xs text-gray-600 mt-2">{{ formatDate(article.published_at) }}</div>
+      <!-- Desktop: Sidebar filters -->
+      <div class="hidden md:block w-86 shrink-0 bg-secondary-200 rounded-lg p-4 h-full">
+        <h2 class="text-xl font-bold mb-4">Filtrer</h2>
+        <UTabs v-model="activeTab" :items="tabs" class="w-full" :content="false" />
+        <div class="mt-4" v-if="activeTab === '0'">
+          <ul class="grid grid-cols-2 gap-2">
+            <li v-for="category in categories" :key="category.id" class="group relative w-full h-full aspect-square"
+              @click="toggleFilter({ type: 'category', id: category.id, label: category.name })">
+              <img :src="category.cover" alt="Category Image"
+                class="w-full h-auto aspect-square object-cover rounded-lg mb-2 absolute inset-0" />
+                <div class="absolute inset-0 opacity-75 bg-black group-hover:opacity-60 rounded-lg transition-all duration-150 pointer-events-none"
+                :class="{ 'bg-primary-800 !opacity-60': filters.some(f => f.type === 'category' && f.id === category.id) }" ></div>
+                <h3
+                class="absolute bottom-0 left-0 right-0 flex flex-col items-center justify-center h-full z-10 font-bold text-lg text-white cursor-pointer">
+                {{ category.name }}</h3>
+            </li>
+          </ul>
+        </div>
+        <div class="mt-4" v-else>
+          <ul class="space-y-2">
+            <li v-for="issue in issues" :key="issue.id" class="flex items-center"
+              @click="toggleFilter({ type: 'issue', id: issue.id, label: issue.title })">
+              <div
+                class="flex items-center gap-2 p-2 bg-white rounded-lg shadow hover:bg-secondary-100 w-full cursor-pointer transition-all duration-150"
+                :class="{ '!bg-primary-500 !text-white': filters.some(f => f.type === 'issue' && f.id === issue.id) }">
+                <img v-if="issue.cover" :src="issue.cover" class="w-16 h-16 object-cover rounded-md"
+                  :alt="issue.title" />
+                <div>
+                  <h3 class="font-bold">{{ issue.title }}</h3>
+                  <p class="text-sm text-gray-600" :class=" {'!text-gray-200' : filters.some(f => f.type ==='issue' && f.id === issue.id)}">{{ formatDate(issue.published_at) }}</p>
                 </div>
               </div>
-            </NuxtLink>
-          </div>
-          <div v-else class="text-gray-500 italic">Aucun article dans cette édition.</div>
-        </section>
+            </li>
+          </ul>
+        </div>
       </div>
-      <div v-else class="text-center text-gray-500 py-10">Aucune édition pour le moment.</div>
+      <!-- Mobile: UDrawer for filters -->
+      <UDrawer v-model:open="drawerOpen" class="md:hidden">
+        <template #content>
+          <div class="p-4">
+            <h2 class="text-xl font-bold mb-4">Filtrer</h2>
+            <UTabs v-model="activeTab" :items="tabs" class="w-full" :content="false" />
+            <div class="mt-4" v-if="activeTab === '0'">
+              <ul class="grid grid-cols-2 gap-2">
+                <li v-for="category in categories" :key="category.id" class="group relative w-full h-full aspect-square"
+                  @click="toggleFilter({ type: 'category', id: category.id, label: category.name }); drawerOpen = false">
+                  <img :src="category.cover" alt="Category Image"
+                    class="w-full h-auto aspect-square object-cover rounded-lg mb-2 absolute inset-0" />
+                  <div class="absolute inset-0 opacity-75 bg-black group-hover:opacity-60 rounded-lg transition-all duration-150 pointer-events-none"
+                    :class="{ 'bg-primary-800 !opacity-60': filters.some(f => f.type === 'category' && f.id === category.id) }"></div>
+                  <h3
+                    class="absolute bottom-0 left-0 right-0 flex flex-col items-center justify-center h-full z-10 font-bold text-xl text-white cursor-pointer">
+                    {{ category.name }}</h3>
+                </li>
+              </ul>
+            </div>
+            <div class="mt-4" v-else>
+              <ul class="space-y-2">
+                <li v-for="issue in issues" :key="issue.id" class="flex items-center"
+                  @click="toggleFilter({ type: 'issue', id: issue.id, label: issue.title }); drawerOpen = false">
+                  <div
+                    class="flex items-center gap-2 p-2 bg-white rounded-lg shadow hover:bg-secondary-100 w-full cursor-pointer transition-all duration-150"
+                    :class="{ '!bg-primary-500 !text-white': filters.some(f => f.type === 'issue' && f.id === issue.id) }">
+                    <img v-if="issue.cover" :src="issue.cover" class="w-16 h-16 object-cover rounded-md"
+                      :alt="issue.title" />
+                    <div>
+                      <h3 class="font-bold">{{ issue.title }}</h3>
+                      <p class="text-sm text-gray-600" :class=" {'!text-gray-200' : filters.some(f => f.type ==='issue' && f.id === issue.id)}">{{ formatDate(issue.published_at) }}</p>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </template>
+      </UDrawer>
+      <div class="w-full">
+        <div class="flex items-center gap-2 mb-4 flex-wrap">
+          <span class="flex items-center gap-2 text-lg font-bold">
+            <Icon name="mingcute-filter-line" />
+            Filtres :
+          </span>
+          <UBadge v-for="filter in filters" :key="filter.id" class="cursor-pointer group relative hover:bg-primary-600"
+            color="primary" :label="filter.label"  @click="filters.splice(filters.indexOf(filter), 1)"
+            :icon="filter.type === 'category' ? 'mingcute-folder-2-line' : 'mingcute-calendar-2-line'" >
+            <template #trailing>
+              <Icon name="tabler-x" class="text-white transition-colors" />
+            </template>
+          </UBadge>
+          <UBadge v-if="filters.length === 0" color="secondary" label="Aucun"
+            class="cursor-default" />
+        </div>
+
+        <ArticlesWall v-if="articles.length > 0" :articles="articles" />
+        <div v-else class="text-center text-gray-500 mt-8 w-full h-full flex flex-col items-center justify-center">
+          <Icon name="mingcute-sad-line" class="text-4xl mb-2" />
+          <p>Aucun article trouvé avec les filtres sélectionnés.</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-const { getIssues, getArticles } = useDb()
+import { ref, watch } from 'vue'
+import { useAsyncData } from '#imports'
+const { getIssues, getArticles, getCategories } = useDb()
 
-const editionsWithArticles = ref<any[]>([])
-const pending = ref(true)
+const tabs = [
+  { label: 'Catégories', icon: 'mingcute-folder-2-line' },
+  { label: 'Éditions', icon: 'mingcute-calendar-2-line' },
+]
 
-function formatDate(date: string) {
-  return date ? new Date(date).toLocaleDateString() : ''
-}
+const activeTab = ref('0')
+const filters = ref<any[]>([])
+const drawerOpen = ref(false)
 
-const translateEditionStatus = (status: string) => {
-  switch (status) {
-    case 'draft':
-      return 'Brouillon'
-    case 'ready':
-      return 'Prêt'
-    case 'published':
-      return 'Publié'
-    default:
-      return status
+const { data: ssrIssues } = await useAsyncData('issues', getIssues)
+const { data: ssrCategories } = await useAsyncData('categories', getCategories)
+const { data: ssrArticles } = await useAsyncData('articles', () => getArticles([]))
+
+const issues = ref<any[]>(ssrIssues.value || [])
+const categories = ref<any[]>(ssrCategories.value || [])
+const articles = ref<any[]>(ssrArticles.value || [])
+
+function toggleFilter(filter: any) {
+  if (!filters.value.some(f => f.type === filter.type && f.id === filter.id)) {
+    filters.value.push(filter)
+  } else {
+    filters.value = filters.value.filter(f => f.type !== filter.type || f.id !== filter.id)
   }
 }
 
-onMounted(async () => {
-  pending.value = true
-  try {
-    const allEditions = await getIssues()
-    const editionsWithArts = await Promise.all(
-      allEditions.map(async (edition: any) => {
-        const articles = await getArticles(edition.id)
-        return { ...edition, articles }
-      })
-    )
-    editionsWithArticles.value = editionsWithArts
-  } catch (e) {
-    editionsWithArticles.value = []
-  } finally {
-    pending.value = false
-  }
-})
+function formatDate(dateString: string) {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
+// Fetch articles with current filters (client only)
+async function fetchArticles() {
+  const filterParams = filters.value.map((f: any) => ({ type: f.type, id: f.id }))
+  articles.value = await getArticles(filterParams)
+}
+
+watch(filters, fetchArticles, { deep: true })
+
 </script>

@@ -5,7 +5,18 @@
       <p class="text-gray-500 mb-6">{{ formatDate(article.published_at) }}</p>
 
       <div v-if="article.categories && article.categories.length" class="flex flex-wrap gap-2 mb-4">
-        <UBadge v-for="cat in article.categories" :key="cat.name || cat" color="secondary" :label="cat.name || cat" :icon="cat.icon ? 'mingcute:' + cat.icon : undefined" />
+        <NuxtLink 
+          v-for="cat in article.categories" 
+          :key="cat.name || cat"
+          :to="`/category/${(cat.name || cat).toLowerCase().replace(/\s+/g, '-')}`"
+          class="hover:opacity-80 transition-opacity"
+        >
+          <UBadge 
+            color="secondary" 
+            :label="cat.name || cat" 
+            :icon="cat.icon ? 'mingcute:' + cat.icon : undefined" 
+          />
+        </NuxtLink>
       </div>
 
       <div v-if="article.cover" class="mb-6">
