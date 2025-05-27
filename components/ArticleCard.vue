@@ -20,28 +20,18 @@
         </div>
         <h3 class="text-lg font-bold mb-1 text-black">{{ article.title }}</h3>
         <p class="text-gray-600 text-sm line-clamp-3">{{ article.description }}</p>
-        <div class="text-xs text-gray-600 mt-2">Publié le {{ formatDate(article.published_at) }}</div>
+        <div class="text-xs text-gray-600 mt-2" v-if="article.published_at">Publié le {{ formatDate(article.published_at) }}</div>
       </div>
     </div>
   </NuxtLink>
 </template>
 
 <script setup lang="ts">
-interface Article {
-  slug: string
-  title: string
-  description?: string
-  cover?: string
-  published_at: string
-  categories?: Array<{
-    name: string
-    icon?: string
-  }>
-}
+import type { ArticleWithCategories } from '~/composables/useDb'
 
-withDefaults(defineProps<{
-  article: Article
-  showCover?: boolean
+ withDefaults(defineProps<{
+   article: ArticleWithCategories
+   showCover?: boolean
 }>(), {
   showCover: true
 })

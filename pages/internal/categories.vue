@@ -41,19 +41,13 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useSupabaseClient } from '#imports'
 import IconPicker from '~/components/IconPicker.vue'
-
-interface Category {
-  id?: string
-  name: string
-  icon?: string
-  cover?: string
-}
+import type { Tables } from '~/types/database.types'
 
 const client = useSupabaseClient()
-const categories = ref<Category[]>([])
+const categories = ref<Tables<'categories'>[]>([])
 const modalOpen = ref(false)
 const submitting = ref(false)
-const form = reactive<Category>({ name: '', icon: '', cover: '' })
+const form = reactive({ name: '', icon: '', cover: '' })
 let editingId: string | null = null
 
 async function fetchCategories() {
@@ -69,7 +63,7 @@ function openAddModal() {
   modalOpen.value = true
 }
 
-function editCategory(cat: Category) {
+function editCategory(cat: Tables<'categories'>) {
   editingId = cat.id || null
   form.name = cat.name
   form.icon = cat.icon || ''

@@ -40,7 +40,7 @@
             <span class="mt-1 text-sm">{{ item.voteCount }}</span>
           </div>
           <!-- content -->
-          <NuxtLink :to="item.url" target="_blank" class="flex-1">
+          <NuxtLink :to="item.url || '#'" target="_blank" class="flex-1">
             <div class="flex justify-between items-center">
               <h3 class="text-lg font-medium">{{ item.title }}</h3>
               <UBadge :label="item.type" color="secondary" />
@@ -95,32 +95,15 @@
 
 <script setup lang="ts">
 import {UModal, UDrawer} from '#components'
+import type { RealtimeChannel } from '@supabase/supabase-js'
+import type { VeilleEntry, VeilleInsert } from '~/composables/useDb'
 const toast = useToast()
-
-interface VeilleEntry {
-  id: string
-  title: string
-  url?: string
-  description?: string
-  laveille_votes?: Array<{ id: string }>
-}
-
-interface VeilleVote {
-  article_id: string
-}
-
-interface EntryWithVotes {
-  id: string
-  title: string
-  url?: string
-  description?: string
-  voteCount: number
-}
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
+const db = useDb()
 
-const entries = ref<EntryWithVotes[]>([])
+const entries = ref<VeilleEntry[]>([])
 const loading = ref(false)
 const form = reactive({ title: '', url: '', description: '', type: 'article', cover: '', source: '' })
 const fetchingMetadata = ref(false)
@@ -187,56 +170,36 @@ async function fetchMetadata() {
 
 async function fetchEntries() {
   loading.value = true
-  const { data, error } = await supabase
-    .from('laveille')
-    .select(`id, title, url, description, type, submitted_at, laveille_votes(id)`)
-    .eq('status', 'approved')
-  if (error) {
-    console.error(error)
-  } else if (data) {
-    entries.value = (data as VeilleEntry[]).map(item => ({
-      id: item.id,
-      title: item.title,
-      url: item.url,
-      description: item.description,
-      type: item.type,
-      submitted_at: item.submitted_at,
-      voteCount: item.laveille_votes?.length || 0
-    }))
-    // sort by voteCount descending
-    entries.value.sort((a, b) => b.voteCount - a.voteCount)
+  try {
+    entries.value = await db.getVeilleEntries()
     // fetch votes by current user
     votedIds.value.clear()
     if (user.value?.id) {
-      const { data: votes } = await supabase
-        .from('laveille_votes')
-        .select('article_id')
-        .eq('voter_id', user.value.id)
-      if (votes) {
-        (votes as VeilleVote[]).forEach(v => votedIds.value.add(v.article_id))
-      }
+      votedIds.value = await db.getUserVeilleVotes(user.value.id)
     }
+  } catch (error) {
+    console.error('Error fetching entries:', error)
+  } finally {
+    loading.value = false
   }
-  loading.value = false
 }
 
 async function submitEntry() {
   submitError.value = null
   submitted.value = false
   submitting.value = true
-  const payload: any = {
+  
+  const payload: VeilleInsert = {
     title: form.title,
+    type: form.type,
     ...(form.url && { url: form.url }),
     ...(form.description && { description: form.description }),
-    type: form.type,
     ...(form.cover && { cover: form.cover }),
     ...(form.source && { source: form.source })
   }
-  const { error } = await supabase
-    .from('laveille')
-    .insert(payload)
-  if (error) submitError.value = error.message
-  else {
+  
+  try {
+    await db.submitVeilleEntry(payload)
     submitted.value = true
     form.title = ''
     form.url = ''
@@ -244,23 +207,23 @@ async function submitEntry() {
     form.type = 'article'
     form.cover = ''
     form.source = ''
-  }
-  submitting.value = false
-  openSubmitModal.value = false
-  if (submitError.value) {
-    toast.add({
-      title: 'Erreur',
-      color: 'error',
-      description: submitError.value,
-      icon: 'mingcute-alert-line',
-    })
-  } else {
+    openSubmitModal.value = false
     toast.add({
       title: 'Article soumis',
       color: 'success',
       description: 'Votre article a été soumis avec succès. Il sera examiné par notre équipe.',
       icon: 'mingcute-check-line',
     })
+  } catch (error: any) {
+    submitError.value = error.message
+    toast.add({
+      title: 'Erreur',
+      color: 'error',
+      description: error.message,
+      icon: 'mingcute-alert-line',
+    })
+  } finally {
+    submitting.value = false
   }
 }
 
@@ -288,19 +251,12 @@ async function vote(id: string) {
     const entry = entries.value.find(e => e.id === id)
     if (entry) entry.voteCount++
   }
+  
   try {
     if (isVoted) {
-      const { error } = await supabase
-        .from('laveille_votes')
-        .delete()
-        .eq('article_id', id)
-        .eq('voter_id', user.value.id)
-      if (error) throw error
+      await db.unvoteVeilleEntry(id, user.value.id)
     } else {
-      const { error } = await supabase
-        .from('laveille_votes')
-        .insert({ article_id: id, voter_id: user.value.id })
-      if (error) throw error
+      await db.voteVeilleEntry(id, user.value.id)
     }
   } catch (err) {
     console.error(err)
@@ -334,7 +290,7 @@ onMounted(() => {
   veilleChannel = supabase
     .channel('public:laveille')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'laveille' }, (payload) => {
-      if (payload.new?.status === 'approved') fetchEntries()
+      if ((payload.new as any)?.status === 'approved') fetchEntries()
     })
     .subscribe()
   // subscribe to vote changes
@@ -343,6 +299,7 @@ onMounted(() => {
     .on('postgres_changes', { event: '*', schema: 'public', table: 'laveille_votes' }, () => fetchEntries())
     .subscribe()
 })
+
 onUnmounted(() => {
   supabase.removeChannel(veilleChannel)
   supabase.removeChannel(votesChannel)

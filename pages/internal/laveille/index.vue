@@ -23,7 +23,7 @@
           <template #footer>
             <div class="flex space-x-2">
               <UButton size="sm" color="success" @click="approve(item.id)">Approve</UButton>
-              <UButton size="sm" color="danger" @click="remove(item.id)">Delete</UButton>
+              <UButton size="sm" color="error" @click="remove(item.id)">Delete</UButton>
             </div>
           </template>
         </UCard>

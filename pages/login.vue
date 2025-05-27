@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { translateErrorCode } from 'supabase-error-translator-js';
 const supabase = useSupabaseClient()
 const email = ref('')
 const loading = ref(false)
@@ -57,7 +56,7 @@ onMounted(async () => {
 
   const tokenHash = useRoute().query.token
 
-  if (tokenHash) {
+  if (tokenHash && typeof tokenHash === 'string') {
     console.log('Token hash:', tokenHash)
     const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'email' })
     console.log(data, error)

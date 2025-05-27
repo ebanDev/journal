@@ -39,7 +39,7 @@
               </td>
               <td class="px-4 py-2 space-x-2">
                 <UButton size="sm" color="success" @click="saveMember(member.email)">Enregistrer</UButton>
-                <UButton size="sm" color="danger" @click="deleteMember(member.email)">Supprimer</UButton>
+                <UButton size="sm" color="error" @click="deleteMember(member.email)">Supprimer</UButton>
               </td>
             </tr>
           </tbody>
@@ -53,17 +53,9 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { useSupabaseClient } from '#imports'
-
-type MemberRow = {
-  email: string
-  full_name: string | null
-  uni_year: string | null
-  phone: string | null
-  role: 'member' | 'editor' | 'admin'
-}
-
+import type { Tables } from '~/types/database.types'
 const supabase = useSupabaseClient()
-const members = ref<MemberRow[]>([])
+const members = ref<Tables<'members'>[]>([])
 const loading = ref(true)
 let membersChannel: RealtimeChannel
 
@@ -71,7 +63,7 @@ async function fetchMembers() {
   loading.value = true
   const { data, error } = await supabase
     .from('members')
-    .select('email, full_name, uni_year, phone, role')
+    .select('*')
   if (error) console.error(error)
   else members.value = data ?? []
   loading.value = false

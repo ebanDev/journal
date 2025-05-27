@@ -107,7 +107,7 @@ function selectIcon(icon: string) {
       <Icon icon="mingcute:down-line" class="w-4 h-4 text-gray-400" />
     </UButton>
 
-    <UModal v-model:open="showSheet" title="Choisir une icône" :ui="{width: 'max-w-2xl'}">
+    <UModal v-model:open="showSheet" title="Choisir une icône">
       <template #body>
         <div class="flex items-center mb-2 gap-2">
           <UInput v-model="searchQuery" placeholder="Rechercher une icône..." class="flex-1" />

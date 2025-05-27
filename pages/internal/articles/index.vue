@@ -7,21 +7,7 @@
       </div>
     </div>
 
-    <div v-if="pendingEditions">
-      <div class="space-y-4">
-        <UPlaceholder class="h-6 w-1/3" />
-        <div class="space-y-6">
-          <UPlaceholder class="h-8 w-1/4" />
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            <UPlaceholder class="h-40" />
-            <UPlaceholder class="h-40" />
-            <UPlaceholder class="h-40" />
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div v-else>
+    <div v-if="editions">
       <div v-if="editions.length" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         <UCard v-for="edition in editions" :key="edition.id" class="relative cursor-pointer"
           @click="router.push(`/internal/issues/${edition.id}`)">
@@ -56,7 +42,8 @@
       </template>
       <template #body>
         <div class="py-2">
-          Voulez-vous vraiment supprimer l’édition <b>{{ editionToDelete?.title }}</b> ?
+          Voulez-vous vraiment supprimer l’édition <b>{{ editionToDelete?.title || 'Titre inconnu' }}</b> ?
+          <p class="text-sm text-gray-500">Cette action est irréversible.</p>
         </div>
       </template>
       <template #footer>
@@ -73,6 +60,8 @@
 const supabase = useSupabaseClient()
 const { getIssues, deleteIssueById } = useDb()
 const router = useRouter()
+import type { RealtimeChannel } from '@supabase/supabase-js'
+import type { Tables } from '~/types/database.types'
 
 // Load editions
 const { data: editions = [], pending: pendingEditions, refresh: refreshEditions } = await useAsyncData('editions', async () => {
@@ -85,6 +74,7 @@ const { data: editions = [], pending: pendingEditions, refresh: refreshEditions 
 })
 
 let issuesChannel: RealtimeChannel
+
 onMounted(() => {
   issuesChannel = supabase
     .channel('public:issues')
@@ -111,10 +101,10 @@ const translateEditionStatus = (status: string) => {
 
 // Delete logic
 const showDeleteModal = ref(false)
-const editionToDelete = ref(null)
+const editionToDelete = ref(null as Tables<'issues'> | null)
 const deleting = ref(false)
 
-function askDelete(edition) {
+function askDelete(edition: Tables<'issues'>) {
   editionToDelete.value = edition
   showDeleteModal.value = true
 }

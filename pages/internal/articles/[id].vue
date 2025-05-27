@@ -21,13 +21,13 @@
       <BubbleMenu v-if="editor" :editor="editor" :tippy-options="{ duration: 100 }"
         class="bg-white rounded-lg shadow p-1 flex gap-1">
         <UButton v-for="b in buttons" :key="b.icon" :icon="b.icon" size="xs" variant="ghost" color="neutral"
-          :class="b.active() ? 'bg-amber-100 text-amber-700' : ''" @click="b.command" :title="b.title" />
+          :class="b.active() ? 'bg-amber-100 text-amber-700' : ''" @click="b.command || null" :title="b.title" />
       </BubbleMenu>
 
       <!-- Content -->
       <EditorContent :editor="editor"
         class="prose prose-headings:text-stone-700 prose-h1:text-3xl prose-h2:font-extrabold max-w-full w-[800px] min-h-full"
-        @click="editor.value?.chain().focus().run()" />
+        @click="editor?.chain().focus().run()" />
     </div>
 
     <!-- Properties Panel -->
@@ -93,7 +93,6 @@
             <template v-if="saveState === 'success'">Sauvegardé</template>
             <template v-else>Sauvegarder</template>
           </UButton>
-          <UButton block variant="ghost" @click="goBack">Retour à la liste</UButton>
         </div>
       </div>
     </transition>
@@ -204,13 +203,23 @@ const save = async (opts: { silent?: boolean } = {}) => {
   const { error } = await supabase.from('articles').update(payload).eq('id', id)
   if (error) {
     saveState.value = 'error'
-    return toast.error('Save failed')
+    return toast.add({
+      title: "Échec de la sauvegarde",
+      color: 'error',
+      icon: 'tabler-x',
+      description: error.message
+    })
   }
   await setArticleCategories(id, selectedCategories.value)
   lastSavedDate.value = new Date()
   saveState.value = 'success'
   setTimeout(() => { saveState.value = 'default' }, 2000)
-  if (!opts.silent) toast.success('Sauvegardé')
+  if (!opts.silent) toast.add({
+    title: "Sauvegardé",
+    color: 'success',
+    icon: 'tabler-check',
+    description: 'L\'article a été sauvegardé avec succès.'
+  })
 }
 const debouncedSave = debounce(() => save({ silent: true }), 2000)
 
@@ -223,7 +232,12 @@ const fetchData = async () => {
     .select('title,content,draft,published_at,slug,cover,description,featured')
     .eq('id', id)
     .single()
-  if (error) return toast.error('Load failed')
+  if (error) return toast.add({
+    title: "Échec de la récupération",
+    color: 'error',
+    icon: 'tabler-x',
+    description: error.message
+  })
   title.value = data.title
   editor.value?.commands.setContent(data.content)
   meta.slug = data.slug || ''
@@ -239,7 +253,6 @@ const fetchData = async () => {
 const publish = () => {
   save()
 }
-const goBack = () => router.push('/internal/articles')
 
 const triggerFileUpload = () => {
   fileInput.value?.click()

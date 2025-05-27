@@ -76,7 +76,7 @@ if (user?.value?.email) {
     .select('full_name')
     .eq('email', user.value.email)
     .single()
-  userName.value = data?.full_name
+  userName.value = data?.full_name || ''
 }
 </script>
 

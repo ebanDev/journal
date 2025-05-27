@@ -52,7 +52,7 @@
           <UInput v-model="form.slug" />
         </UFormField>
         <UFormField label="Description">
-          <UTextarea v-model="form.description" rows="3" class="w-full resize-none" />
+          <UTextarea v-model="form.description" :rows="3" class="w-full resize-none" />
         </UFormField>
         <UFormField label="Date de publication">
           <UPopover>
@@ -211,7 +211,7 @@ async function fetchEdition() {
     form.published_at = ''
   }
   activeStatusTab.value = ed.status || 'draft'
-  articles.value = await getArticles(editionId) || []
+  articles.value = await getArticles([{type: 'issue', id: editionId}]) || []
   loadingArticles.value = false
 }
 

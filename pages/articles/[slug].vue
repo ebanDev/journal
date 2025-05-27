@@ -2,18 +2,18 @@
   <div class="max-w-3xl mx-auto w-full py-8 px-4">
     <div v-if="article">
       <h1 class="font-serif text-4xl mb-4">{{ article.title }}</h1>
-      <p class="text-gray-500 mb-6">{{ formatDate(article.published_at) }}</p>
+      <p class="text-gray-500 mb-6" v-if="article.published_at">{{ formatDate(article.published_at) }}</p>
 
       <div v-if="article.categories && article.categories.length" class="flex flex-wrap gap-2 mb-4">
         <NuxtLink 
           v-for="cat in article.categories" 
-          :key="cat.name || cat"
-          :to="`/category/${(cat.name || cat).toLowerCase().replace(/\s+/g, '-')}`"
+          :key="cat.name"
+          :to="`/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`"
           class="hover:opacity-80 transition-opacity"
         >
           <UBadge 
             color="secondary" 
-            :label="cat.name || cat" 
+            :label="cat.name" 
             :icon="cat.icon ? 'mingcute:' + cat.icon : undefined" 
           />
         </NuxtLink>
@@ -40,6 +40,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSupabaseClient, useToast } from '#imports'
 import { useDb } from '~/composables/useDb'
+import type {ArticleWithCategories} from '~/composables/useDb'
 
 const supabase = useSupabaseClient()
 const route = useRoute()
@@ -47,18 +48,7 @@ const router = useRouter()
 const toast = useToast()
 const slug = String(route.params.slug)
 
-interface Article {
-  title: string
-  content: string
-  published_at: string
-  cover?: string
-  description?: string
-  categories?: string[]
-  draft?: boolean
-  slug?: string
-}
-
-const article = ref<Article | null>(null)
+const article = ref(null as ArticleWithCategories | null)
 
 const formatDate = (date: string) => new Date(date).toLocaleDateString()
 
@@ -68,13 +58,21 @@ const fetchArticle = async () => {
   try {
     const found = await getArticleBySlug(slug)
     if (!found) {
-      toast.error('Article non trouvé')
+      toast.add({
+        title: 'Article non trouvé',
+        description: 'L\'article que vous cherchez n\'existe pas.',
+        color: 'error',
+      })
       router.push('/')
       return
     }
     article.value = found
   } catch (e) {
-    toast.error('Erreur lors du chargement de l\'article')
+    toast.add({
+      title: 'Erreur',
+      description: 'Erreur lors du chargement de l\'article',
+      color: 'error',
+    })
     router.push('/')
   }
 }

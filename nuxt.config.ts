@@ -16,7 +16,9 @@ export default defineNuxtConfig({
 
   supabase: {
     redirectOptions: {
-      include: ["/internal"]
+      include: ["/internal"],
+      login:  '/login',
+      callback: '/login',
     },
   },
 
@@ -25,4 +27,8 @@ export default defineNuxtConfig({
       tailwindcss(),
     ],
   },
+
+  typescript: {
+    typeCheck: true
+  }
 })

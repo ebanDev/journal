@@ -7,7 +7,7 @@
       <p v-else class="text-gray-600 mb-3">Aucune édition publiée</p>
 
       <div class="flex gap-4 flex-col justify-start pt-2">
-        <div v-for="(article, index) in featuredArticles" :key="article.slug" class="group">
+        <div v-for="(article, index) in featuredArticles" :key="article.id" class="group">
           <!-- Featured article card -->
           <NuxtLink :to="`/articles/${article.slug}`">
             <div
@@ -21,31 +21,32 @@
 
               <div class="p-4">
                 <div v-if="article.categories && article.categories.length" class="flex flex-wrap gap-2 mb-2">
-                  <UBadge v-for="cat in article.categories" :key="cat.name"
-                    color="secondary"
-                    :label="cat.name" :icon="cat.icon ? 'mingcute:' + cat.icon : undefined" />
+                  <UBadge v-for="cat in article.categories" :key="cat.name" color="secondary" :label="cat.name"
+                    :icon="cat.icon ? 'mingcute:' + cat.icon : undefined" />
                 </div>
                 <h2 class="font-serif text-base md:text-2xl font-medium mb-1 md:mb-3 text-black">
                   {{ article.title }}
                 </h2>
                 <p class="hidden md:block text-gray-600 mb-4 text-sm leading-[1.3] !line-clamp-5">{{ article.description
                   }}</p>
-                <div class="text-xs text-gray-600">{{ formatDate(article.published_at) }}</div>
+                <div class="text-xs text-gray-600" v-if="article.published_at">{{ formatDate(article.published_at) }}
+                </div>
               </div>
             </div>
           </NuxtLink>
         </div>
-              <!-- Special card for the issue (mobile only, after 'à la une') -->
-      <div class="block md:hidden mb-4">
-        <NuxtLink v-if="latestEdition" :to="`/issues/${latestEdition.slug}`"
-          class="flex items-center gap-3 bg-primary-600 rounded-lg p-4 shadow transition-colors text-white">
-          <img v-if="latestEdition.cover" :src="latestEdition.cover" class="w-16 h-16 object-cover rounded-md" :alt="latestEdition.title" />
-          <div>
-            <div class="font-bold text-lg">Voir l’édition complète</div>
-            <div class="text-sm text-gray-100 line-clamp-2">{{ latestEdition.title }}</div>
-          </div>
-        </NuxtLink>
-      </div>
+        <!-- Special card for the issue (mobile only, after 'à la une') -->
+        <div class="block md:hidden mb-4">
+          <NuxtLink v-if="latestEdition" :to="`/issues/${latestEdition.slug}`"
+            class="flex items-center gap-3 bg-primary-600 rounded-lg p-4 shadow transition-colors text-white">
+            <img v-if="latestEdition.cover" :src="latestEdition.cover" class="w-16 h-16 object-cover rounded-md"
+              :alt="latestEdition.title" />
+            <div>
+              <div class="font-bold text-lg">Voir l’édition complète</div>
+              <div class="text-sm text-gray-100 line-clamp-2">{{ latestEdition.title }}</div>
+            </div>
+          </NuxtLink>
+        </div>
       </div>
     </section>
 
@@ -62,7 +63,7 @@
 
       <div class="space-y-2">
         <div v-for="item in veille" :key="item.id" class="group">
-          <NuxtLink :to="item.url" target="_blank"
+          <NuxtLink :to="item.url || ''" target="_blank"
             class="block hover:bg-[var(--color-amber-150)] transition-colors rounded-lg">
             <div class="flex items-center gap-2">
               <div class="size-20 md:size-28 rounded-lg bg-gray-100 flex shrink-0 items-center justify-center">
@@ -92,10 +93,12 @@
     <h1 class="font-serif text-3xl md:text-4xl mb-8 md:text-center">Catégories</h1>
     <div class="relative">
       <div class="flex gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4">
-        <NuxtLink v-for="cat in categories" :key="cat.id" :to="`/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`"
+        <NuxtLink v-for="cat in categories" :key="cat.id"
+          :to="`/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`"
           class="group rounded-lg min-w-[260px] max-w-xs h-64 flex flex-col items-center justify-between shadow-sm snap-center relative overflow-hidden">
           <div v-if="cat.cover" class="absolute inset-0 w-full h-full">
-            <img :src="cat.cover" :alt="cat.name" class="object-cover w-full h-full transition-transform group-hover:scale-105 duration-200" />
+            <img :src="cat.cover" :alt="cat.name"
+              class="object-cover w-full h-full transition-transform group-hover:scale-105 duration-200" />
             <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
           </div>
           <div class="absolute bottom-0 left-0 right-0 flex flex-col items-center gap-2 py-4 text-white z-10">
@@ -113,17 +116,14 @@
     <h2 class="font-serif text-3xl md:text-4xl mb-8 md:text-center px-4">Éditions</h2>
     <!-- A swiper --->
     <ClientOnly>
-      <swiper-container :slidesPerView="'auto'" :centeredSlides="true"
-        :grabCursor="true" :effect="'coverflow'" :initialSlide="1" 
-        :mousewheel="{ enabled: true }"
-        :autoplay="{ delay: 2000, pauseOnMouseEnter: true }"
-        :coverflowEffect="{ rotate: 0, stretch: 0, depth: 100, modifier: 1, scale: .9, slideShadows: true }"
-        >
+      <swiper-container :slidesPerView="'auto'" :centeredSlides="true" :grabCursor="true" :effect="'coverflow'"
+        :initialSlide="1" :mousewheel="{ enabled: true }" :autoplay="{ delay: 2000, pauseOnMouseEnter: true }"
+        :coverflowEffect="{ rotate: 0, stretch: 0, depth: 100, modifier: 1, scale: .9, slideShadows: true }">
         <swiper-slide v-for="issue in issues" :key="issue.id" class="flex justify-center w-auto max-w-[70%] h-auto">
           <NuxtLink :to="`/issues/${issue.slug}`"
             class="bg-secondary-100 hover:bg-[var(--color-amber-200)] transition-colors rounded-lg p-3 h-auto">
-            <img v-if="issue.cover" :src="issue.cover" class="object-contain w-auto h-auto max-w-full max-h-128 rounded-t-lg"
-              :alt="issue.title" />
+            <img v-if="issue.cover" :src="issue.cover"
+              class="object-contain w-auto h-auto max-w-full max-h-128 rounded-t-lg" :alt="issue.title" />
           </NuxtLink>
         </swiper-slide>
       </swiper-container>
@@ -136,49 +136,29 @@ import { onMounted, onUnmounted, computed, ref } from 'vue'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { useSupabaseClient, useAsyncData } from '#imports'
 import { useDb } from '~/composables/useDb'
-
-// Interfaces
-interface Article {
-  title: string
-  slug: string
-  cover?: string
-  description?: string
-  categories?: string[]
-  featured: boolean
-  published_at: string
-}
-interface VeilleEntry {
-  id: string
-  title: string
-  url?: string
-  description?: string
-  cover?: string
-  source?: string
-  type: string
-}
-interface Edition {
-  title: string
-  articles: Article[]
-}
+import type { ArticleWithCategories } from '~/composables/useDb'
 
 const { getIssues, getArticles, getCategories } = useDb()
 const client = useSupabaseClient()
 
-const issues = await getIssues() as Array<{ id: string; slug: string; cover?: string; title: string }>
-const categories = await getCategories() as Array<{ id: string; slug: string; name: string }>
+const issues = await getIssues()
+const categories = await getCategories()
 
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString()
 }
 
 // Fetch latest published edition using getIssues
-const { data: latestEdition, refresh: refreshEdition } = await useAsyncData<Edition | null>('latestEdition', async () => {
+const { data: latestEdition, refresh: refreshEdition } = await useAsyncData('latestEdition', async () => {
   const published = (issues || []).filter((i: any) => i.status === 'published')
   if (!published.length) return null
   const editionId = published[0].id
   // Fetch articles with new schema fields
-  published[0].articles = await getArticles([{ type: 'issue', id: editionId }]) as Article[]
-  return published[0] as Edition
+  const editionWithArticles = {
+    ...published[0],
+    articles: await getArticles([{ type: 'issue', id: editionId }]) as ArticleWithCategories[]
+  }
+  return editionWithArticles
 })
 
 const featuredArticles = computed(() =>
@@ -189,20 +169,22 @@ const otherArticles = computed(() =>
 )
 
 const articleLimit = ref(9)
+let resizeHandler: () => void
+
 onMounted(() => {
-  const updateLimit = () => {
+  resizeHandler = () => {
     articleLimit.value = window.innerWidth < 768 ? 3 : 9
   }
-  updateLimit()
-  window.addEventListener('resize', updateLimit)
+  resizeHandler()
+  window.addEventListener('resize', resizeHandler)
 })
 onUnmounted(() => {
-  window.removeEventListener('resize', () => { })
+  window.removeEventListener('resize', resizeHandler)
 })
 const limitedOtherArticles = computed(() => otherArticles.value.slice(0, articleLimit.value))
 
 // Fetch latest veille entries (unchanged)
-const { data: veille = [], refresh: refreshVeille } = await useAsyncData<VeilleEntry[]>('veille', async () => {
+const { data: veille = [], refresh: refreshVeille } = await useAsyncData('veille', async () => {
   const { data } = await client
     .from('laveille')
     .select('id, title, url, description, cover, source, type')

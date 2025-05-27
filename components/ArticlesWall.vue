@@ -14,20 +14,8 @@
 </template>
 
 <script setup lang="ts">
-interface Article {
-  slug: string
-  title: string
-  description?: string
-  cover?: string
-  published_at: string
-  categories?: Array<{
-    name: string
-    icon?: string
-  }>
-}
-
 const props = withDefaults(defineProps<{
-  articles: Article[]
+  articles: ArticleWithCategories[]
   width?: number
   gap?: number
   coverFrequency?: number

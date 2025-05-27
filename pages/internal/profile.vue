@@ -1,28 +1,16 @@
 <script setup lang="ts">
-type MemberProfile = {
-  email: string
-  full_name: string | null
-  uni_year: string | null
-  phone: string | null
-  role: string | null
-}
+import type { Tables } from '~/types/database.types'
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
-const profile = ref<MemberProfile>({
-  email: '',
-  full_name: null,
-  uni_year: null,
-  phone: null,
-  role: null,
-})
+const profile = ref<Tables<'members'>>({} as Tables<'members'>)
 const status = ref<string | null>(null)
 
 async function loadProfile() {
   if (!user.value?.email) return
   const { data, error } = await supabase
-    .from<MemberProfile>('members')
-    .select('email,full_name,uni_year,phone,role')
+    .from('members')
+    .select('*')
     .eq('email', user.value.email)
     .single()
   if (error) {
@@ -51,7 +39,7 @@ onMounted(loadProfile)
       <h2 class="text-xl font-semibold">Your Profile</h2>
     </template>
 
-    <UForm class="space-y-4">
+    <div class="space-y-4">
       <UFormField name="email" label="Email">
         <UInput v-model="profile.email" disabled />
       </UFormField>
@@ -74,7 +62,7 @@ onMounted(loadProfile)
       </UFormField>
 
       <UButton label="Logout" icon="tabler-logout" @click="logout" />
-    </UForm>
+    </div>
 
     <p v-if="status" class="mt-4 text-center text-sm text-gray-600">{{ status }}</p>
   </UCard>

@@ -1,4 +1,18 @@
-import { useSupabaseClient } from '#imports'
+import type { Tables, TablesInsert } from '~/types/database.types'
+
+export type ArticleWithCategories = Tables<'articles'> & {
+  categories: Array<{ name: string, icon?: string }>
+} 
+
+// La Veille types
+export type VeilleEntry = Tables<'laveille'> & {
+  voteCount: number
+  laveille_votes?: Array<{ id: string }>
+}
+
+export type VeilleVote = Tables<'laveille_votes'>
+
+export type VeilleInsert = TablesInsert<'laveille'>
 
 export function useDb() {
   const supabase = useSupabaseClient()
@@ -186,6 +200,70 @@ export function useDb() {
     return data?.map((row: any) => row.categories?.name).filter(Boolean) || []
   }
 
+  // LA VEILLE FUNCTIONS
+  
+  // Get all approved la-veille entries with vote counts
+  async function getVeilleEntries() {
+    const { data, error } = await supabase
+      .from('laveille')
+      .select(`id, title, url, description, type, submitted_at, laveille_votes(id)`)
+      .eq('status', 'approved')
+    if (error) throw error
+    
+    return (data || []).map(item => ({
+      id: item.id,
+      title: item.title,
+      url: item.url,
+      description: item.description,
+      type: item.type,
+      submitted_at: item.submitted_at,
+      voteCount: item.laveille_votes?.length || 0
+    })) as VeilleEntry[]
+  }
+
+  // Get user's votes for la-veille entries
+  async function getUserVeilleVotes(userId: string) {
+    const { data, error } = await supabase
+      .from('laveille_votes')
+      .select('article_id')
+      .eq('voter_id', userId)
+    if (error) throw error
+    return new Set((data || []).map(v => v.article_id))
+  }
+
+  // Submit a new la-veille entry
+  async function submitVeilleEntry(entry: VeilleInsert) {
+    const { data, error } = await supabase
+      .from('laveille')
+      .insert(entry)
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  }
+
+  // Vote on a la-veille entry
+  async function voteVeilleEntry(articleId: string, userId: string) {
+    const { data, error } = await supabase
+      .from('laveille_votes')
+      .insert({ article_id: articleId, voter_id: userId })
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  }
+
+  // Remove vote from a la-veille entry
+  async function unvoteVeilleEntry(articleId: string, userId: string) {
+    const { error } = await supabase
+      .from('laveille_votes')
+      .delete()
+      .eq('article_id', articleId)
+      .eq('voter_id', userId)
+    if (error) throw error
+    return true
+  }
+
   return {
     createNewIssue,
     createNewArticle,
@@ -200,5 +278,11 @@ export function useDb() {
     upsertCategory,
     setArticleCategories,
     getArticleCategories,
+    // La Veille functions
+    getVeilleEntries,
+    getUserVeilleVotes,
+    submitVeilleEntry,
+    voteVeilleEntry,
+    unvoteVeilleEntry
   }
 }
