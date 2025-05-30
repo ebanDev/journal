@@ -275,6 +275,17 @@ async function vote(id: string) {
 
 async function submitArticle() {
   if (!form.url) return
+  const user = useSupabaseUser()
+  
+  if (user.value) {
+    toast.add({
+      title: 'Erreur',
+      color: 'error',
+      description: 'Vous devez être connecté pour soumettre un article.',
+      icon: 'mingcute-alert-line',
+    })
+    return
+  }
   form.title = ''
   form.description = ''
   form.cover = ''
