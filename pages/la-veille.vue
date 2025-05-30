@@ -29,7 +29,7 @@
             { label: 'Date', value: 'date' }
           ]"
           placeholder="Trier" class="w-40" icon="tabler-arrows-sort" />
-      </div>UModal
+      </div>
 
       <div v-if="entries.length">
         <div v-for="item in displayedEntries" :key="item.id" class="flex items-start p-4 rounded-lg bg-white shadow mb-4">
