@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
     return { error: 'URL parameter is required' }
   }
   try {
-    const res = await fetch(url)
+    const res = await fetch(decodeURIComponent(url))
     const html = await res.text()
     const $ = cheerio.load(html)
     const title = $('head > title').text() || ''

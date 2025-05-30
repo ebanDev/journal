@@ -152,7 +152,7 @@ async function fetchMetadata() {
   if (!form.url) return
   fetchingMetadata.value = true
   try {
-    const { title, description, cover, source, error } = await $fetch<any>('/api/metadata', { params: { url: form.url } })
+    const { title, description, cover, source, error } = await $fetch<any>('/api/metadata', { params: { url: encodeURIComponent(form.url) } })
     if (error) {
       console.error('Metadata error:', error)
     } else {
