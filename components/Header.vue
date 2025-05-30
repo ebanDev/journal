@@ -1,8 +1,8 @@
 <template>
   <header class="flex justify-between px-8 w-screen items-center py-4 bg-[#FFFDFD]">
     <NuxtLink to="/">
-      <h1 class="font-serif text-3xl">Contradiction<span class="text-primary-600">·</span>s</h1>
-      <h2 class="font-bold text-base">Le journal des luttes de Bordeaux</h2>
+      <h1 class="font-serif text-3xl text-black">Contradiction<span class="text-primary-600">·</span>s</h1>
+      <h2 class="font-bold text-base text-black">Le journal des luttes de Bordeaux</h2>
     </NuxtLink>
     <div class="relative">
       <UInput class="w-96" v-model="searchQuery" @input="onSearch" @focus="onFocus" @blur="onBlur"

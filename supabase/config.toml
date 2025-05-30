@@ -21,6 +21,9 @@ project_id = "journal"
     [auth.email.template.magic_link]
       subject = "Se connecter à Contradiction·s"
       content_path = "supabase/templates/magic-link.html"
+    [auth.email.template.invite]
+      subject = "Invitation à Contradiction·s"
+      content_path = "supabase/templates/invite.html"
 
 [functions.send-invite]
 verify_jwt = false
