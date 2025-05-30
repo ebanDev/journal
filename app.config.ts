@@ -35,6 +35,11 @@ export default defineAppConfig({
           variant: 'solid',
           class: 'bg-secondary-300 text-black hover:bg-secondary-400'
         },
+        {
+          color: 'primary',
+          variant: 'solid',
+          class: 'text-white'
+        }
       ],
     },
     input: {

@@ -30,5 +30,9 @@ export default defineNuxtConfig({
 
   typescript: {
     typeCheck: true
+  },
+
+  ui: {
+    colorMode: false,
   }
 })
