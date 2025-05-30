@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-screen">
+  <div class="flex h-screen bg-[#FCFAF8] text-[#1d1c1c]">
     <div class="flex h-screen w-64 flex-col bg-secondary-50 p-4">
       <NuxtLink to="/" class="font-serif font-bold pb-2">Contradiction·s</NuxtLink>
       <h3 class="font-bold pb-2">Espace interne</h3>
