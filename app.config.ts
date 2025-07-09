@@ -27,7 +27,8 @@ export default defineAppConfig({
     },
     button: {
       slots: {
-        leadingIcon: '!size-5'
+        base: 'cursor-pointer',
+        leadingIcon: '!size-5',
       },
       compoundVariants: [
         {
@@ -39,7 +40,7 @@ export default defineAppConfig({
           color: 'primary',
           variant: 'solid',
           class: 'text-white'
-        }
+        },
       ],
     },
     input: {

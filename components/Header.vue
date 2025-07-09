@@ -34,7 +34,7 @@
     <div class="flex gap-2 items-center">
       <UButton label="Tous les articles" icon="mingcute-news-line" href="/articles" color="secondary" size="md" />
       <UButton label="La veille" icon="mingcute-radar-line" href="/la-veille" color="secondary" size="md" />
-      <UButton :label="userName" icon="mingcute-user-4-line" href="/internal" size="md" />
+      <UButton :label="userName" icon="mingcute-user-4-line" href="/internal/profile" size="md" />
     </div>
   </header>
 </template>

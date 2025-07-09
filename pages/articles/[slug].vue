@@ -23,10 +23,6 @@
         <img :src="article.cover" alt="Cover" class="w-full rounded" />
       </div>
 
-      <p v-if="article.description" class="text-gray-600 mb-6">
-        {{ article.description }}
-      </p>
-
       <div class="prose max-w-none" v-html="article.content"></div>
     </div>
     <div v-else class="text-center py-20">

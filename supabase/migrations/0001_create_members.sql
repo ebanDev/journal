@@ -40,6 +40,18 @@ LANGUAGE SQL SECURITY DEFINER AS $$
     );
 $$;
 
+CREATE OR REPLACE FUNCTION public.role_unchanged(uid UUID, mem_email TEXT, new_role TEXT)
+RETURNS BOOLEAN
+LANGUAGE SQL SECURITY DEFINER AS $$
+  SELECT uid IS NOT NULL
+    AND EXISTS (
+      SELECT 1 FROM public.members
+       WHERE user_id = uid
+         AND email   = mem_email
+         AND role    = new_role
+    );
+$$;
+
 -- 4. RLS Policies
 
 -- A) Self can SELECT own record
@@ -55,8 +67,7 @@ CREATE POLICY "Self can update own profile"
   USING ( public.is_self(auth.uid(), email) )
   WITH CHECK (
     public.is_self(auth.uid(), email)
-    -- no change to role:
-    AND role = (SELECT role FROM public.members WHERE email = public.members.email)
+    AND public.role_unchanged(auth.uid(), email, role)
   );
 
 -- C) Admins full access

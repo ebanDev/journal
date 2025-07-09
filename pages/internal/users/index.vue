@@ -15,7 +15,7 @@
       <div class="overflow-auto">
         <table class="min-w-full table-auto">
           <thead>
-            <tr class="bg-gray-100">
+            <tr class="bg-secondary-200">
               <th class="px-4 py-2">Email</th>
               <th class="px-4 py-2">Nom complet</th>
               <th class="px-4 py-2">Année</th>
@@ -25,21 +25,27 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="member in members" :key="member.email" class="border-b">
+            <tr v-for="member in members" :key="member.email" class="border-b border-secondary-300">
               <td class="px-4 py-2">{{ member.email }}</td>
-              <td class="px-4 py-2"><UInput v-model="member.full_name" /></td>
-              <td class="px-4 py-2"><UInput v-model="member.uni_year" /></td>
-              <td class="px-4 py-2"><UInput v-model="member.phone" /></td>
+              <td class="px-4 py-2"><UInput v-model="member.full_name" class="w-full"/></td>
+              <td class="px-4 py-2"><UInput v-model="member.uni_year" class="w-full"/></td>
+              <td class="px-4 py-2"><UInput v-model="member.phone" class="w-full"/></td>
               <td class="px-4 py-2">
-                <select v-model="member.role" class="border rounded px-2 py-1">
-                  <option value="member">Membre</option>
-                  <option value="editor">Éditeur</option>
-                  <option value="admin">Admin</option>
-                </select>
+                <USelect
+                  v-model="member.role"
+                  :items="[
+                  { label: 'Membre', value: 'member' },
+                  { label: 'Éditeur', value: 'editor' },
+                  { label: 'Admin', value: 'admin' }
+                  ]"
+                  option-attribute="label"
+                  value-attribute="value"
+                  class="w-40"
+                />
               </td>
               <td class="px-4 py-2 space-x-2">
-                <UButton size="sm" color="success" @click="saveMember(member.email)">Enregistrer</UButton>
-                <UButton size="sm" color="error" @click="deleteMember(member.email)">Supprimer</UButton>
+                <UButton size="sm" color="primary" @click="saveMember(member.email)">Enregistrer</UButton>
+                <UButton size="sm" color="secondary" @click="deleteMember(member.email)">Supprimer</UButton>
               </td>
             </tr>
           </tbody>

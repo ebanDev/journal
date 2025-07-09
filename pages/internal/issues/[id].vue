@@ -1,7 +1,7 @@
 <template>
   <div class="flex gap-6 w-full">
     <!-- Left: Articles in this édition -->
-    <section class="flex-[3] container mx-auto p-8 ">
+    <section class="flex-[3] container mx-auto p-8">
       <div class="w-full flex justify-between items-center mb-4">
         <h1 class="text-2xl font-bold">Articles de l'Édition</h1>
         <UButton size="lg" :to="`/internal/articles/new?issue=${editionId}`">Nouvel Article</UButton>
@@ -35,7 +35,7 @@
     </section>
 
     <!-- Right: Settings panel (always visible) -->
-    <aside class="flex-[1] bg-secondary-50 p-6 rounded shadow-sm flex flex-col">
+    <aside class="flex-[1] p-6 rounded shadow-sm flex flex-col bg-white">
       <h2 class="text-xl font-semibold mb-2">Paramètres de l’Édition</h2>
       <UTabs
         v-model="activeStatusTab"
@@ -48,8 +48,12 @@
         <UFormField label="Titre">
           <UInput v-model="form.title" />
         </UFormField>
-        <UFormField label="Slug">
-          <UInput v-model="form.slug" />
+        <UFormField label="Lien">
+          <UInput v-model="form.slug"> 
+            <template #leading>
+              <span class="text-gray-500">/</span>
+            </template>
+          </UInput>
         </UFormField>
         <UFormField label="Description">
           <UTextarea v-model="form.description" :rows="3" class="w-full resize-none" />

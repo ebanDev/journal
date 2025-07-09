@@ -1,5 +1,5 @@
 <template>
-  <div class="flex bg-white h-screen overflow-auto">
+  <div class="flex h-screen overflow-auto">
     <!-- Editor Area -->
     <div :class="['flex-1 px-8 py-6 transition-all', isPanelOpen ? 'mr-80' : 'mx-auto']">
       <!-- Floating Actions -->
@@ -20,8 +20,10 @@
       <!-- Bubble Menu -->
       <BubbleMenu v-if="editor" :editor="editor" :tippy-options="{ duration: 100 }"
         class="bg-white rounded-lg shadow p-1 flex gap-1">
-        <UButton v-for="b in buttons" :key="b.icon" :icon="b.icon" size="xs" variant="ghost" color="neutral"
-          :class="b.active() ? 'bg-amber-100 text-amber-700' : ''" @click="b.command || null" :title="b.title" />
+        <UTooltip v-for="b in buttons" :key="b.icon" :text="b.title">
+          <UButton :icon="b.icon" size="xs" variant="ghost" color="neutral"
+            :class="b.active() ? 'bg-amber-100 text-amber-700' : ''" @click="b.command" />
+        </UTooltip>
       </BubbleMenu>
 
       <!-- Content -->
@@ -32,7 +34,7 @@
 
     <!-- Properties Panel -->
     <transition name="slide">
-      <div v-if="isPanelOpen" class="fixed right-0 top-0 h-full w-80 bg-secondary-50 shadow p-4 flex flex-col z-30">
+      <div v-if="isPanelOpen" class="fixed right-0 top-0 h-full w-80 bg-white shadow p-4 flex flex-col z-30">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-semibold">Propriétés</h3>
           <UButton icon="i-tabler-x" color="neutral" size="xs" variant="ghost" @click="isPanelOpen = false" />
@@ -42,19 +44,25 @@
         <UTabs v-model="activeTab" :items="tabItems" class="w-full mb-4" :content="false" />
 
         <div class="space-y-4 flex-1 overflow-y-auto">
-          <UFormField label="Slug">
-            <UInput v-model="meta.slug" placeholder="mon-article" class="w-full" />
+          <UFormField label="Lien">
+            <UInput v-model="meta.slug" placeholder="mon-article" class="w-full">
+              <template #leading>
+                <span class="text-gray-500">/</span>
+              </template>
+            </UInput>
           </UFormField>
 
           <!-- Cover preview -->
           <div v-if="meta.cover" class="mb-4">
-            <img :src="meta.cover" alt="Cover preview" class="w-full h-auto rounded" />
+            <img :src="meta.cover" alt="Aperçu de l'illustration" class="w-full h-auto rounded" />
           </div>
 
-          <UFormField label="Cover URL">
+          <UFormField label="URL de l'illustration">
             <div class="flex items-center space-x-2">
               <UInput v-model="meta.cover" placeholder="https://..." class="flex-1" />
-              <UButton icon="i-tabler-upload" size="sm" @click="triggerFileUpload" title="Upload cover" />
+              <UTooltip text="Télécharger une couverture">
+                <UButton icon="i-tabler-upload" size="sm" @click="triggerFileUpload" />
+              </UTooltip>
               <input type="file" ref="fileInput" class="hidden" accept="image/*" @change="handleFileUpload" />
             </div>
           </UFormField>
@@ -75,12 +83,12 @@
             />
           </UFormField>
 
-          <UFormField label="À la une">
+          <UFormField label="Article à la une">
             <USwitch v-model="meta.featured" />
           </UFormField>
 
           <div>
-            <span class="font-medium">Mots&nbsp;: </span>{{ wordCount }}
+            <span class="font-medium">Nombre de mots&nbsp;: </span>{{ wordCount }}
           </div>
           <div>
             <span class="font-medium">Dernière sauvegarde&nbsp;: </span>{{ lastSaved }}
@@ -92,6 +100,9 @@
             :icon="saveState === 'success' ? 'i-mingcute-checkbox-line' : 'i-mingcute-save-2-line'">
             <template v-if="saveState === 'success'">Sauvegardé</template>
             <template v-else>Sauvegarder</template>
+          </UButton>
+          <UButton block color="error" variant="outline" @click="deleteArticle" icon="i-mingcute-delete-2-line">
+            Supprimer l'article
           </UButton>
         </div>
       </div>
@@ -167,16 +178,16 @@ const activeTab = ref('0')
 
 // Format buttons
 const buttons = [
-  { icon: 'i-mingcute-heading-1-line', command: () => editor.value?.chain().focus().toggleHeading({ level: 1 }).run(), active: () => editor.value?.isActive('heading', { level: 1 }) ?? false, title: 'H1' },
-  { icon: 'i-mingcute-heading-2-line', command: () => editor.value?.chain().focus().toggleHeading({ level: 2 }).run(), active: () => editor.value?.isActive('heading', { level: 2 }) ?? false, title: 'H2' },
-  { icon: 'i-mingcute-heading-3-line', command: () => editor.value?.chain().focus().toggleHeading({ level: 3 }).run(), active: () => editor.value?.isActive('heading', { level: 3 }) ?? false, title: 'H3' },
-  { icon: 'i-mingcute-code-line', command: () => editor.value?.chain().focus().toggleCodeBlock().run(), active: () => editor.value?.isActive('codeBlock') ?? false, title: 'Code' },
-  { icon: 'i-mingcute-bold-line', command: () => editor.value?.chain().focus().toggleBold().run(), active: () => editor.value?.isActive('bold') ?? false, title: 'Gras' },
-  { icon: 'i-mingcute-italic-line', command: () => editor.value?.chain().focus().toggleItalic().run(), active: () => editor.value?.isActive('italic') ?? false, title: 'Italique' },
-  { icon: 'i-mingcute-strikethrough-line', command: () => editor.value?.chain().focus().toggleStrike().run(), active: () => editor.value?.isActive('strike') ?? false, title: 'Barré' },
-  { icon: 'i-mingcute-list-check-line', command: () => editor.value?.chain().focus().toggleBulletList().run(), active: () => editor.value?.isActive('bulletList') ?? false, title: 'Liste puces' },
-  { icon: 'i-mingcute-list-ordered-line', command: () => editor.value?.chain().focus().toggleOrderedList().run(), active: () => editor.value?.isActive('orderedList') ?? false, title: 'Liste numérotée' },
-  { icon: 'i-mingcute-quote-right-line', command: () => editor.value?.chain().focus().toggleBlockquote().run(), active: () => editor.value?.isActive('blockquote') ?? false, title: 'Citation' }
+  { icon: 'i-mingcute-heading-1-line', command: () => { editor.value?.chain().focus().toggleHeading({ level: 1 }).run() }, active: () => editor.value?.isActive('heading', { level: 1 }) ?? false, title: 'Titre 1' },
+  { icon: 'i-mingcute-heading-2-line', command: () => { editor.value?.chain().focus().toggleHeading({ level: 2 }).run() }, active: () => editor.value?.isActive('heading', { level: 2 }) ?? false, title: 'Titre 2' },
+  { icon: 'i-mingcute-heading-3-line', command: () => { editor.value?.chain().focus().toggleHeading({ level: 3 }).run() }, active: () => editor.value?.isActive('heading', { level: 3 }) ?? false, title: 'Titre 3' },
+  { icon: 'i-mingcute-code-line', command: () => { editor.value?.chain().focus().toggleCodeBlock().run() }, active: () => editor.value?.isActive('codeBlock') ?? false, title: 'Code' },
+  { icon: 'i-mingcute-bold-line', command: () => { editor.value?.chain().focus().toggleBold().run() }, active: () => editor.value?.isActive('bold') ?? false, title: 'Gras' },
+  { icon: 'i-mingcute-italic-line', command: () => { editor.value?.chain().focus().toggleItalic().run() }, active: () => editor.value?.isActive('italic') ?? false, title: 'Italique' },
+  { icon: 'i-mingcute-strikethrough-line', command: () => { editor.value?.chain().focus().toggleStrike().run() }, active: () => editor.value?.isActive('strike') ?? false, title: 'Barré' },
+  { icon: 'i-mingcute-list-check-line', command: () => { editor.value?.chain().focus().toggleBulletList().run() }, active: () => editor.value?.isActive('bulletList') ?? false, title: 'Liste puces' },
+  { icon: 'i-mingcute-list-ordered-line', command: () => { editor.value?.chain().focus().toggleOrderedList().run() }, active: () => editor.value?.isActive('orderedList') ?? false, title: 'Liste numérotée' },
+  { icon: 'i-mingcute-quote-right-line', command: () => { editor.value?.chain().focus().toggleBlockquote().run() }, active: () => editor.value?.isActive('blockquote') ?? false, title: 'Citation' }
 ]
 
 // Helpers & CRUD
@@ -254,6 +265,30 @@ const publish = () => {
   save()
 }
 
+const deleteArticle = async () => {
+  const confirm = window.confirm('Êtes-vous sûr de vouloir supprimer cet article ?')
+  if (!confirm) return
+
+  const { error } = await supabase.from('articles').delete().eq('id', id)
+  if (error) {
+    toast.add({ 
+      title: "La suppression a échoué", 
+      color: 'error', 
+      icon: 'tabler-x', 
+      description: error.message 
+    })
+    return
+  }
+
+  toast.add({ 
+    title: "Article supprimé", 
+    color: 'success', 
+    icon: 'tabler-check', 
+    description: 'L\'article a été supprimé avec succès.' 
+  })
+  router.push('/internal/articles')
+}
+
 const triggerFileUpload = () => {
   fileInput.value?.click()
 }
@@ -270,22 +305,9 @@ const handleFileUpload = async (event: Event) => {
 }
 
 const fileInput = ref<HTMLInputElement | null>(null)
-
 onMounted(fetchData)
 </script>
 
 <style scoped>
-.slide-enter-active,
-.slide-leave-active {
-  transition: transform .3s
-}
-
-.slide-enter-from,
-.slide-leave-to {
-  transform: translateX(100%)
-}
-
-:deep(.ProseMirror) {
-  @apply min-h-[70vh] outline-none;
-}
+/* Add any component-specific styles here */
 </style>
