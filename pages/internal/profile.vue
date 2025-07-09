@@ -10,7 +10,10 @@ const isEditing = ref(false)
 const isSaving = ref(false)
 
 async function loadProfile() {
-  if (!user.value?.email) return
+  if (!user.value?.email) {
+    navigateTo('/login')
+    return
+  }
   const { data, error } = await supabase
     .from('members')
     .select('*')
