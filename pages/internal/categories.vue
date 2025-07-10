@@ -39,11 +39,12 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import { useSupabaseClient } from '#imports'
+import { useSupabaseClient, useToast } from '#imports'
 import IconPicker from '~/components/IconPicker.vue'
 import type { Tables } from '~/types/database.types'
 
 const client = useSupabaseClient()
+const toast = useToast()
 const categories = ref<Tables<'categories'>[]>([])
 const modalOpen = ref(false)
 const submitting = ref(false)
@@ -73,14 +74,42 @@ function editCategory(cat: Tables<'categories'>) {
 
 async function saveCategory() {
   submitting.value = true
-  if (editingId) {
-    await client.from('categories').update({ name: form.name, icon: form.icon, cover: form.cover }).eq('id', editingId)
-  } else {
-    await client.from('categories').insert({ name: form.name, icon: form.icon, cover: form.cover })
+  try {
+    if (editingId) {
+      const { error } = await client.from('categories').update({ name: form.name, icon: form.icon, cover: form.cover }).eq('id', editingId)
+      if (error) throw error
+      
+      toast.add({
+        title: 'Catégorie modifiée',
+        color: 'success',
+        icon: 'tabler-check',
+        description: 'La catégorie a été modifiée avec succès.'
+      })
+    } else {
+      const { error } = await client.from('categories').insert({ name: form.name, icon: form.icon, cover: form.cover })
+      if (error) throw error
+      
+      toast.add({
+        title: 'Catégorie créée',
+        color: 'success',
+        icon: 'tabler-check',
+        description: 'La catégorie a été créée avec succès.'
+      })
+    }
+    
+    modalOpen.value = false
+    await fetchCategories()
+  } catch (error: any) {
+    console.error('Error saving category:', error)
+    toast.add({
+      title: 'Erreur',
+      color: 'error',
+      icon: 'tabler-x',
+      description: error.message || 'Une erreur est survenue lors de la sauvegarde de la catégorie.'
+    })
+  } finally {
+    submitting.value = false
   }
-  submitting.value = false
-  modalOpen.value = false
-  await fetchCategories()
 }
 
 onMounted(fetchCategories)

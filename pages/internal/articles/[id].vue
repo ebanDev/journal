@@ -2,6 +2,21 @@
   <div class="flex h-screen overflow-auto">
     <!-- Editor Area -->
     <div :class="['flex-1 px-8 py-6 transition-all', isPanelOpen ? 'mr-80' : 'mx-auto']">
+      <!-- Back Button -->
+      <div class="fixed top-4 left-60 z-20">
+        <UButton 
+          icon="i-mingcute-arrow-left-line" 
+          variant="ghost" 
+          color="neutral"
+          :loading="saveState === 'loading'"
+          :disabled="saveState === 'loading'"
+          @click="navigateBack"
+        >
+          <template v-if="saveState === 'loading'">En attente de la sauvegarde</template>
+          <template v-else></template>
+        </UButton>
+      </div>
+
       <!-- Floating Actions -->
       <div class="fixed top-4 right-4 flex gap-2 z-20">
         <UButton v-if="saveState === 'loading'" icon="i-mingcute-sandglass-line" variant="ghost" color="neutral"
@@ -111,7 +126,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSupabaseClient, useSupabaseUser, useToast } from '#imports'
 import { EditorContent, useEditor, BubbleMenu } from '@tiptap/vue-3'
@@ -306,6 +321,38 @@ const handleFileUpload = async (event: Event) => {
 
 const fileInput = ref<HTMLInputElement | null>(null)
 onMounted(fetchData)
+
+// Navigation function
+const navigateBack = () => {
+  if (saveState.value === 'loading') {
+    return // Prevent navigation while saving
+  }
+  router.push('/internal/articles')
+}
+
+// Helper function to generate slug from title
+const generateSlug = (text: string): string => {
+  return text
+    .toLowerCase()
+    .normalize('NFD') // Decompose accented characters
+    .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+    .trim()
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single
+    .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
+}
+
+// Watch title changes for auto-slug generation
+watch(title, (newTitle) => {
+  // Only auto-generate slug if:
+  // 1. Article is in draft status (activeTab.value === '0')
+  // 2. Title is not empty
+  // Note: We sync the slug with title for drafts even if slug already exists
+  if (activeTab.value === '0' && newTitle.trim()) {
+    meta.slug = generateSlug(newTitle)
+  }
+})
 </script>
 
 <style scoped>

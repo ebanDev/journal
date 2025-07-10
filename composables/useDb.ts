@@ -16,6 +16,25 @@ export type VeilleInsert = TablesInsert<'laveille'>
 
 export function useDb() {
   const supabase = useSupabaseClient()
+  const user = useSupabaseUser()
+
+  // Helper function to get or create anonymous ID
+  function getAnonymousId(): string {
+    if (process.client) {
+      let anonymousId = useCookie('anonymous_id', { 
+        maxAge: 60 * 60 * 24 * 365, // 1 year
+        secure: true,
+        sameSite: 'strict'
+      })
+      
+      if (!anonymousId.value) {
+        anonymousId.value = 'anon_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+      }
+      
+      return anonymousId.value
+    }
+    return 'anon_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+  }
 
   // Create a new issue
   async function createNewIssue(data: { title: string; description?: string; status?: string }) {
@@ -221,45 +240,79 @@ export function useDb() {
     })) as VeilleEntry[]
   }
 
-  // Get user's votes for la-veille entries
-  async function getUserVeilleVotes(userId: string) {
-    const { data, error } = await supabase
+  // Get user's votes for la-veille entries (updated for anonymous users)
+  async function getUserVeilleVotes(userId?: string) {
+    const anonymousId = getAnonymousId()
+    
+    let query = supabase
       .from('laveille_votes')
       .select('article_id')
-      .eq('voter_id', userId)
+    
+    if (userId) {
+      query = query.eq('voter_id', userId)
+    } else {
+      query = query.eq('anonymous_id', anonymousId).is('voter_id', null)
+    }
+    
+    const { data, error } = await query
     if (error) throw error
     return new Set((data || []).map(v => v.article_id))
   }
 
-  // Submit a new la-veille entry
+  // Submit a new la-veille entry (updated for anonymous users)
   async function submitVeilleEntry(entry: VeilleInsert) {
+    const anonymousId = getAnonymousId()
+    
+    const payload = {
+      ...entry,
+      submitter_id: user.value?.id || null,
+      anonymous_id: user.value?.id ? null : anonymousId
+    }
+    
     const { data, error } = await supabase
       .from('laveille')
-      .insert(entry)
+      .insert(payload)
       .select()
       .single()
     if (error) throw error
     return data
   }
 
-  // Vote on a la-veille entry
-  async function voteVeilleEntry(articleId: string, userId: string) {
+  // Vote on a la-veille entry (updated for anonymous users)
+  async function voteVeilleEntry(articleId: string, userId?: string) {
+    const anonymousId = getAnonymousId()
+    
+    const payload = {
+      article_id: articleId,
+      voter_id: userId || null,
+      anonymous_id: userId ? null : anonymousId
+    }
+    
     const { data, error } = await supabase
       .from('laveille_votes')
-      .insert({ article_id: articleId, voter_id: userId })
+      .insert(payload)
       .select()
       .single()
     if (error) throw error
     return data
   }
 
-  // Remove vote from a la-veille entry
-  async function unvoteVeilleEntry(articleId: string, userId: string) {
-    const { error } = await supabase
+  // Remove vote from a la-veille entry (updated for anonymous users)
+  async function unvoteVeilleEntry(articleId: string, userId?: string) {
+    const anonymousId = getAnonymousId()
+    
+    let query = supabase
       .from('laveille_votes')
       .delete()
       .eq('article_id', articleId)
-      .eq('voter_id', userId)
+    
+    if (userId) {
+      query = query.eq('voter_id', userId)
+    } else {
+      query = query.eq('anonymous_id', anonymousId).is('voter_id', null)
+    }
+    
+    const { error } = await query
     if (error) throw error
     return true
   }

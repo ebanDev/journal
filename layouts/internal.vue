@@ -1,18 +1,21 @@
 <template>
-  <div class="flex h-screen bg-[#FCFAF8] text-[#1d1c1c]">
-    <div class="flex h-screen w-64 flex-col bg-white p-4">
+  <div class="flex h-screen bg-[#FCFAF8] text-[#1d1c1c] overflow-hidden">
+    <div class="flex h-full w-56 flex-col bg-white p-4 border-r border-gray-200 flex-shrink-0">
       <NuxtLink to="/" class="font-serif font-bold pb-2">Contradiction·s</NuxtLink>
       <h3 class="font-bold pb-2">Espace interne</h3>
       <UNavigationMenu orientation="vertical" :items="items" class="data-[orientation=vertical]:w-48" color="primary" />
     </div>
-    <NuxtPage />
+    <div class="flex-1 min-w-0 h-full overflow-hidden">
+      <NuxtPage />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import type { NavigationMenuItem } from '@nuxt/ui'
 import { useSupabaseClient, useSupabaseUser, useAsyncData } from '#imports'
+import type { RealtimeChannel } from '@supabase/supabase-js'
 
 // Fetch current member role
 const client = useSupabaseClient()
@@ -23,13 +26,33 @@ const { data: member } = await useAsyncData('currentMember', async () => {
   return data
 })
 const isAdmin = computed(() => member.value?.role === 'admin')
+const isEditor = computed(() => member.value?.role === 'editor' || member.value?.role === 'admin')
+
+// Fetch pending submissions count for editors/admins with real-time updates
+const { data: pendingCount, refresh: refreshPendingCount } = await useAsyncData('pendingLaveilleCount', async () => {
+  if (!isEditor.value) return 0
+  const { count } = await client
+    .from('laveille')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'pending')
+  return count || 0
+}, {
+  default: () => 0
+})
 
 // Base navigation items
 const baseItems: NavigationMenuItem[] = [
   { label: 'Profil', icon: 'mingcute-user-1-line', to: '/internal/profile' },
   { label: 'Articles', icon: 'mingcute-news-line', to: '/internal/articles' },
   { label: 'Catégories', icon: 'mingcute-folder-2-line', to: '/internal/categories' },
-  { label: 'La Veille', icon: 'mingcute-radar-line', to: '/internal/laveille' },
+  { 
+    label: 'La Veille', 
+    icon: 'mingcute-radar-line', 
+    to: '/internal/laveille',
+    ...(isEditor.value && pendingCount.value > 0 && {
+      badge: pendingCount.value.toString()
+    })
+  },
 ]
 
 // Add Users panel for admins
@@ -38,4 +61,44 @@ if (isAdmin.value) {
 }
 
 const items = ref<NavigationMenuItem[][]>([baseItems])
+
+// Real-time subscription for laveille changes
+let laveilleChannel: RealtimeChannel
+
+onMounted(() => {
+  if (isEditor.value) {
+    laveilleChannel = client
+      .channel('public:laveille')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'laveille',
+        filter: 'status=eq.pending'
+      }, () => {
+        // Refresh the pending count when laveille table changes
+        refreshPendingCount()
+      })
+      .subscribe()
+  }
+})
+
+onUnmounted(() => {
+  if (laveilleChannel) {
+    client.removeChannel(laveilleChannel)
+  }
+})
+
+// Watch for pendingCount changes to update the navigation items
+watch(pendingCount, (newCount) => {
+  const laveilleItem = baseItems.find(item => item.to === '/internal/laveille')
+  if (laveilleItem && isEditor.value) {
+    if (newCount > 0) {
+      laveilleItem.badge = newCount.toString()
+    } else {
+      delete laveilleItem.badge
+    }
+    // Force reactivity update
+    items.value = [baseItems]
+  }
+})
 </script>

@@ -1,6 +1,9 @@
 <template>
-  <div class="container max-w-4xl mx-auto p-4 space-y-8">
-    <h1 class="text-3xl font-serif">La Veille</h1>
+  <div class="container max-w-4xl mx-auto p-4 space-y-4">
+    <h1 class="text-3xl font-serif md:mt-4">La Veille</h1>
+    <p>
+      La Veille est un espace de partage d'articles, vidéos, podcasts et autres contenus intéressants. Vous pouvez soumettre vos trouvailles pour les partager avec la communauté.
+    </p>
     <section>
       <!-- Send Article Form -->
       <div class="flex flex-col bg-secondary-300 p-3 rounded-lg mb-4">
@@ -172,11 +175,9 @@ async function fetchEntries() {
   loading.value = true
   try {
     entries.value = await db.getVeilleEntries()
-    // fetch votes by current user
+    // fetch votes by current user (authenticated or anonymous)
     votedIds.value.clear()
-    if (user.value?.id) {
-      votedIds.value = await db.getUserVeilleVotes(user.value.id)
-    }
+    votedIds.value = await db.getUserVeilleVotes(user.value?.id)
   } catch (error) {
     console.error('Error fetching entries:', error)
   } finally {
@@ -230,16 +231,6 @@ async function submitEntry() {
 let veilleChannel: RealtimeChannel
 let votesChannel: RealtimeChannel
 async function vote(id: string) {
-  if (!user.value?.id) {
-    toast.add({
-      title: 'Erreur',
-      color: 'error',
-      description: 'Vous devez être connecté pour voter.',
-      icon: 'mingcute-alert-line',
-    })
-    return
-  }
-
   const isVoted = votedIds.value.has(id)
   // optimistic update
   if (isVoted) {
@@ -254,9 +245,9 @@ async function vote(id: string) {
   
   try {
     if (isVoted) {
-      await db.unvoteVeilleEntry(id, user.value.id)
+      await db.unvoteVeilleEntry(id, user.value?.id)
     } else {
-      await db.voteVeilleEntry(id, user.value.id)
+      await db.voteVeilleEntry(id, user.value?.id)
     }
   } catch (err) {
     console.error(err)
@@ -275,17 +266,7 @@ async function vote(id: string) {
 
 async function submitArticle() {
   if (!form.url) return
-  const user = useSupabaseUser()
   
-  if (user.value) {
-    toast.add({
-      title: 'Erreur',
-      color: 'error',
-      description: 'Vous devez être connecté pour soumettre un article.',
-      icon: 'mingcute-alert-line',
-    })
-    return
-  }
   form.title = ''
   form.description = ''
   form.cover = ''
