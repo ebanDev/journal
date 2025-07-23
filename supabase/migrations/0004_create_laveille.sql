@@ -30,9 +30,16 @@ ALTER TABLE public.laveille_votes ENABLE ROW LEVEL SECURITY;
 -- 4. RLS Policies for la veille submissions
 
 -- 4.A Public can submit (insert) new entries (anonymous or signed)
+-- Anonymous users can only submit with pending status, authenticated users can submit with approved status
 CREATE POLICY "Public submit la veille" ON public.laveille FOR INSERT
   TO anon, authenticated
-  WITH CHECK (true);
+  WITH CHECK (
+    -- Anonymous users can only submit with pending status (or default)
+    (submitter_id IS NULL AND anonymous_id IS NOT NULL AND (status = 'pending' OR status IS NULL))
+    OR
+    -- Authenticated users can submit with approved status for auto-approval
+    (submitter_id = auth.uid() AND submitter_id IS NOT NULL)
+  );
 
 -- 4.B Public can read only approved entries
 CREATE POLICY "Public read approved la veille" ON public.laveille FOR SELECT

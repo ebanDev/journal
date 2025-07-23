@@ -259,14 +259,15 @@ export function useDb() {
     return new Set((data || []).map(v => v.article_id))
   }
 
-  // Submit a new la-veille entry (updated for anonymous users)
+  // Submit a new la-veille entry (updated for anonymous users and auto-approval for authenticated users)
   async function submitVeilleEntry(entry: VeilleInsert) {
     const anonymousId = getAnonymousId()
     
     const payload = {
       ...entry,
       submitter_id: user.value?.id || null,
-      anonymous_id: user.value?.id ? null : anonymousId
+      anonymous_id: user.value?.id ? null : anonymousId,
+      status: user.value?.id ? 'approved' : 'pending'
     }
     
     const { data, error } = await supabase
