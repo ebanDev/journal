@@ -42,8 +42,6 @@ export default defineNuxtConfig({
     registerType: 'autoUpdate',
     workbox: {
       globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
-      navigateFallback: '/',
-      navigateFallbackDenylist: [/^\/api/, /^\/manifest\.webmanifest$/, /^\/sw\.js$/],
       cleanupOutdatedCaches: true,
       runtimeCaching: [
         {
