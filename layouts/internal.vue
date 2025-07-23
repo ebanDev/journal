@@ -1,5 +1,33 @@
 <template>
-  <div class="flex h-screen bg-[#FCFAF8] text-[#1d1c1c] overflow-hidden">
+  <!-- Mobile warning message -->
+  <div class="md:hidden flex flex-col items-center justify-center h-screen bg-[#FCFAF8] text-[#1d1c1c] p-6">
+    <div class="text-center max-w-sm">
+      <div class="mb-6">
+        <UIcon name="mingcute-computer-line" class="text-6xl text-gray-400 mx-auto mb-4" />
+      </div>
+      <h2 class="text-2xl font-serif font-bold text-gray-800 mb-4">
+        Espace interne
+      </h2>
+      <p class="text-gray-600 mb-6 leading-relaxed">
+        L'espace interne de <strong>Contradiction·s</strong> est conçu pour un usage sur ordinateur.
+      </p>
+      <p class="text-sm text-gray-500 mb-8">
+        Veuillez vous connecter depuis un ordinateur pour accéder à toutes les fonctionnalités.
+      </p>
+      <UButton 
+        to="/" 
+        variant="outline" 
+        color="primary"
+        icon="mingcute-arrow-left-line"
+        class="w-full"
+      >
+        Retour à l'accueil
+      </UButton>
+    </div>
+  </div>
+
+  <!-- Desktop layout -->
+  <div class="hidden md:flex h-screen bg-[#FCFAF8] text-[#1d1c1c] overflow-hidden">
     <div class="flex h-full w-56 flex-col bg-white p-4 border-r border-gray-200 flex-shrink-0">
       <NuxtLink to="/" class="font-serif font-bold pb-2">Contradiction·s</NuxtLink>
       <h3 class="font-bold pb-2">Espace interne</h3>

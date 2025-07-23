@@ -7,7 +7,13 @@
     <section>
       <!-- Send Article Form -->
       <div class="flex flex-col bg-secondary-300 p-3 rounded-lg mb-4">
-        <span class="text-lg font-semibold pl-2">Envoyer un article</span>
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-lg font-semibold pl-2">Envoyer un article</span>
+          <div v-if="isProcessingSharedContent" class="flex items-center space-x-2 text-amber-600">
+            <Icon name="mingcute:loading-line" class="animate-spin" />
+            <span class="text-sm">Contenu partagé en cours...</span>
+          </div>
+        </div>
         <div class="flex">
           <UInput v-model="form.url"
             placeholder="https://www.contretemps.eu/pcf-marxisme-1960-1980-economie-marxiste/" class="flex-grow" />
@@ -46,7 +52,9 @@
           <NuxtLink :to="item.url || '#'" target="_blank" class="flex-1">
             <div class="flex justify-between items-center">
               <h3 class="text-lg font-medium">{{ item.title }}</h3>
-              <UBadge :label="item.type" color="secondary" />
+              <div class="flex items-center space-x-2">
+                <UBadge :label="item.type" color="secondary" />
+              </div>
             </div>
             <p v-if="item.description" class="text-gray-600 mt-1 text-sm">{{ item.description }}</p>
           </NuxtLink>
@@ -118,6 +126,7 @@ const openSubmitModal = ref(false)
 const filter = ref('last7days')
 const sort = ref('votes')
 const isMobile = ref(false)
+const isProcessingSharedContent = ref(false)
 
 const filteredEntries = computed(() => {
   const now = new Date()
@@ -277,6 +286,31 @@ async function submitArticle() {
 
 onMounted(() => {
   isMobile.value = window.innerWidth < 768
+  
+  // Check for shared content from URL parameters
+  const route = useRoute()
+  const sharedTitle = route.query.title as string
+  const sharedText = route.query.text as string  
+  const sharedUrl = route.query.url as string
+  
+  if (sharedUrl) {
+    isProcessingSharedContent.value = true
+    
+    // Pre-fill form with shared data
+    form.title = sharedTitle || ''
+    form.url = sharedUrl
+    form.description = sharedText || ''
+    
+    // Fetch metadata for shared URL and open modal
+    fetchMetadata().then(() => {
+      isProcessingSharedContent.value = false
+      openSubmitModal.value = true
+    }).catch(() => {
+      isProcessingSharedContent.value = false
+      openSubmitModal.value = true
+    })
+  }
+  
   fetchEntries()
   // subscribe to new approved entries
   veilleChannel = supabase
