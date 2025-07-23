@@ -46,8 +46,8 @@ onMounted(async () => {
     const title = `${issue.value.title} - Contradiction·s`
     const description = issue.value.description || 
       `Découvrez l'édition "${issue.value.title}" de Contradiction·s, le journal des luttes de Bordeaux.`
-    const issueUrl = `https://contradictions.org/issues/${issue.value.slug}`
-    const imageUrl = issue.value.cover || 'https://contradictions.org/icon-512x512.png'
+    const issueUrl = `https://journal-delta-rose.vercel.app/issues/${issue.value.slug}`
+    const imageUrl = issue.value.cover || 'https://journal-delta-rose.vercel.app/icon-512x512.png'
     
     useSeoMeta({
       title,

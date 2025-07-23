@@ -8,7 +8,7 @@ useSeoMeta({
   // Open Graph
   ogTitle: 'Confirmation de connexion - Contradiction·s',
   ogDescription: 'Confirmation de votre connexion à Contradiction·s.',
-  ogImage: 'https://contradictions.org/icon-512x512.png',
+  ogImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
   ogType: 'website',
   ogSiteName: 'Contradiction·s',
   ogLocale: 'fr_FR',

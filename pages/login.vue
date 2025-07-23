@@ -90,8 +90,8 @@ useSeoMeta({
   // Open Graph
   ogTitle: 'Se connecter - Contradiction·s',
   ogDescription: 'Connectez-vous à votre espace membre de Contradiction·s.',
-  ogImage: 'https://contradictions.org/icon-512x512.png',
-  ogUrl: 'https://contradictions.org/login',
+  ogImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
+  ogUrl: 'https://journal-delta-rose.vercel.app/login',
   ogType: 'website',
   ogSiteName: 'Contradiction·s',
   ogLocale: 'fr_FR',
@@ -100,13 +100,13 @@ useSeoMeta({
   twitterCard: 'summary_large_image',
   twitterTitle: 'Se connecter - Contradiction·s',
   twitterDescription: 'Connectez-vous à votre espace membre de Contradiction·s.',
-  twitterImage: 'https://contradictions.org/icon-512x512.png',
+  twitterImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
 })
 
 // Canonical link
 useHead({
   link: [
-    { rel: 'canonical', href: 'https://contradictions.org/login' }
+    { rel: 'canonical', href: 'https://journal-delta-rose.vercel.app/login' }
   ]
 })
 </script>

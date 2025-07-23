@@ -40,8 +40,8 @@ onMounted(async () => {
     // Set up SEO for category page
     const title = `${category.value.name} - Contradiction·s`
     const description = `Découvrez tous les articles de la catégorie "${category.value.name}" sur Contradiction·s, le journal des luttes de Bordeaux.`
-    const categoryUrl = `https://contradictions.org/category/${category.value.name.toLowerCase().replace(/\s+/g, '-')}`
-    const imageUrl = category.value.cover || 'https://contradictions.org/icon-512x512.png'
+    const categoryUrl = `https://journal-delta-rose.vercel.app/category/${category.value.name.toLowerCase().replace(/\s+/g, '-')}`
+    const imageUrl = category.value.cover || 'https://journal-delta-rose.vercel.app/icon-512x512.png'
     
     useSeoMeta({
       title,

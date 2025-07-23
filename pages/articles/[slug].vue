@@ -82,8 +82,8 @@ const setupSEO = (articleData: ArticleWithCategories) => {
     `Lisez "${articleData.title}" sur Contradiction·s, le journal des luttes de Bordeaux.`
   
   const categories = articleData.categories?.map(cat => cat.name).join(', ') || ''
-  const imageUrl = articleData.cover || 'https://contradictions.org/icon-512x512.png'
-  const articleUrl = `https://contradictions.org/articles/${articleData.slug}`
+  const imageUrl = articleData.cover || 'https://journal-delta-rose.vercel.app/icon-512x512.png'
+  const articleUrl = `https://journal-delta-rose.vercel.app/articles/${articleData.slug}`
   
   useSeoMeta({
     title,

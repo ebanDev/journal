@@ -77,8 +77,8 @@ useSeoMeta({
   // Open Graph
   ogTitle: 'Recherche - Contradiction·s',
   ogDescription: 'Recherchez dans tous les articles de Contradiction·s, le journal des luttes de Bordeaux.',
-  ogImage: 'https://contradictions.org/icon-512x512.png',
-  ogUrl: 'https://contradictions.org/search',
+  ogImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
+  ogUrl: 'https://journal-delta-rose.vercel.app/search',
   ogType: 'website',
   ogSiteName: 'Contradiction·s',
   ogLocale: 'fr_FR',
@@ -87,13 +87,13 @@ useSeoMeta({
   twitterCard: 'summary_large_image',
   twitterTitle: 'Recherche - Contradiction·s',
   twitterDescription: 'Recherchez dans tous les articles de Contradiction·s.',
-  twitterImage: 'https://contradictions.org/icon-512x512.png',
+  twitterImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
 })
 
 // Canonical link
 useHead({
   link: [
-    { rel: 'canonical', href: 'https://contradictions.org/search' }
+    { rel: 'canonical', href: 'https://journal-delta-rose.vercel.app/search' }
   ]
 })
 </script>

@@ -51,12 +51,12 @@
           <!-- content -->
           <NuxtLink :to="item.url || '#'" target="_blank" class="flex-1">
             <div class="flex justify-between items-center">
-              <h3 class="text-lg font-medium">{{ item.title }}</h3>
+              <h3 class="md:text-lg text-base font-medium">{{ item.title }}</h3>
               <div class="flex items-center space-x-2">
                 <UBadge :label="item.type" color="secondary" />
               </div>
             </div>
-            <p v-if="item.description" class="text-gray-600 mt-1 text-sm">{{ item.description }}</p>
+            <p v-if="item.description" class="text-gray-600 mt-1 text-sm line-clamp-4">{{ item.description }}</p>
           </NuxtLink>
         </div>
       </div>
@@ -149,7 +149,14 @@ const filteredEntries = computed(() => {
 const displayedEntries = computed(() => {
   const list = filteredEntries.value.slice()
   if (sort.value === 'votes') {
-    return list.sort((a, b) => b.voteCount - a.voteCount)
+    return list.sort((a, b) => {
+      // Primary sort by vote count (descending)
+      const voteDiff = b.voteCount - a.voteCount
+      if (voteDiff !== 0) return voteDiff
+      
+      // Secondary sort by date (most recent first) when votes are equal
+      return new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime()
+    })
   } else if (sort.value === 'date') {
     return list.sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime())
   }
@@ -180,18 +187,25 @@ async function fetchMetadata() {
   }
 }
 
+// SSR data fetching with automatic hydration
+const { data: ssrEntries, refresh: refreshEntries } = await useAsyncData('veille-entries', async () => {
+  return await db.getVeilleEntries()
+})
+
+const { data: ssrVotedIds, refresh: refreshVotes } = await useAsyncData('veille-votes', async () => {
+  return await db.getUserVeilleVotes(user.value?.id)
+})
+
+// Initialize reactive refs with SSR data
+entries.value = ssrEntries.value || []
+votedIds.value = ssrVotedIds.value || new Set()
+
+// Keep fetchEntries for manual refreshes
 async function fetchEntries() {
-  loading.value = true
-  try {
-    entries.value = await db.getVeilleEntries()
-    // fetch votes by current user (authenticated or anonymous)
-    votedIds.value.clear()
-    votedIds.value = await db.getUserVeilleVotes(user.value?.id)
-  } catch (error) {
-    console.error('Error fetching entries:', error)
-  } finally {
-    loading.value = false
-  }
+  await refreshEntries()
+  await refreshVotes()
+  entries.value = ssrEntries.value || []
+  votedIds.value = ssrVotedIds.value || new Set()
 }
 
 async function submitEntry() {
@@ -218,12 +232,26 @@ async function submitEntry() {
     form.cover = ''
     form.source = ''
     openSubmitModal.value = false
-    toast.add({
-      title: 'Article soumis',
-      color: 'success',
-      description: 'Votre article a été soumis avec succès. Il sera examiné par notre équipe.',
-      icon: 'mingcute-check-line',
-    })
+    
+    // Different message and behavior for authenticated vs anonymous users
+    if (user.value) {
+      // Authenticated user - auto-approved, refresh list immediately
+      await fetchEntries()
+      toast.add({
+        title: 'Article publié',
+        color: 'success',
+        description: 'Votre article a été publié avec succès.',
+        icon: 'mingcute-check-line',
+      })
+    } else {
+      // Anonymous user - requires approval
+      toast.add({
+        title: 'Article soumis',
+        color: 'success',
+        description: 'Votre article a été soumis avec succès. Il sera examiné par notre équipe.',
+        icon: 'mingcute-check-line',
+      })
+    }
   } catch (error: any) {
     submitError.value = error.message
     toast.add({
@@ -311,8 +339,8 @@ onMounted(() => {
     })
   }
   
-  fetchEntries()
-  // subscribe to new approved entries
+  // Data is already available from SSR, no need to fetch again
+  // Just set up realtime subscriptions
   veilleChannel = supabase
     .channel('public:laveille')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'laveille' }, (payload) => {
@@ -340,8 +368,8 @@ useSeoMeta({
   // Open Graph
   ogTitle: 'La Veille - Contradiction·s',
   ogDescription: 'Une sélection de contenus d\'autres médias à lire, à écouter, à suivre. Partagez et votez pour vos trouvailles.',
-  ogImage: 'https://contradictions.org/icon-512x512.png',
-  ogUrl: 'https://contradictions.org/la-veille',
+  ogImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
+  ogUrl: 'https://journal-delta-rose.vercel.app/la-veille',
   ogType: 'website',
   ogSiteName: 'Contradiction·s',
   ogLocale: 'fr_FR',
@@ -350,13 +378,13 @@ useSeoMeta({
   twitterCard: 'summary_large_image',
   twitterTitle: 'La Veille - Contradiction·s',
   twitterDescription: 'Une sélection de contenus d\'autres médias à lire, à écouter, à suivre.',
-  twitterImage: 'https://contradictions.org/icon-512x512.png',
+  twitterImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
 })
 
 // Canonical link
 useHead({
   link: [
-    { rel: 'canonical', href: 'https://contradictions.org/la-veille' }
+    { rel: 'canonical', href: 'https://journal-delta-rose.vercel.app/la-veille' }
   ]
 })
 </script>

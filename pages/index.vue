@@ -133,7 +133,6 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, computed, ref } from 'vue'
-import type { RealtimeChannel } from '@supabase/supabase-js'
 import { useSupabaseClient, useAsyncData } from '#imports'
 import { useDb } from '~/composables/useDb'
 import type { ArticleWithCategories } from '~/composables/useDb'
@@ -141,16 +140,18 @@ import type { ArticleWithCategories } from '~/composables/useDb'
 const { getIssues, getArticles, getCategories } = useDb()
 const client = useSupabaseClient()
 
-const issues = await getIssues()
-const categories = await getCategories()
+// Wrap all data fetching with useAsyncData for proper SSR and caching
+const { data: issues, refresh: refreshIssues } = await useAsyncData('issues', getIssues)
+const { data: categories, refresh: refreshCategories } = await useAsyncData('categories', getCategories)
 
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString()
 }
 
-// Fetch latest published edition using getIssues
+// Fetch latest published edition using the cached issues data
 const { data: latestEdition, refresh: refreshEdition } = await useAsyncData('latestEdition', async () => {
-  const published = (issues || []).filter((i: any) => i.status === 'published')
+  const issuesData = issues.value || []
+  const published = issuesData.filter((i: any) => i.status === 'published')
   if (!published.length) return null
   const editionId = published[0].id
   // Fetch articles with new schema fields
@@ -194,22 +195,16 @@ const { data: veille = [], refresh: refreshVeille } = await useAsyncData('veille
   return data ?? []
 })
 
-let realtimeEditionChannel: RealtimeChannel
-let realtimeVeilleChannel: RealtimeChannel
 onMounted(() => {
-  realtimeEditionChannel = client
-    .channel('public:issues')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'issues' }, () => refreshEdition())
-    .subscribe()
-  realtimeVeilleChannel = client
-    .channel('public:laveille')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'laveille' }, () => refreshVeille())
-    .subscribe()
+  resizeHandler = () => {
+    articleLimit.value = window.innerWidth < 768 ? 3 : 9
+  }
+  resizeHandler()
+  window.addEventListener('resize', resizeHandler)
 })
 
 onUnmounted(() => {
-  client.removeChannel(realtimeEditionChannel)
-  client.removeChannel(realtimeVeilleChannel)
+  window.removeEventListener('resize', resizeHandler)
 })
 
 useSeoMeta({
@@ -220,8 +215,8 @@ useSeoMeta({
   // Open Graph
   ogTitle: 'Contradiction·s, le journal des luttes de Bordeaux',
   ogDescription: 'Le journal des luttes de Bordeaux, un espace pour partager et documenter les luttes sociales et politiques.',
-  ogImage: 'https://contradictions.org/icon-512x512.png',
-  ogUrl: 'https://contradictions.org',
+  ogImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
+  ogUrl: 'https://journal-delta-rose.vercel.app',
   ogType: 'website',
   ogSiteName: 'Contradiction·s',
   ogLocale: 'fr_FR',
@@ -230,13 +225,13 @@ useSeoMeta({
   twitterCard: 'summary_large_image',
   twitterTitle: 'Contradiction·s, le journal des luttes de Bordeaux',
   twitterDescription: 'Le journal des luttes de Bordeaux, un espace pour partager et documenter les luttes sociales et politiques.',
-  twitterImage: 'https://contradictions.org/icon-512x512.png',
+  twitterImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
 })
 
 // Canonical link
 useHead({
   link: [
-    { rel: 'canonical', href: 'https://contradictions.org' }
+    { rel: 'canonical', href: 'https://journal-delta-rose.vercel.app' }
   ]
 })
 </script>
