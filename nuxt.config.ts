@@ -42,7 +42,7 @@ export default defineNuxtConfig({
     registerType: 'autoUpdate',
     workbox: {
       globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
-      navigateFallback: '/index.html',
+      navigateFallback: '/',
       navigateFallbackDenylist: [/^\/api/, /^\/manifest\.webmanifest$/, /^\/sw\.js$/],
       cleanupOutdatedCaches: true,
       runtimeCaching: [
@@ -97,9 +97,7 @@ export default defineNuxtConfig({
         method: 'GET',
         enctype: 'application/x-www-form-urlencoded',
         params: {
-          title: 'title',
-          text: 'text',
-          url: 'url'
+          text: 'url',
         }
       }
     },
