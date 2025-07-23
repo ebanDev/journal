@@ -38,6 +38,12 @@ export default defineNuxtConfig({
     colorMode: false,
   },
 
+  icon: {
+    clientBundle: {
+      scan: true,
+    }
+  },
+
   pwa: {
     registerType: 'autoUpdate',
     workbox: {

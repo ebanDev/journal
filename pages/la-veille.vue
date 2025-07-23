@@ -98,8 +98,8 @@
       </div>
     </template>
     <template #footer>
-      <UButton label="Submit" @click="submitEntry" :loading="submitting" class="justify-center" />
-      <UButton label="Cancel" @click="fetchingMetadata = false" color="secondary" class="justify-center" />
+      <UButton label="Envoyer" @click="submitEntry" :loading="submitting" class="justify-center" />
+      <UButton label="Annuler" @click="fetchingMetadata = false" color="secondary" class="justify-center" />
     </template>
   </component>
 </template>
