@@ -49,7 +49,6 @@ export default defineNuxtConfig({
   },
 
   seo: {
-    global: true,
     fallbackTitle: false,
     redirectToCanonicalSiteUrl: true,
   },

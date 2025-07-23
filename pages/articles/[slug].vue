@@ -107,8 +107,7 @@ const setupSEO = (articleData: ArticleWithCategories) => {
     twitterImage: imageUrl,
     
     // Article specific
-    articleAuthor: 'Contradiction·s',
-    articlePublisher: 'Contradiction·s',
+    articleAuthor: ['Contradiction·s'],
     articlePublishedTime: articleData.published_at || '',
     articleSection: categories,
   })
