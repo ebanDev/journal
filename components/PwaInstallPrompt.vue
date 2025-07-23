@@ -1,6 +1,6 @@
 <template>
   <div 
-    v-if="showInstallBanner" 
+    v-if="showInstallBanner && isMobile" 
     ref="installBannerRef"
     class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-white border border-amber-200 rounded-lg shadow-lg p-4 z-50"
     :class="{ 
@@ -61,6 +61,7 @@ const updating = ref(false)
 const installBannerRef = ref<HTMLElement>()
 const hasTriggered = ref(false)
 const hasScrolled = ref(false)
+const isMobile = ref(false)
 
 // Manual PWA install prompt handling (fix for @vite-pwa/nuxt issue #130)
 const deferredPrompt = ref<any>(null)
@@ -98,7 +99,7 @@ function setDismissedToday(): void {
 
 // Check scroll position and show banner if conditions are met
 function checkScrollTrigger(): void {
-  if (hasScrolled.value || !import.meta.client) return
+  if (hasScrolled.value || !import.meta.client || !isMobile.value) return
   
   const scrollY = window.scrollY || document.documentElement.scrollTop
   
@@ -127,8 +128,8 @@ function checkScrollTrigger(): void {
 
 // Show install prompt based on scroll and dismissal state
 watchEffect(() => {
-  if (import.meta.client && $pwa) {
-    // Only show if PWA is installable, not dismissed today, and user has scrolled
+  if (import.meta.client && $pwa && isMobile.value) {
+    // Only show if PWA is installable, not dismissed today, user has scrolled, and on mobile
     const shouldShow = (canInstall.value || $pwa.showInstallPrompt) && 
                       !$pwa.isPWAInstalled && 
                       !wasDismissedToday() && 
@@ -157,9 +158,20 @@ function removeEventListeners() {
   }
 }
 
+// Check if device is mobile
+function checkIsMobile() {
+  if (import.meta.client) {
+    // Check screen width only
+    isMobile.value = window.innerWidth <= 768
+  }
+}
+
 // Set up scroll listener
 onMounted(() => {
   if (import.meta.client) {
+    // Check if device is mobile
+    checkIsMobile()
+    
     // Check if app is already installed - if so, don't set up listeners
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
     const isIOSStandalone = (navigator as any).standalone === true
