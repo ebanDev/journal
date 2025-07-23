@@ -42,8 +42,22 @@ export default defineNuxtConfig({
     registerType: 'autoUpdate',
     workbox: {
       globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
-      navigateFallback: '/',
-      navigateFallbackDenylist: [/^\/api/],
+      navigateFallback: '/index.html',
+      navigateFallbackDenylist: [/^\/api/, /^\/manifest\.webmanifest$/, /^\/sw\.js$/],
+      cleanupOutdatedCaches: true,
+      runtimeCaching: [
+        {
+          urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'google-fonts-cache',
+            expiration: {
+              maxEntries: 10,
+              maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+            }
+          }
+        }
+      ]
     },
     manifest: {
       name: 'Contradiction·s, le journal des luttes de Bordeaux',
