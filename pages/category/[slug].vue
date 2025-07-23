@@ -36,6 +36,40 @@ onMounted(async () => {
   category.value = (categories || []).find((c: any) => c.name.toLowerCase().replace(/\s+/g, '-') === slug)
   if (category.value) {
     articles.value = await getArticles([{ type: 'category', id: category.value.id }])
+    
+    // Set up SEO for category page
+    const title = `${category.value.name} - Contradiction·s`
+    const description = `Découvrez tous les articles de la catégorie "${category.value.name}" sur Contradiction·s, le journal des luttes de Bordeaux.`
+    const categoryUrl = `https://contradictions.org/category/${category.value.name.toLowerCase().replace(/\s+/g, '-')}`
+    const imageUrl = category.value.cover || 'https://contradictions.org/icon-512x512.png'
+    
+    useSeoMeta({
+      title,
+      description,
+      keywords: `${category.value.name}, Bordeaux, luttes sociales, politique, journal`,
+      
+      // Open Graph
+      ogTitle: title,
+      ogDescription: description,
+      ogImage: imageUrl,
+      ogUrl: categoryUrl,
+      ogType: 'website',
+      ogSiteName: 'Contradiction·s',
+      ogLocale: 'fr_FR',
+      
+      // Twitter
+      twitterCard: 'summary_large_image',
+      twitterTitle: title,
+      twitterDescription: description,
+      twitterImage: imageUrl,
+    })
+    
+    // Canonical link
+    useHead({
+      link: [
+        { rel: 'canonical', href: categoryUrl }
+      ]
+    })
   }
   loading.value = false
 })

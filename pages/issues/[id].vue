@@ -41,6 +41,44 @@ onMounted(async () => {
   issue.value = (issues || []).find((i: any) => i.slug === slug)
   if (issue.value) {
     articles.value = await getArticles([{ type: 'issue', id: issue.value.id }])
+    
+    // Set up SEO for issue page
+    const title = `${issue.value.title} - Contradiction·s`
+    const description = issue.value.description || 
+      `Découvrez l'édition "${issue.value.title}" de Contradiction·s, le journal des luttes de Bordeaux.`
+    const issueUrl = `https://contradictions.org/issues/${issue.value.slug}`
+    const imageUrl = issue.value.cover || 'https://contradictions.org/icon-512x512.png'
+    
+    useSeoMeta({
+      title,
+      description,
+      keywords: `édition, ${issue.value.title}, Bordeaux, luttes sociales, politique, journal`,
+      
+      // Open Graph
+      ogTitle: title,
+      ogDescription: description,
+      ogImage: imageUrl,
+      ogUrl: issueUrl,
+      ogType: 'website',
+      ogSiteName: 'Contradiction·s',
+      ogLocale: 'fr_FR',
+      
+      // Twitter
+      twitterCard: 'summary_large_image',
+      twitterTitle: title,
+      twitterDescription: description,
+      twitterImage: imageUrl,
+      
+      // Issue specific
+      articlePublishedTime: issue.value.published_at || '',
+    })
+    
+    // Canonical link
+    useHead({
+      link: [
+        { rel: 'canonical', href: issueUrl }
+      ]
+    })
   }
   loading.value = false
 })

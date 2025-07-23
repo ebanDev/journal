@@ -79,6 +79,36 @@ onMounted(async () => {
     }
   }
 })
+
+// SEO setup
+useSeoMeta({
+  title: 'Se connecter - Contradiction·s',
+  description: 'Connectez-vous à votre espace membre de Contradiction·s, le journal des luttes de Bordeaux.',
+  keywords: 'connexion, membre, Bordeaux, luttes sociales, politique, journal',
+  robots: 'noindex, follow', // Login pages shouldn't be indexed
+  
+  // Open Graph
+  ogTitle: 'Se connecter - Contradiction·s',
+  ogDescription: 'Connectez-vous à votre espace membre de Contradiction·s.',
+  ogImage: 'https://contradictions.org/icon-512x512.png',
+  ogUrl: 'https://contradictions.org/login',
+  ogType: 'website',
+  ogSiteName: 'Contradiction·s',
+  ogLocale: 'fr_FR',
+  
+  // Twitter
+  twitterCard: 'summary_large_image',
+  twitterTitle: 'Se connecter - Contradiction·s',
+  twitterDescription: 'Connectez-vous à votre espace membre de Contradiction·s.',
+  twitterImage: 'https://contradictions.org/icon-512x512.png',
+})
+
+// Canonical link
+useHead({
+  link: [
+    { rel: 'canonical', href: 'https://contradictions.org/login' }
+  ]
+})
 </script>
 <template>
   <div class="flex flex-col h-full p-4 md:py-8">

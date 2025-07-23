@@ -330,4 +330,33 @@ onUnmounted(() => {
   supabase.removeChannel(veilleChannel)
   supabase.removeChannel(votesChannel)
 })
+
+// SEO setup
+useSeoMeta({
+  title: 'La Veille - Contradiction·s',
+  description: 'La Veille de Contradiction·s : découvrez une sélection de contenus d\'autres médias à lire, à écouter, à suivre. Partagez et votez pour vos trouvailles.',
+  keywords: 'veille, articles, médias, partage, Bordeaux, luttes sociales, politique',
+  
+  // Open Graph
+  ogTitle: 'La Veille - Contradiction·s',
+  ogDescription: 'Une sélection de contenus d\'autres médias à lire, à écouter, à suivre. Partagez et votez pour vos trouvailles.',
+  ogImage: 'https://contradictions.org/icon-512x512.png',
+  ogUrl: 'https://contradictions.org/la-veille',
+  ogType: 'website',
+  ogSiteName: 'Contradiction·s',
+  ogLocale: 'fr_FR',
+  
+  // Twitter
+  twitterCard: 'summary_large_image',
+  twitterTitle: 'La Veille - Contradiction·s',
+  twitterDescription: 'Une sélection de contenus d\'autres médias à lire, à écouter, à suivre.',
+  twitterImage: 'https://contradictions.org/icon-512x512.png',
+})
+
+// Canonical link
+useHead({
+  link: [
+    { rel: 'canonical', href: 'https://contradictions.org/la-veille' }
+  ]
+})
 </script>

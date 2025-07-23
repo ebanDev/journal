@@ -212,13 +212,32 @@ onUnmounted(() => {
   client.removeChannel(realtimeVeilleChannel)
 })
 
+useSeoMeta({
+  title: 'Contradiction·s, le journal des luttes de Bordeaux',
+  description: 'Le journal des luttes de Bordeaux, un espace pour partager et documenter les luttes sociales et politiques. Découvrez nos derniers articles et éditions.',
+  keywords: 'Bordeaux, luttes sociales, politique, journal, actualité, analyses, Contradiction·s',
+  
+  // Open Graph
+  ogTitle: 'Contradiction·s, le journal des luttes de Bordeaux',
+  ogDescription: 'Le journal des luttes de Bordeaux, un espace pour partager et documenter les luttes sociales et politiques.',
+  ogImage: 'https://contradictions.org/icon-512x512.png',
+  ogUrl: 'https://contradictions.org',
+  ogType: 'website',
+  ogSiteName: 'Contradiction·s',
+  ogLocale: 'fr_FR',
+  
+  // Twitter
+  twitterCard: 'summary_large_image',
+  twitterTitle: 'Contradiction·s, le journal des luttes de Bordeaux',
+  twitterDescription: 'Le journal des luttes de Bordeaux, un espace pour partager et documenter les luttes sociales et politiques.',
+  twitterImage: 'https://contradictions.org/icon-512x512.png',
+})
+
+// Canonical link
 useHead({
-  title: 'Contradiction·s - À la une',
-  meta: [
-    { name: 'description', content: 'Dernière édition de Contradiction·s' },
-    { property: 'og:title', content: 'Contradiction·s - À la une' },
-    { property: 'og:description', content: 'Dernière édition de Contradiction·s' },
-  ],
+  link: [
+    { rel: 'canonical', href: 'https://contradictions.org' }
+  ]
 })
 </script>
 

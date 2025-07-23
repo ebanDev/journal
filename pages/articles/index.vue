@@ -156,4 +156,33 @@ async function fetchArticles() {
 
 watch(filters, fetchArticles, { deep: true })
 
+// SEO setup
+useSeoMeta({
+  title: 'Tous les articles - Contradiction·s',
+  description: 'Parcourez tous les articles de Contradiction·s, le journal des luttes de Bordeaux. Découvrez nos analyses, reportages et réflexions sur les luttes sociales et politiques.',
+  keywords: 'articles, Bordeaux, luttes sociales, politique, journal, actualité, analyses',
+  
+  // Open Graph
+  ogTitle: 'Tous les articles - Contradiction·s',
+  ogDescription: 'Parcourez tous les articles de Contradiction·s, le journal des luttes de Bordeaux. Découvrez nos analyses, reportages et réflexions sur les luttes sociales et politiques.',
+  ogImage: 'https://contradictions.org/icon-512x512.png',
+  ogUrl: 'https://contradictions.org/articles',
+  ogType: 'website',
+  ogSiteName: 'Contradiction·s',
+  ogLocale: 'fr_FR',
+  
+  // Twitter
+  twitterCard: 'summary_large_image',
+  twitterTitle: 'Tous les articles - Contradiction·s',
+  twitterDescription: 'Parcourez tous les articles de Contradiction·s, le journal des luttes de Bordeaux.',
+  twitterImage: 'https://contradictions.org/icon-512x512.png',
+})
+
+// Canonical link
+useHead({
+  link: [
+    { rel: 'canonical', href: 'https://contradictions.org/articles' }
+  ]
+})
+
 </script>

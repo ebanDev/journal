@@ -14,6 +14,10 @@ export default defineNuxtConfig({
     '@nuxtjs/supabase',
     'nuxt-swiper',
     '@vite-pwa/nuxt',
+    '@nuxtjs/seo',
+    '@nuxtjs/robots',
+    '@nuxtjs/sitemap',
+    'nuxt-schema-org'
   ],
 
   supabase: {
@@ -42,6 +46,19 @@ export default defineNuxtConfig({
     clientBundle: {
       scan: true,
     }
+  },
+
+  seo: {
+    global: true,
+    fallbackTitle: false,
+    redirectToCanonicalSiteUrl: true,
+  },
+
+  site: {
+    url: process.env.NUXT_PUBLIC_SITE_URL || 'https://contradictions.org',
+    name: 'Contradiction·s, le journal des luttes de Bordeaux',
+    description: 'Le journal des luttes de Bordeaux, un espace pour partager et documenter les luttes sociales et politiques.',
+    defaultLocale: 'fr',
   },
 
   pwa: {

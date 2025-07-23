@@ -66,4 +66,34 @@ const onSearch = debounce(async () => {
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString()
 }
+
+// SEO setup
+useSeoMeta({
+  title: 'Recherche - Contradiction·s',
+  description: 'Recherchez dans tous les articles de Contradiction·s, le journal des luttes de Bordeaux. Trouvez rapidement l\'information qui vous intéresse.',
+  keywords: 'recherche, articles, Bordeaux, luttes sociales, politique, journal',
+  robots: 'noindex, follow', // Search pages typically shouldn't be indexed
+  
+  // Open Graph
+  ogTitle: 'Recherche - Contradiction·s',
+  ogDescription: 'Recherchez dans tous les articles de Contradiction·s, le journal des luttes de Bordeaux.',
+  ogImage: 'https://contradictions.org/icon-512x512.png',
+  ogUrl: 'https://contradictions.org/search',
+  ogType: 'website',
+  ogSiteName: 'Contradiction·s',
+  ogLocale: 'fr_FR',
+  
+  // Twitter
+  twitterCard: 'summary_large_image',
+  twitterTitle: 'Recherche - Contradiction·s',
+  twitterDescription: 'Recherchez dans tous les articles de Contradiction·s.',
+  twitterImage: 'https://contradictions.org/icon-512x512.png',
+})
+
+// Canonical link
+useHead({
+  link: [
+    { rel: 'canonical', href: 'https://contradictions.org/search' }
+  ]
+})
 </script>

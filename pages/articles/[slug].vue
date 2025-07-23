@@ -63,6 +63,9 @@ const fetchArticle = async () => {
       return
     }
     article.value = found
+    
+    // Set up SEO meta tags dynamically when article is loaded
+    setupSEO(found)
   } catch (e) {
     toast.add({
       title: 'Erreur',
@@ -71,6 +74,51 @@ const fetchArticle = async () => {
     })
     router.push('/')
   }
+}
+
+const setupSEO = (articleData: ArticleWithCategories) => {
+  const title = `${articleData.title} - Contradiction·s`
+  const description = articleData.description || 
+    `Lisez "${articleData.title}" sur Contradiction·s, le journal des luttes de Bordeaux.`
+  
+  const categories = articleData.categories?.map(cat => cat.name).join(', ') || ''
+  const imageUrl = articleData.cover || 'https://contradictions.org/icon-512x512.png'
+  const articleUrl = `https://contradictions.org/articles/${articleData.slug}`
+  
+  useSeoMeta({
+    title,
+    description,
+    keywords: `${categories}, Bordeaux, luttes sociales, politique, journal`,
+    author: 'Contradiction·s',
+    
+    // Open Graph
+    ogTitle: title,
+    ogDescription: description,
+    ogImage: imageUrl,
+    ogUrl: articleUrl,
+    ogType: 'article',
+    ogSiteName: 'Contradiction·s',
+    ogLocale: 'fr_FR',
+    
+    // Twitter
+    twitterCard: 'summary_large_image',
+    twitterTitle: title,
+    twitterDescription: description,
+    twitterImage: imageUrl,
+    
+    // Article specific
+    articleAuthor: 'Contradiction·s',
+    articlePublisher: 'Contradiction·s',
+    articlePublishedTime: articleData.published_at || '',
+    articleSection: categories,
+  })
+  
+  // Canonical link still needs useHead
+  useHead({
+    link: [
+      { rel: 'canonical', href: articleUrl }
+    ]
+  })
 }
 
 onMounted(fetchArticle)
