@@ -61,8 +61,8 @@ export default defineNuxtConfig({
       name: 'Contradiction·s, le journal des luttes de Bordeaux',
       short_name: 'Contradictions·s',
       description: 'Le journal des luttes de Bordeaux, un espace pour partager et documenter les luttes sociales et politiques.',
-      theme_color: '#fffbeb', // amber-50
-      background_color: '#fffbeb', // amber-50
+      theme_color: '#FCFAF8', // amber-50
+      background_color: '#FCFAF8', // amber-50
       display: 'standalone',
       start_url: '/',
       scope: '/',
