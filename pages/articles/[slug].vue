@@ -32,7 +32,7 @@
       </div>
 
       <div v-if="article.cover" class="mb-6">
-        <img :src="article.cover" alt="Cover" class="w-full rounded" />
+        <img :src="article.cover" alt="Cover" class="w-full rounded max-h-80 object-cover" />
       </div>
 
       <div @click="handleCitationClick" @mouseover="handleSourceHover" @mouseleave="handleSourceLeave">
@@ -53,13 +53,6 @@
           <p v-if="hoveredSource.description" class="text-sm text-gray-600 line-clamp-3">
             {{ hoveredSource.description }}
           </p>
-        </div>
-        
-        <div v-if="hoveredSource.url" class="pt-2 border-t border-gray-100">
-          <span class="inline-flex items-center gap-1 text-sm text-blue-600">
-            <Icon name="i-mingcute-external-link-line" class="text-xs" />
-            Cliquer pour voir la source
-          </span>
         </div>
         
         <div v-if="hoveredSource.author || hoveredSource.publishedAt" class="pt-2 border-t border-gray-100 space-y-1">
