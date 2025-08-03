@@ -52,6 +52,7 @@ export type Database = {
           issue_id: string | null
           published_at: string | null
           slug: string | null
+          sources: string | null
           title: string
         }
         Insert: {
@@ -66,6 +67,7 @@ export type Database = {
           issue_id?: string | null
           published_at?: string | null
           slug?: string | null
+          sources?: string | null
           title: string
         }
         Update: {
@@ -80,6 +82,7 @@ export type Database = {
           issue_id?: string | null
           published_at?: string | null
           slug?: string | null
+          sources?: string | null
           title?: string
         }
         Relationships: [

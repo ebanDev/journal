@@ -38,8 +38,8 @@ onMounted(async () => {
     articles.value = await getArticles([{ type: 'category', id: category.value.id }])
     
     // Set up SEO for category page
-    const title = `${category.value.name} - Contradiction·s`
-    const description = `Découvrez tous les articles de la catégorie "${category.value.name}" sur Contradiction·s, le journal des luttes de Bordeaux.`
+    const title = `${category.value.name} - Sursaut!`
+    const description = `Découvrez tous les articles de la catégorie "${category.value.name}" sur Sursaut!, le journal des luttes de Bordeaux.`
     const categoryUrl = `https://journal-delta-rose.vercel.app/category/${category.value.name.toLowerCase().replace(/\s+/g, '-')}`
     const imageUrl = category.value.cover || 'https://journal-delta-rose.vercel.app/icon-512x512.png'
     
@@ -54,7 +54,7 @@ onMounted(async () => {
       ogImage: imageUrl,
       ogUrl: categoryUrl,
       ogType: 'website',
-      ogSiteName: 'Contradiction·s',
+      ogSiteName: 'Sursaut!',
       ogLocale: 'fr_FR',
       
       // Twitter

@@ -1,16 +1,16 @@
 <script setup lang="ts">
 // SEO setup
 useSeoMeta({
-  title: 'Confirmation de connexion - Contradiction·s',
-  description: 'Confirmation de votre connexion à Contradiction·s.',
+  title: 'Confirmation de connexion - Sursaut!',
+  description: 'Confirmation de votre connexion à Sursaut!.',
   robots: 'noindex, nofollow', // This page should not be indexed
   
   // Open Graph
-  ogTitle: 'Confirmation de connexion - Contradiction·s',
-  ogDescription: 'Confirmation de votre connexion à Contradiction·s.',
+  ogTitle: 'Confirmation de connexion - Sursaut!',
+  ogDescription: 'Confirmation de votre connexion à Sursaut!.',
   ogImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
   ogType: 'website',
-  ogSiteName: 'Contradiction·s',
+  ogSiteName: 'Sursaut!',
   ogLocale: 'fr_FR',
 })
 </script>

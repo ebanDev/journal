@@ -1,7 +1,9 @@
 import type { Tables, TablesInsert } from '~/types/database.types'
+import type { Source } from '~/composables/useSources'
 
 export type ArticleWithCategories = Tables<'articles'> & {
   categories: Array<{ name: string, icon?: string }>
+  sources: Source[]
 } 
 
 // La Veille types
@@ -155,7 +157,14 @@ export function useDb() {
       ...data,
       categories: (data.article_categories || [])
         .map((ac: any) => ac.categories && { name: ac.categories.name, icon: ac.categories.icon })
-        .filter(Boolean)
+        .filter(Boolean),
+      sources: data.sources ? (() => {
+        try {
+          return JSON.parse(data.sources)
+        } catch {
+          return []
+        }
+      })() : []
     }
   }
 

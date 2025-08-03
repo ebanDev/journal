@@ -82,24 +82,24 @@ onMounted(async () => {
 
 // SEO setup
 useSeoMeta({
-  title: 'Se connecter - Contradiction·s',
-  description: 'Connectez-vous à votre espace membre de Contradiction·s, le journal des luttes de Bordeaux.',
+  title: 'Se connecter - Sursaut!',
+  description: 'Connectez-vous à votre espace membre de Sursaut!, le journal des luttes de Bordeaux.',
   keywords: 'connexion, membre, Bordeaux, luttes sociales, politique, journal',
   robots: 'noindex, follow', // Login pages shouldn't be indexed
   
   // Open Graph
-  ogTitle: 'Se connecter - Contradiction·s',
-  ogDescription: 'Connectez-vous à votre espace membre de Contradiction·s.',
+  ogTitle: 'Se connecter - Sursaut!',
+  ogDescription: 'Connectez-vous à votre espace membre de Sursaut!.',
   ogImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
   ogUrl: 'https://journal-delta-rose.vercel.app/login',
   ogType: 'website',
-  ogSiteName: 'Contradiction·s',
+  ogSiteName: 'Sursaut!',
   ogLocale: 'fr_FR',
   
   // Twitter
   twitterCard: 'summary_large_image',
-  twitterTitle: 'Se connecter - Contradiction·s',
-  twitterDescription: 'Connectez-vous à votre espace membre de Contradiction·s.',
+  twitterTitle: 'Se connecter - Sursaut!',
+  twitterDescription: 'Connectez-vous à votre espace membre de Sursaut!.',
   twitterImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
 })
 

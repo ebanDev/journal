@@ -208,22 +208,22 @@ onUnmounted(() => {
 })
 
 useSeoMeta({
-  title: 'Contradiction·s, le journal des luttes de Bordeaux',
+  title: 'Sursaut!, le journal des luttes de Bordeaux',
   description: 'Le journal des luttes de Bordeaux, un espace pour partager et documenter les luttes sociales et politiques. Découvrez nos derniers articles et éditions.',
-  keywords: 'Bordeaux, luttes sociales, politique, journal, actualité, analyses, Contradiction·s',
+  keywords: 'Bordeaux, luttes sociales, politique, journal, actualité, analyses, Sursaut!',
   
   // Open Graph
-  ogTitle: 'Contradiction·s, le journal des luttes de Bordeaux',
+  ogTitle: 'Sursaut!, le journal des luttes de Bordeaux',
   ogDescription: 'Le journal des luttes de Bordeaux, un espace pour partager et documenter les luttes sociales et politiques.',
   ogImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
   ogUrl: 'https://journal-delta-rose.vercel.app',
   ogType: 'website',
-  ogSiteName: 'Contradiction·s',
+  ogSiteName: 'Sursaut!',
   ogLocale: 'fr_FR',
   
   // Twitter
   twitterCard: 'summary_large_image',
-  twitterTitle: 'Contradiction·s, le journal des luttes de Bordeaux',
+  twitterTitle: 'Sursaut!, le journal des luttes de Bordeaux',
   twitterDescription: 'Le journal des luttes de Bordeaux, un espace pour partager et documenter les luttes sociales et politiques.',
   twitterImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
 })

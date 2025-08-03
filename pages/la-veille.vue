@@ -361,22 +361,22 @@ onUnmounted(() => {
 
 // SEO setup
 useSeoMeta({
-  title: 'La Veille - Contradiction·s',
-  description: 'La Veille de Contradiction·s : découvrez une sélection de contenus d\'autres médias à lire, à écouter, à suivre. Partagez et votez pour vos trouvailles.',
+  title: 'La Veille - Sursaut!',
+  description: 'La Veille de Sursaut! : découvrez une sélection de contenus d\'autres médias à lire, à écouter, à suivre. Partagez et votez pour vos trouvailles.',
   keywords: 'veille, articles, médias, partage, Bordeaux, luttes sociales, politique',
   
   // Open Graph
-  ogTitle: 'La Veille - Contradiction·s',
+  ogTitle: 'La Veille - Sursaut!',
   ogDescription: 'Une sélection de contenus d\'autres médias à lire, à écouter, à suivre. Partagez et votez pour vos trouvailles.',
   ogImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
   ogUrl: 'https://journal-delta-rose.vercel.app/la-veille',
   ogType: 'website',
-  ogSiteName: 'Contradiction·s',
+  ogSiteName: 'Sursaut!',
   ogLocale: 'fr_FR',
   
   // Twitter
   twitterCard: 'summary_large_image',
-  twitterTitle: 'La Veille - Contradiction·s',
+  twitterTitle: 'La Veille - Sursaut!',
   twitterDescription: 'Une sélection de contenus d\'autres médias à lire, à écouter, à suivre.',
   twitterImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
 })

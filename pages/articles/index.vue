@@ -158,23 +158,23 @@ watch(filters, fetchArticles, { deep: true })
 
 // SEO setup
 useSeoMeta({
-  title: 'Tous les articles - Contradiction·s',
-  description: 'Parcourez tous les articles de Contradiction·s, le journal des luttes de Bordeaux. Découvrez nos analyses, reportages et réflexions sur les luttes sociales et politiques.',
+  title: 'Tous les articles - Sursaut!',
+  description: 'Parcourez tous les articles de Sursaut!, le journal des luttes de Bordeaux. Découvrez nos analyses, reportages et réflexions sur les luttes sociales et politiques.',
   keywords: 'articles, Bordeaux, luttes sociales, politique, journal, actualité, analyses',
   
   // Open Graph
-  ogTitle: 'Tous les articles - Contradiction·s',
-  ogDescription: 'Parcourez tous les articles de Contradiction·s, le journal des luttes de Bordeaux. Découvrez nos analyses, reportages et réflexions sur les luttes sociales et politiques.',
+  ogTitle: 'Tous les articles - Sursaut!',
+  ogDescription: 'Parcourez tous les articles de Sursaut!, le journal des luttes de Bordeaux. Découvrez nos analyses, reportages et réflexions sur les luttes sociales et politiques.',
   ogImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
   ogUrl: 'https://journal-delta-rose.vercel.app/articles',
   ogType: 'website',
-  ogSiteName: 'Contradiction·s',
+  ogSiteName: 'Sursaut!',
   ogLocale: 'fr_FR',
   
   // Twitter
   twitterCard: 'summary_large_image',
-  twitterTitle: 'Tous les articles - Contradiction·s',
-  twitterDescription: 'Parcourez tous les articles de Contradiction·s, le journal des luttes de Bordeaux.',
+  twitterTitle: 'Tous les articles - Sursaut!',
+  twitterDescription: 'Parcourez tous les articles de Sursaut!, le journal des luttes de Bordeaux.',
   twitterImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
 })
 

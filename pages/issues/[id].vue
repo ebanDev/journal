@@ -43,9 +43,9 @@ onMounted(async () => {
     articles.value = await getArticles([{ type: 'issue', id: issue.value.id }])
     
     // Set up SEO for issue page
-    const title = `${issue.value.title} - Contradiction·s`
+    const title = `${issue.value.title} - Sursaut!`
     const description = issue.value.description || 
-      `Découvrez l'édition "${issue.value.title}" de Contradiction·s, le journal des luttes de Bordeaux.`
+      `Découvrez l'édition "${issue.value.title}" de Sursaut!, le journal des luttes de Bordeaux.`
     const issueUrl = `https://journal-delta-rose.vercel.app/issues/${issue.value.slug}`
     const imageUrl = issue.value.cover || 'https://journal-delta-rose.vercel.app/icon-512x512.png'
     
@@ -60,7 +60,7 @@ onMounted(async () => {
       ogImage: imageUrl,
       ogUrl: issueUrl,
       ogType: 'website',
-      ogSiteName: 'Contradiction·s',
+      ogSiteName: 'Sursaut!',
       ogLocale: 'fr_FR',
       
       // Twitter

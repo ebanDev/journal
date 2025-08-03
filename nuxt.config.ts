@@ -55,7 +55,7 @@ export default defineNuxtConfig({
 
   site: {
     url: process.env.NUXT_PUBLIC_SITE_URL || 'https://journal-delta-rose.vercel.app',
-    name: 'Contradiction·s, le journal des luttes de Bordeaux',
+    name: 'Revue Sursaut!',
     description: 'Le journal des luttes de Bordeaux, un espace pour partager et documenter les luttes sociales et politiques.',
     defaultLocale: 'fr',
   },
@@ -65,6 +65,7 @@ export default defineNuxtConfig({
     workbox: {
       globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
       cleanupOutdatedCaches: true,
+      navigateFallbackDenylist: [/^\/login/, /^\/api/, /^\/internal/],
       runtimeCaching: [
         {
           urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -72,6 +73,7 @@ export default defineNuxtConfig({
           options: {
             cacheName: 'google-fonts-cache',
             expiration: {
+              
               maxEntries: 10,
               maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
             }
@@ -80,8 +82,8 @@ export default defineNuxtConfig({
       ]
     },
     manifest: {
-      name: 'Contradiction·s, le journal des luttes de Bordeaux',
-      short_name: 'Contradictions·s',
+      name: 'Revue Sursaut!',
+      short_name: 'Sursaut!',
       description: 'Le journal des luttes de Bordeaux, un espace pour partager et documenter les luttes sociales et politiques.',
       theme_color: '#FCFAF8', // amber-50
       background_color: '#FCFAF8', // amber-50
@@ -122,8 +124,9 @@ export default defineNuxtConfig({
       }
     },
     devOptions: {
-      enabled: true,
+      enabled: false,
       type: 'module',
+      navigateFallbackAllowlist: [/^\/$/]
     },
   }
 })

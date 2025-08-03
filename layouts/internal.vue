@@ -9,7 +9,7 @@
         Espace interne
       </h2>
       <p class="text-gray-600 mb-6 leading-relaxed">
-        L'espace interne de <strong>Contradiction·s</strong> est conçu pour un usage sur ordinateur.
+        L'espace interne de <strong>Sursaut!</strong> est conçu pour un usage sur ordinateur.
       </p>
       <p class="text-sm text-gray-500 mb-8">
         Veuillez vous connecter depuis un ordinateur pour accéder à toutes les fonctionnalités.
@@ -29,7 +29,7 @@
   <!-- Desktop layout -->
   <div class="hidden md:flex h-screen bg-[#FCFAF8] text-[#1d1c1c] overflow-hidden">
     <div class="flex h-full w-56 flex-col bg-white p-4 border-r border-gray-200 flex-shrink-0">
-      <NuxtLink to="/" class="font-serif font-bold pb-2">Contradiction·s</NuxtLink>
+      <NuxtLink to="/" class="font-serif font-bold pb-2">Sursaut!</NuxtLink>
       <h3 class="font-bold pb-2">Espace interne</h3>
       <UNavigationMenu orientation="vertical" :items="items" class="data-[orientation=vertical]:w-48" color="primary" />
     </div>
