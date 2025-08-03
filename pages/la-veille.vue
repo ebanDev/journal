@@ -2,7 +2,17 @@
   <div class="container max-w-4xl mx-auto p-4 space-y-4">
     <h1 class="text-3xl font-serif md:mt-4">La Veille</h1>
     <p>
-      La Veille est un espace de partage d'articles, vidéos, podcasts et autres contenus intéressants. Vous pouvez soumettre vos trouvailles pour les partager avec la communauté.
+      La Veille est un espace de partage d'articles, vidéos, podc// Initialize reactive refs with SSR data
+entries.value = ssrEntries.value || []
+votedIds.value = new Set((ssrVotedIds.value || []) as string[])
+
+// Keep fetchEntries for manual refreshes
+async function fetchEntries() {
+  await refreshEntries()
+  await refreshVotes()
+  entries.value = ssrEntries.value || []
+  votedIds.value = new Set((ssrVotedIds.value || []) as string[])
+}res contenus intéressants. Vous pouvez soumettre vos trouvailles pour les partager avec la communauté.
     </p>
     <section>
       <!-- Send Article Form -->
@@ -108,11 +118,13 @@
 import {UModal, UDrawer} from '#components'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import type { VeilleEntry, VeilleInsert } from '~/composables/useDb'
-const toast = useToast()
+import { useOptimizedDb } from '~/composables/useOptimizedDb'
 
+const toast = useToast()
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 const db = useDb()
+const { getOptimizedVeille } = useOptimizedDb()
 
 const entries = ref<VeilleEntry[]>([])
 const loading = ref(false)
@@ -187,25 +199,26 @@ async function fetchMetadata() {
   }
 }
 
-// SSR data fetching with automatic hydration
-const { data: ssrEntries, refresh: refreshEntries } = await useAsyncData('veille-entries', async () => {
-  return await db.getVeilleEntries()
-})
-
+// SSR data fetching with optimized caching
+const { data: ssrEntries, refresh: refreshEntries } = await getOptimizedVeille()
 const { data: ssrVotedIds, refresh: refreshVotes } = await useAsyncData('veille-votes', async () => {
-  return await db.getUserVeilleVotes(user.value?.id)
+  const votes = await db.getUserVeilleVotes(user.value?.id)
+  return Array.from(votes) // Convert Set to Array for serialization
+}, {
+  default: () => [],
+  server: false // Votes are user-specific, only fetch on client
 })
 
 // Initialize reactive refs with SSR data
 entries.value = ssrEntries.value || []
-votedIds.value = ssrVotedIds.value || new Set()
+votedIds.value = new Set(ssrVotedIds.value || [])
 
 // Keep fetchEntries for manual refreshes
 async function fetchEntries() {
   await refreshEntries()
   await refreshVotes()
   entries.value = ssrEntries.value || []
-  votedIds.value = ssrVotedIds.value || new Set()
+  votedIds.value = new Set(ssrVotedIds.value || [])
 }
 
 async function submitEntry() {

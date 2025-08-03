@@ -110,23 +110,41 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { useAsyncData } from '#imports'
-const { getIssues, getArticles, getCategories } = useDb()
+import { ref, computed, watch } from 'vue'
+import { useOptimizedDb } from '~/composables/useOptimizedDb'
 
-const tabs = [
-  { label: 'Catégories', icon: 'mingcute-folder-2-line' },
-  { label: 'Éditions', icon: 'mingcute-calendar-2-line' },
-]
+const { getOptimizedArticles, getOptimizedCategories, getOptimizedIssues } = useOptimizedDb()
 
+// Use optimized data fetching with SSR and caching
+const { data: ssrCategories } = await getOptimizedCategories()
+const { data: ssrIssues } = await getOptimizedIssues()
+const { data: ssrArticles } = await getOptimizedArticles()
+
+// UI state
 const activeTab = ref('0')
-const filters = ref<any[]>([])
+const filters = ref<Array<{ type: string; id: string; label: string }>>([])
 const drawerOpen = ref(false)
 
-const { data: ssrIssues } = await useAsyncData('issues', getIssues)
-const { data: ssrCategories } = await useAsyncData('categories', getCategories)
-const { data: ssrArticles } = await useAsyncData('articles', () => getArticles([]))
+// Responsive detection
+const isMobile = computed(() => {
+  if (process.client) {
+    return window.innerWidth < 768
+  }
+  return false
+})
 
+// Filter tabs
+const tabs = [{
+  key: '0',
+  label: 'Catégories',
+  icon: 'mingcute-tag-line'
+}, {
+  key: '1', 
+  label: 'Éditions',
+  icon: 'mingcute-book-line'
+}]
+
+// Initialize reactive data from SSR
 const issues = ref<any[]>(ssrIssues.value || [])
 const categories = ref<any[]>(ssrCategories.value || [])
 const articles = ref<any[]>(ssrArticles.value || [])
@@ -148,10 +166,11 @@ function formatDate(dateString: string) {
   })
 }
 
-// Fetch articles with current filters (client only)
+// Fetch articles with current filters using optimized composable
 async function fetchArticles() {
   const filterParams = filters.value.map((f: any) => ({ type: f.type, id: f.id }))
-  articles.value = await getArticles(filterParams)
+  const { data } = await getOptimizedArticles(filterParams)
+  articles.value = data.value || []
 }
 
 watch(filters, fetchArticles, { deep: true })
@@ -184,5 +203,4 @@ useHead({
     { rel: 'canonical', href: 'https://journal-delta-rose.vercel.app/articles' }
   ]
 })
-
 </script>

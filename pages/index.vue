@@ -134,58 +134,47 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, computed, ref } from 'vue'
 import { useSupabaseClient, useAsyncData } from '#imports'
-import { useDb } from '~/composables/useDb'
+import { useOptimizedDb } from '~/composables/useOptimizedDb'
 import type { ArticleWithCategories } from '~/composables/useDb'
 
-const { getIssues, getArticles, getCategories } = useDb()
+const { getOptimizedIssues, getOptimizedCategories, getFeaturedArticles, getLatestEdition } = useOptimizedDb()
 const client = useSupabaseClient()
 
-// Wrap all data fetching with useAsyncData for proper SSR and caching
-const { data: issues, refresh: refreshIssues } = await useAsyncData('issues', getIssues)
-const { data: categories, refresh: refreshCategories } = await useAsyncData('categories', getCategories)
+// Use optimized data fetching with SSR and caching
+const { data: issues } = await getOptimizedIssues()
+const { data: categories } = await getOptimizedCategories()
+const { data: featuredArticles } = await getFeaturedArticles()
+const { data: latestEdition } = await getLatestEdition()
 
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString()
 }
 
-// Fetch latest published edition using the cached issues data
-const { data: latestEdition, refresh: refreshEdition } = await useAsyncData('latestEdition', async () => {
-  const issuesData = issues.value || []
-  const published = issuesData.filter((i: any) => i.status === 'published')
-  if (!published.length) return null
-  const editionId = published[0].id
-  // Fetch articles with new schema fields
-  const editionWithArticles = {
-    ...published[0],
-    articles: await getArticles([{ type: 'issue', id: editionId }]) as ArticleWithCategories[]
-  }
-  return editionWithArticles
+// Computed properties for article display
+const limitedOtherArticles = computed(() => {
+  // Get non-featured articles from the latest edition
+  const allArticles = featuredArticles.value || []
+  return allArticles.slice(0, articleLimit.value)
 })
 
-const featuredArticles = computed(() =>
-  latestEdition.value?.articles?.filter(a => a.featured) || []
-)
-const otherArticles = computed(() =>
-  latestEdition.value?.articles?.filter(a => !a.featured) || []
-)
-
+// Reactive variables for responsive behavior
 const articleLimit = ref(9)
-let resizeHandler: () => void
 
+// Resize handler for responsive article display
 onMounted(() => {
-  resizeHandler = () => {
+  const resizeHandler = () => {
     articleLimit.value = window.innerWidth < 768 ? 3 : 9
   }
   resizeHandler()
   window.addEventListener('resize', resizeHandler)
+  
+  onUnmounted(() => {
+    window.removeEventListener('resize', resizeHandler)
+  })
 })
-onUnmounted(() => {
-  window.removeEventListener('resize', resizeHandler)
-})
-const limitedOtherArticles = computed(() => otherArticles.value.slice(0, articleLimit.value))
 
-// Fetch latest veille entries (unchanged)
-const { data: veille = [], refresh: refreshVeille } = await useAsyncData('veille', async () => {
+// Fetch latest veille entries (cached)
+const { data: veille } = await useAsyncData('homepage-veille', async () => {
   const { data } = await client
     .from('laveille')
     .select('id, title, url, description, cover, source, type')
@@ -193,18 +182,9 @@ const { data: veille = [], refresh: refreshVeille } = await useAsyncData('veille
     .order('submitted_at', { ascending: false })
     .limit(5)
   return data ?? []
-})
-
-onMounted(() => {
-  resizeHandler = () => {
-    articleLimit.value = window.innerWidth < 768 ? 3 : 9
-  }
-  resizeHandler()
-  window.addEventListener('resize', resizeHandler)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', resizeHandler)
+}, {
+  default: () => [],
+  server: true
 })
 
 useSeoMeta({

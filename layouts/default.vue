@@ -11,6 +11,16 @@
   </div>
 </template>
 
+<script setup>
+// Prefetch essential data for instant navigation
+const { prefetchEssentialData } = useOptimizedDb()
+
+onMounted(() => {
+  // Prefetch data after initial render
+  prefetchEssentialData()
+})
+</script>
+
 <style scoped>
 .shadow-t {
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);

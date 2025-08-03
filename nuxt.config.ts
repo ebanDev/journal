@@ -4,6 +4,37 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   css: ['~/assets/css/main.css'],
+  
+  // Enable SSR and prerendering for better performance
+  ssr: true,
+  nitro: {
+    prerender: {
+      routes: ['/sitemap.xml', '/robots.txt']
+    }
+  },
+
+  // Performance optimizations
+  experimental: {
+    payloadExtraction: false // Reduce JS payload size
+  },
+
+  // Enhanced caching and performance headers
+  routeRules: {
+    // Homepage pre-rendered at build time
+    '/': { prerender: true, headers: { 'cache-control': 's-maxage=60' } },
+    // Articles page cached for 10 minutes with ISR
+    '/articles': { isr: 600, headers: { 'cache-control': 's-maxage=300' } },
+    // Individual articles cached for 1 hour
+    '/articles/**': { isr: 3600, headers: { 'cache-control': 's-maxage=1800' } },
+    // La veille page short-term cache (5 minutes)
+    '/la-veille': { isr: 300, headers: { 'cache-control': 's-maxage=150' } },
+    // Search page client-side only
+    '/search': { prerender: false },
+    // Admin pages always server-side rendered
+    '/internal/**': { headers: { 'cache-control': 'no-cache' } },
+    // API routes with appropriate caching
+    '/api/**': { cors: true, headers: { 'cache-control': 's-maxage=60' } }
+  },
 
   modules: [
     '@nuxt/fonts',
@@ -73,9 +104,35 @@ export default defineNuxtConfig({
           options: {
             cacheName: 'google-fonts-cache',
             expiration: {
-              
               maxEntries: 10,
               maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+            }
+          }
+        },
+        {
+          urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/(articles|categories|issues|laveille)(\?.*)?$/i,
+          handler: 'StaleWhileRevalidate',
+          options: {
+            cacheName: 'supabase-content-cache',
+            expiration: {
+              maxEntries: 100,
+              maxAgeSeconds: 60 * 5 // 5 minutes for content
+            },
+            plugins: [{
+              cacheWillUpdate: async ({ response }: { response: Response }) => {
+                return response.status === 200 ? response : null
+              }
+            }]
+          }
+        },
+        {
+          urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/v1\/object\/public\/.*/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'supabase-images-cache',
+            expiration: {
+              maxEntries: 200,
+              maxAgeSeconds: 60 * 60 * 24 * 7 // 1 week for images
             }
           }
         }
@@ -124,7 +181,7 @@ export default defineNuxtConfig({
       }
     },
     devOptions: {
-      enabled: false,
+      enabled: true,
       type: 'module',
       navigateFallbackAllowlist: [/^\/$/]
     },
