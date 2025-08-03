@@ -1,7 +1,7 @@
 <template>
   <header class="flex justify-between px-8 w-screen items-center py-4 bg-[#FFFDFD]">
     <NuxtLink to="/">
-      <h1 class="font-serif text-3xl text-black">Sursaut!</h1>
+      <h1 class="font-serif text-3xl text-black">Sursaut<span class="text-primary-600">!</span></h1>
       <h2 class="font-bold text-base text-black">Le journal des luttes de Bordeaux</h2>
     </NuxtLink>
     <div class="relative">
