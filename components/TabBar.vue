@@ -1,6 +1,6 @@
 <template>
-  <nav class="fixed bottom-0 left-0 right-0 bg-[#FFFDFD] shadow-t py-3 flex gap-1 justify-center z-50 flex-col items-center">
-    <h1 class="text-sm font-serif text-gray-600">Sursaut<span class="text-primary-600">!</span></h1>
+  <nav class="fixed bottom-0 left-0 right-0 bg-[#FFFDFD] py-3 flex gap-1 justify-center z-150 flex-col items-center">
+    <h1 class="text-base font-serif text-gray-800">Sursaut<span class="text-primary-600">!</span></h1>
     <div class="flex justify-around items-center w-full">
       <NuxtLink
       v-for="item in navItems"
@@ -22,13 +22,6 @@
     </div>
   </nav>
 </template>
-
-
-<style scoped>
-.shadow-t {
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.050);
-}
-</style>
 
 <script setup lang="ts">
 const currentPath = computed(() => useRoute().path);
