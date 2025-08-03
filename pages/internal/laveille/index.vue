@@ -1,265 +1,262 @@
 <template>
-  <div class="container mx-auto px-4 py-8 min-h-screen">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold">Gestionnaire La Veille</h1>
-      <div class="flex items-center gap-3">
-        <UBadge 
-          v-if="displayedPendingCount > 0" 
-          color="primary" 
-          size="md" 
-          variant="soft"
-        >
-          {{ displayedPendingCount }} en attente
-        </UBadge>
+  <div class="h-full flex flex-col">
+    <div class="flex-none px-4 py-6 border-b border-gray-200">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Gestionnaire La Veille</h1>
+        <div class="flex items-center gap-3">
+          <UBadge 
+            v-if="displayedPendingCount > 0" 
+            color="primary" 
+            size="md" 
+            variant="soft"
+          >
+            {{ displayedPendingCount }} en attente
+          </UBadge>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex gap-4 flex-wrap">
+        <USelect
+          v-model="selectedStatus"
+          :items="statusOptions"
+          placeholder="Tous les statuts"
+          @update:model-value="fetchSubmissions"
+          class="min-w-48"
+        />
+        <USelect
+          v-model="selectedType"
+          :items="typeOptions"
+          placeholder="Tous les types"
+          @update:model-value="fetchSubmissions"
+          class="min-w-48"
+        />
+        <UInput
+          v-model="searchQuery"
+          placeholder="Rechercher..."
+          icon="i-mingcute-search-line"
+          @input="debouncedSearch"
+          class="min-w-64"
+        />
       </div>
     </div>
 
-    <!-- Filters -->
-    <div class="flex gap-4 mb-6 flex-wrap">
-      <USelect
-        v-model="selectedStatus"
-        :options="statusOptions"
-        option-attribute="label"
-        value-attribute="value"
-        placeholder="Tous les statuts"
-        @update:model-value="fetchSubmissions"
-        class="min-w-48"
-      />
-      <USelect
-        v-model="selectedType"
-        :options="typeOptions"
-        option-attribute="label"
-        value-attribute="value"
-        placeholder="Tous les types"
-        @update:model-value="fetchSubmissions"
-        class="min-w-48"
-      />
-      <UInput
-        v-model="searchQuery"
-        placeholder="Rechercher..."
-        icon="i-mingcute-search-line"
-        @input="debouncedSearch"
-        class="min-w-64"
-      />
-    </div>
-
-    <div v-if="loading" class="space-y-4">
-      <div class="h-6 w-1/3 mb-4 bg-gray-200 rounded animate-pulse" />
-      <div class="space-y-4">
-        <USkeleton class="h-40 w-full" v-for="i in 3" :key="i" />
-      </div>
-    </div>
-
-    <div v-else-if="submissions.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <UCard v-for="item in submissions" :key="item.id" class="hover:shadow-md transition-shadow">
-        <template #header>
-          <div class="flex items-start justify-between">
-            <div class="flex-1 min-w-0">
-              <h2 class="text-lg font-semibold text-gray-900 truncate">{{ item.title }}</h2>
-              <div class="flex items-center gap-2 mt-1 flex-wrap">
-                <UBadge 
-                  :color="getStatusColor(item.status)" 
-                  size="sm" 
-                  variant="soft"
-                >
-                  {{ getStatusLabel(item.status) }}
-                </UBadge>
-                <UBadge 
-                  color="neutral" 
-                  size="sm" 
-                  variant="outline"
-                >
-                  {{ item.type }}
-                </UBadge>
-                <span class="text-xs text-gray-500">
-                  {{ formatDate(item.submitted_at) }}
-                </span>
-              </div>
-            </div>
-            <div class="flex gap-1">
-              <UButton
-                size="xs"
-                color="neutral"
-                variant="ghost"
-                icon="i-mingcute-edit-line"
-                @click="editSubmission(item)"
-              />
-              <UButton
-                size="xs"
-                color="error"
-                variant="ghost"
-                icon="i-mingcute-delete-2-line"
-                @click="confirmDelete(item)"
-                :loading="processingIds.has(item.id)"
-              />
-            </div>
-          </div>
-        </template>
-        
-        <div class="space-y-3">
-          <div v-if="item.description" class="text-sm text-gray-700">
-            <p class="leading-relaxed line-clamp-3">{{ item.description }}</p>
-          </div>
-          <div v-else class="text-sm text-gray-500 italic">
-            Aucune description fournie
-          </div>
-          
-          <div v-if="item.url" class="flex items-center gap-2">
-            <UIcon name="i-mingcute-link-line" class="w-4 h-4 text-gray-400 flex-shrink-0" />
-            <a 
-              :href="item.url" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              class="text-blue-600 hover:text-blue-800 underline text-sm truncate"
-            >
-              {{ item.url }}
-            </a>
-          </div>
-
-          <div v-if="item.source" class="flex items-center gap-2">
-            <UIcon name="i-mingcute-news-line" class="w-4 h-4 text-gray-400 flex-shrink-0" />
-            <span class="text-sm text-gray-600 truncate">{{ item.source }}</span>
-          </div>
-
-          <div v-if="item.cover" class="flex items-center gap-2">
-            <img :src="item.cover" alt="Couverture" class="w-16 h-16 object-cover rounded" />
+    <!-- Content Area with Scroll -->
+    <div class="flex-1 min-h-0 overflow-auto">
+      <div class="p-4">
+        <div v-if="loading" class="space-y-4">
+          <div class="h-6 w-1/3 mb-4 bg-gray-200 rounded animate-pulse" />
+          <div class="space-y-4">
+            <USkeleton class="h-40 w-full" v-for="i in 3" :key="i" />
           </div>
         </div>
+
+        <div v-else-if="submissions.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <UCard v-for="item in submissions" :key="item.id" class="hover:bg-gray-50 transition-colors">
+            <template #header>
+              <div class="flex items-start justify-between">
+                <div class="flex-1 min-w-0">
+                  <h2 class="text-lg font-semibold text-gray-900 truncate">{{ item.title }}</h2>
+                  <div class="flex items-center gap-2 mt-1 flex-wrap">
+                    <UBadge 
+                      :color="getStatusColor(item.status)" 
+                      size="sm" 
+                      variant="soft"
+                    >
+                      {{ getStatusLabel(item.status) }}
+                    </UBadge>
+                    <UBadge 
+                      color="neutral" 
+                      size="sm" 
+                      variant="outline"
+                    >
+                      {{ item.type }}
+                    </UBadge>
+                    <span class="text-xs text-gray-500">
+                      {{ formatDate(item.submitted_at) }}
+                    </span>
+                  </div>
+                </div>
+                <div class="flex gap-1">
+                  <UButton
+                    size="xs"
+                    color="neutral"
+                    variant="ghost"
+                    icon="i-mingcute-edit-line"
+                    @click="editSubmission(item)"
+                  />
+                  <UButton
+                    size="xs"
+                    color="error"
+                    variant="ghost"
+                    icon="i-mingcute-delete-2-line"
+                    @click="confirmDelete(item)"
+                    :loading="processingIds.has(item.id)"
+                  />
+                </div>
+              </div>
+            </template>
+            
+            <div class="space-y-3">
+              <div v-if="item.description" class="text-sm text-gray-700">
+                <p class="leading-relaxed line-clamp-3">{{ item.description }}</p>
+              </div>
+              <div v-else class="text-sm text-gray-500 italic">
+                Aucune description fournie
+              </div>
+              
+              <div v-if="item.url" class="flex items-center gap-2">
+                <UIcon name="i-mingcute-link-line" class="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <a 
+                  :href="item.url" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  class="text-blue-600 hover:text-blue-800 underline text-sm truncate"
+                >
+                  {{ item.url }}
+                </a>
+              </div>
+
+              <div v-if="item.source" class="flex items-center gap-2">
+                <UIcon name="i-mingcute-news-line" class="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <span class="text-sm text-gray-600 truncate">{{ item.source }}</span>
+              </div>
+
+              <div v-if="item.cover" class="flex items-center gap-2">
+                <img :src="item.cover" alt="Couverture" class="w-16 h-16 object-cover rounded" />
+              </div>
+            </div>
+            
+            <template #footer>
+              <div class="flex justify-between items-center">
+                <div class="text-xs text-gray-500 flex items-center gap-3">
+                  <span class="flex items-center gap-1">
+                    <UIcon name="i-mingcute-user-line" class="w-3 h-3" />
+                    {{ item.submitter_id ? 'Utilisateur' : 'Anonyme' }}
+                  </span>
+                  <span class="flex items-center gap-1">
+                    <UIcon name="i-mingcute-thumb-up-line" class="w-3 h-3" />
+                    {{ item.vote_count || 0 }}
+                  </span>
+                </div>
+                <div class="flex gap-2">
+                  <UButton 
+                    v-if="item.status === 'pending'"
+                    size="sm" 
+                    color="success" 
+                    icon="i-mingcute-check-line"
+                    @click="updateStatus(item.id, 'approved')"
+                    :loading="processingIds.has(item.id)"
+                  >
+                    Approuver
+                  </UButton>
+                  <UButton 
+                    v-if="item.status === 'pending'"
+                    size="sm" 
+                    color="error" 
+                    icon="i-mingcute-close-line"
+                    @click="updateStatus(item.id, 'rejected')"
+                    :loading="processingIds.has(item.id)"
+                  >
+                    Rejeter
+                  </UButton>
+                </div>
+              </div>
+            </template>
+          </UCard>
+        </div>
         
-        <template #footer>
-          <div class="flex justify-between items-center">
-            <div class="text-xs text-gray-500 flex items-center gap-3">
-              <span class="flex items-center gap-1">
-                <UIcon name="i-mingcute-user-line" class="w-3 h-3" />
-                {{ item.submitter_id ? 'Utilisateur' : 'Anonyme' }}
-              </span>
-              <span class="flex items-center gap-1">
-                <UIcon name="i-mingcute-thumb-up-line" class="w-3 h-3" />
-                {{ item.vote_count || 0 }}
-              </span>
-            </div>
-            <div class="flex gap-2">
-              <UButton 
-                v-if="item.status === 'pending'"
-                size="sm" 
-                color="success" 
-                icon="i-mingcute-check-line"
-                @click="updateStatus(item.id, 'approved')"
-                :loading="processingIds.has(item.id)"
-              >
-                Approuver
-              </UButton>
-              <UButton 
-                v-if="item.status !== 'rejected'"
-                size="sm" 
-                color="error" 
-                icon="i-mingcute-close-line"
-                @click="updateStatus(item.id, 'rejected')"
-                :loading="processingIds.has(item.id)"
-              >
-                Rejeter
-              </UButton>
-            </div>
-          </div>
-        </template>
-      </UCard>
-    </div>
-    
-    <div v-else class="text-center py-16">
-      <UIcon name="i-mingcute-radar-line" class="w-12 h-12 mx-auto mb-4 text-gray-300" />
-      <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune soumission trouvée</h3>
-      <p class="text-gray-500">Aucune soumission ne correspond aux filtres sélectionnés.</p>
+        <div v-else class="text-center py-16">
+          <UIcon name="i-mingcute-radar-line" class="w-12 h-12 mx-auto mb-4 text-gray-300" />
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune soumission trouvée</h3>
+          <p class="text-gray-500">Aucune soumission ne correspond aux filtres sélectionnés.</p>
+        </div>
+      </div>
     </div>
 
     <!-- Edit Modal -->
-    <UModal v-model="showEditModal">
-      <UCard>
-        <template #header>
-          <h3 class="text-lg font-semibold">
-            Modifier la soumission
-          </h3>
-        </template>
-        
-        <div class="space-y-4">
-          <UFormGroup label="Titre" required>
-            <UInput v-model="editForm.title" placeholder="Titre de la soumission" />
-          </UFormGroup>
+    <UModal v-model:open="showEditModal" title="Modifier la soumission">
+      <!-- Invisible trigger button -->
+      <div style="display: none;"></div>
+      
+      <template #body>
+        <UForm :state="editForm" class="space-y-4">
+          <UFormField label="Titre" name="title" required>
+            <UInput v-model="editForm.title" placeholder="Titre de la soumission" class="w-full" />
+          </UFormField>
           
-          <UFormGroup label="URL">
-            <UInput v-model="editForm.url" placeholder="https://..." />
-          </UFormGroup>
+          <UFormField label="URL" name="url">
+            <UInput v-model="editForm.url" placeholder="https://..." class="w-full" />
+          </UFormField>
           
-          <UFormGroup label="Description">
-            <UTextarea v-model="editForm.description" placeholder="Description de la soumission" :rows="3" />
-          </UFormGroup>
+          <UFormField label="Description" name="description">
+            <UTextarea v-model="editForm.description" placeholder="Description de la soumission" :rows="3" class="w-full" />
+          </UFormField>
           
-          <UFormGroup label="Type">
+          <UFormField label="Type" name="type">
             <USelect 
               v-model="editForm.type" 
-              :options="typeOptions.filter(t => t.value !== 'all')" 
-              option-attribute="label"
-              value-attribute="value"
+              :items="typeOptions.filter(t => t.value !== 'all')" 
+              class="w-full"
             />
-          </UFormGroup>
+          </UFormField>
           
-          <UFormGroup label="Source">
-            <UInput v-model="editForm.source" placeholder="Source de l'information" />
-          </UFormGroup>
+          <UFormField label="Source" name="source">
+            <UInput v-model="editForm.source" placeholder="Source de l'information" class="w-full" />
+          </UFormField>
           
-          <UFormGroup label="Image de couverture">
-            <UInput v-model="editForm.cover" placeholder="URL de l'image" />
-          </UFormGroup>
+          <UFormField label="Image de couverture" name="cover">
+            <UInput v-model="editForm.cover" placeholder="URL de l'image" class="w-full" />
+          </UFormField>
           
-          <UFormGroup label="Statut">
+          <UFormField label="Statut" name="status">
             <USelect 
               v-model="editForm.status" 
-              :options="statusOptions.filter(s => s.value !== 'all')" 
-              option-attribute="label"
-              value-attribute="value"
+              :items="statusOptions.filter(s => s.value !== 'all')" 
+              class="w-full"
             />
-          </UFormGroup>
+          </UFormField>
+        </UForm>
+      </template>
+      
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <UButton color="neutral" variant="outline" @click="cancelEdit">Annuler</UButton>
+          <UButton 
+            @click="saveSubmission" 
+            :loading="saving"
+            :disabled="!editForm.title"
+          >
+            Modifier
+          </UButton>
         </div>
-        
-        <template #footer>
-          <div class="flex justify-end gap-2">
-            <UButton color="neutral" @click="cancelEdit">Annuler</UButton>
-            <UButton 
-              @click="saveSubmission" 
-              :loading="saving"
-              :disabled="!editForm.title"
-            >
-              Modifier
-            </UButton>
-          </div>
-        </template>
-      </UCard>
+      </template>
     </UModal>
 
     <!-- Delete Confirmation Modal -->
-    <UModal v-model="showDeleteModal">
-      <UCard>
-        <template #header>
-          <h3 class="text-lg font-semibold text-red-600">Confirmer la suppression</h3>
-        </template>
-        
+    <UModal v-model:open="showDeleteModal" title="Confirmer la suppression">
+      <!-- Invisible trigger button -->
+      <div style="display: none;"></div>
+      
+      <template #body>
         <p class="text-gray-700">
           Êtes-vous sûr de vouloir supprimer la soumission "{{ deletingSubmission?.title }}" ?
           Cette action est irréversible.
         </p>
-        
-        <template #footer>
-          <div class="flex justify-end gap-2">
-            <UButton color="neutral" @click="showDeleteModal = false">Annuler</UButton>
-            <UButton 
-              color="error" 
-              @click="deleteSubmission"
-              :loading="deleting"
-            >
-              Supprimer
-            </UButton>
-          </div>
-        </template>
-      </UCard>
+      </template>
+      
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <UButton color="neutral" variant="outline" @click="showDeleteModal = false">Annuler</UButton>
+          <UButton 
+            color="error" 
+            @click="deleteSubmission"
+            :loading="deleting"
+          >
+            Supprimer
+          </UButton>
+        </div>
+      </template>
     </UModal>
   </div>
 </template>
