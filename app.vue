@@ -1,5 +1,4 @@
 <template>
-  <Analytics />
   <UApp>
     <VitePwaManifest />
     <NuxtLayout>
@@ -9,6 +8,3 @@
   </UApp>
 </template>
 
-<script setup>
-import { Analytics } from '@vercel/analytics/nuxt';
-</script>

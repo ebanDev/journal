@@ -48,7 +48,8 @@ export default defineNuxtConfig({
     '@nuxtjs/seo',
     '@nuxtjs/robots',
     '@nuxtjs/sitemap',
-    'nuxt-schema-org'
+    'nuxt-schema-org',
+    'nuxt-umami'
   ],
 
   supabase: {
@@ -89,6 +90,12 @@ export default defineNuxtConfig({
     name: 'Revue Sursaut!',
     description: 'Le journal des luttes de Bordeaux, un espace pour partager et documenter les luttes sociales et politiques.',
     defaultLocale: 'fr',
+  },
+
+  umami: {
+    id: "779e00d4-6269-4d73-8c5b-950948c25b18",
+    host: "https://stats.sursaut-revue.fr",
+    autoTrack: true,
   },
 
   pwa: {

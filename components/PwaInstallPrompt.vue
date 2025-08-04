@@ -193,6 +193,9 @@ onMounted(() => {
     
     // Listen for appinstalled event
     appInstalledListener = (e: Event) => {
+      // Track PWA installation
+      umTrackEvent('pwa-installed')
+      
       // Reset the deferred prompt
       deferredPrompt.value = null
       canInstall.value = false
@@ -281,6 +284,8 @@ async function installApp() {
       const choiceResult = await deferredPrompt.value.userChoice
       
       if (choiceResult.outcome === 'accepted') {
+        // Track PWA installation
+        umTrackEvent('pwa-installed')
         showInstallBanner.value = false
       }
       
@@ -289,6 +294,8 @@ async function installApp() {
       canInstall.value = false
     } else if ($pwa?.install) {
       await $pwa.install()
+      // Track PWA installation
+      umTrackEvent('pwa-installed')
       showInstallBanner.value = false
     }
   } catch (error) {
