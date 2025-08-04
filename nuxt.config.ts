@@ -22,6 +22,12 @@ export default defineNuxtConfig({
     payloadExtraction: false // Reduce JS payload size
   },
 
+  app: {
+    head: {
+      viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
+    },
+  },
+
   // Enhanced caching and performance headers
   routeRules: {
     // Homepage pre-rendered at build time
