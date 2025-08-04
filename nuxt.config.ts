@@ -37,7 +37,9 @@ export default defineNuxtConfig({
     // Admin pages always server-side rendered
     '/internal/**': { headers: { 'cache-control': 'no-cache' } },
     // API routes with appropriate caching
-    '/api/**': { cors: true, headers: { 'cache-control': 's-maxage=60' } }
+    '/api/**': { cors: true, headers: { 'cache-control': 's-maxage=60' } },
+    // Specific nuxt icon API route
+    '/api/_nuxt_icon/**': { cors: true, headers: { 'cache-control': 's-maxage=31536000' } }
   },
 
   modules: [
