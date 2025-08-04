@@ -2,7 +2,7 @@
   <div 
     v-if="showInstallBanner && isMobile" 
     ref="installBannerRef"
-    class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-white border border-amber-200 rounded-lg shadow-lg p-4 z-50"
+    class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-white border border-amber-200 rounded-lg shadow-lg p-4 z-200"
     :class="{ 
       'transition-transform duration-300': !isDragging,
       'animate-spring-up': hasTriggered && showInstallBanner
@@ -54,13 +54,14 @@
 
 <script setup lang="ts">
 const { $pwa } = useNuxtApp()
+import {useOneSignal} from "@onesignal/onesignal-vue3";
 
 const showInstallBanner = ref(false)
 const installing = ref(false)
 const updating = ref(false)
 const installBannerRef = ref<HTMLElement>()
 const hasTriggered = ref(false)
-const hasScrolled = ref(false)
+const hasScrolled = ref(true)
 const isMobile = ref(false)
 
 // Manual PWA install prompt handling (fix for @vite-pwa/nuxt issue #130)
@@ -193,10 +194,15 @@ onMounted(() => {
     
     // Listen for appinstalled event
     appInstalledListener = (e: Event) => {
-      // Track PWA installation
-      umTrackEvent('pwa-installed')
-      
-      // Reset the deferred prompt
+    // Track PWA installation
+    umTrackEvent('pwa-installed')
+    
+    // After successful installation, prompt for notifications on mobile
+    if (isMobile.value) {
+      setTimeout(() => {
+        promptForNotifications()
+      }, 500)
+    }      // Reset the deferred prompt
       deferredPrompt.value = null
       canInstall.value = false
       showInstallBanner.value = false
@@ -286,6 +292,13 @@ async function installApp() {
       if (choiceResult.outcome === 'accepted') {
         // Track PWA installation
         umTrackEvent('pwa-installed')
+        
+        // After successful installation, prompt for notifications on mobile
+        if (isMobile.value) {
+          setTimeout(() => {
+            promptForNotifications()
+          }, 300)
+        }
         showInstallBanner.value = false
       }
       
@@ -326,6 +339,17 @@ async function updateApp() {
     console.error('Update failed:', error)
   } finally {
     updating.value = false
+  }
+}
+
+// Simple notification prompt for mobile PWA users
+async function promptForNotifications() {
+  if (import.meta.client && isMobile.value) {
+    // Check if OneSignal is available (injected by the plugin)
+    const onesignal = useOneSignal()
+    if (onesignal) {
+      await onesignal.Notifications.requestPermission()
+    }
   }
 }
 </script>

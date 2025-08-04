@@ -110,14 +110,29 @@ onMounted(loadProfile)
 </script>
 
 <template>
-  <div class="min-h-screen py-8">
+  <div class="min-h-screen py-4 md:py-8">
+    <!-- Mobile navigation header -->
+    <div class="md:hidden mb-6 px-4">
+      <div class="flex items-center justify-between">
+        <h1 class="text-xl font-bold text-gray-900">Profil</h1>
+        <UButton 
+          to="/" 
+          variant="outline" 
+          size="sm"
+          icon="mingcute-home-line"
+        >
+          Accueil
+        </UButton>
+      </div>
+    </div>
+
     <div class="max-w-2xl mx-auto px-4">
       <!-- Section En-tête -->
-      <div class="text-center mb-8">
-        <div class="w-24 h-24 bg-gradient-to-br from-primary-500 to-secondary-700 rounded-full mx-auto mb-4 flex items-center justify-center">
-          <UIcon name="heroicons:user" class="w-12 h-12 text-white text-4xl" />
+      <div class="text-center mb-6 md:mb-8">
+        <div class="w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-primary-500 to-secondary-700 rounded-full mx-auto mb-4 flex items-center justify-center">
+          <UIcon name="heroicons:user" class="w-8 h-8 md:w-12 md:h-12 text-white" />
         </div>
-        <h1 class="text-3xl font-bold text-gray-900">{{ profile.full_name || 'Votre Profil' }}</h1>
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900">{{ profile.full_name || 'Votre Profil' }}</h1>
         <p class="text-gray-600 mt-2">{{ translateRole(profile.role) || 'Membre' }}</p>
       </div>
 
@@ -190,14 +205,15 @@ onMounted(loadProfile)
         </div>
 
         <template #footer>
-          <div class="flex justify-between items-center">
-            <div v-if="isEditing" class="flex gap-2">
+          <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+            <div v-if="isEditing" class="flex flex-col sm:flex-row gap-2">
               <UButton 
                 label="Enregistrer" 
                 icon="heroicons:check"
                 color="primary"
                 :loading="isSaving"
                 @click="saveProfile"
+                class="w-full sm:w-auto"
               />
               <UButton 
                 label="Annuler" 
@@ -205,6 +221,7 @@ onMounted(loadProfile)
                 variant="outline"
                 :disabled="isSaving"
                 @click="cancelEdit"
+                class="w-full sm:w-auto"
               />
             </div>
             <div v-else></div>
@@ -213,7 +230,8 @@ onMounted(loadProfile)
               icon="heroicons:arrow-right-on-rectangle" 
               color="error" 
               variant="outline"
-              @click="logout" 
+              @click="logout"
+              class="w-full sm:w-auto"
             />
           </div>
         </template>
