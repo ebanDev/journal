@@ -111,14 +111,16 @@ useHead({
 })
 </script>
 <template>
-  <div class="flex flex-col h-full p-4 md:py-8">
-    <h1 class="font-serif text-3xl">Se connecter</h1>
-    <p class="text-gray-600 mb-6 max-w-lg mt-2">Veuillez entrer votre adresse e-mail pour vous connecter. Celle-ci doit
-      être identique à celle utilisée lors de votre adhésion, en cas de problème contacter <a
-        href="mailto:solidairesetu33@gmail.com" class="underline">solidairesetu33@gmail.com</a>.</p>
-    <UInput label="E-Mail" placeholder="jean@dupont.fr" v-model="email" type="email" class="mb-4" />
-    <UButton @click="sendInvite" icon="tabler:mail" :loading="loading">
-      {{ loading ? 'Envoi en cours...' : 'Recevoir le lien de connexion' }}
-    </UButton>
+  <div class="max-w-xl mx-auto w-full">
+    <div class="flex flex-col h-full p-4 md:py-8">
+      <h1 class="font-serif text-3xl">Se connecter</h1>
+      <p class="text-gray-600 mb-6 max-w-lg mt-2">Veuillez entrer votre adresse e-mail pour vous connecter. Celle-ci doit
+        être identique à celle utilisée lors de votre adhésion, en cas de problème contacter <a
+          href="mailto:solidairesetu33@gmail.com" class="underline">solidairesetu33@gmail.com</a>.</p>
+      <UInput label="E-Mail" placeholder="jean@dupont.fr" v-model="email" type="email" class="mb-4" />
+      <UButton @click="sendInvite" icon="tabler:mail" :loading="loading">
+        {{ loading ? 'Envoi en cours...' : 'Recevoir le lien de connexion' }}
+      </UButton>
+    </div>
   </div>
 </template>
