@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
       if (!apiKey) {
         return { error: 'YouTube API key is not configured' }
       }
-      const videoId = decodedUrl.split('v=')[1]?.split('&')[0] || decodedUrl.split('/').pop()
+      const videoId = decodedUrl.split('v=')[1]?.split('&')[0] || decodedUrl.split('/').pop()?.split('?')[0]
       console.log('Fetching YouTube metadata for ID:', videoId)
       if (!videoId) {
         return { error: 'Invalid YouTube video ID' }
