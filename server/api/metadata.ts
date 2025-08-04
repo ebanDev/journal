@@ -26,7 +26,11 @@ export default defineEventHandler(async (event) => {
       }
       const apiUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet`
       const apiRes = await fetch(apiUrl)
+      if (!apiRes.ok) {
+        return { error: 'Failed to fetch YouTube metadata' }
+      }
       const apiData = await apiRes.json()
+      console.log('YouTube API response:', apiRes.status, apiRes.statusText, apiData)
       if (apiData.items.length > 0) {
         const { title, description, thumbnails, channelTitle } = apiData.items[0].snippet
         return { title, description, cover: thumbnails.high.url, source: channelTitle }
