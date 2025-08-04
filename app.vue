@@ -1,9 +1,9 @@
 <template>
+  <Analytics />
   <UApp>
     <VitePwaManifest />
     <NuxtLayout>
       <NuxtPage />
-      <Analytics />
     </NuxtLayout>
     <PwaInstallPrompt />
   </UApp>

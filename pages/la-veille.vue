@@ -2,17 +2,7 @@
   <div class="container max-w-4xl mx-auto p-4 space-y-4">
     <h1 class="text-3xl font-serif md:mt-4">La Veille</h1>
     <p>
-      La Veille est un espace de partage d'articles, vidéos, podc// Initialize reactive refs with SSR data
-entries.value = ssrEntries.value || []
-votedIds.value = new Set((ssrVotedIds.value || []) as string[])
-
-// Keep fetchEntries for manual refreshes
-async function fetchEntries() {
-  await refreshEntries()
-  await refreshVotes()
-  entries.value = ssrEntries.value || []
-  votedIds.value = new Set((ssrVotedIds.value || []) as string[])
-}res contenus intéressants. Vous pouvez soumettre vos trouvailles pour les partager avec la communauté.
+      La Veille est un espace de partage d'articles, vidéos, podcasts et autres contenus intéressants. Vous pouvez soumettre vos trouvailles pour les partager avec la communauté.
     </p>
     <section>
       <!-- Send Article Form -->
