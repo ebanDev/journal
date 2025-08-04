@@ -5,8 +5,8 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('covers', 'covers', true);
 
 -- 2. Enable RLS on storage.objects
-ALTER TABLE storage.objects
-  ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE storage.objects
+--  ENABLE ROW LEVEL SECURITY;
 
 -- 3. Secure uploads/upserts for editors and admins
 CREATE POLICY "Allow covers upload by editors and admins"
