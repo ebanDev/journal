@@ -83,7 +83,7 @@
         </UFormField>
         <UFormField label="Type" class="w-full">
           <USelect v-model="form.type"
-            :items="[{ label: 'Article', value: 'article' }, {label: "Livre", value: 'book'}, { label: 'Vidéo', value: 'video' }, { label: 'Podcast', value: 'podcast' }, { label: 'Autre', value: 'other' }]"
+            :items="[{ label: 'Article', value: 'article' }, {label: 'Livre', value: 'book'}, { label: 'Vidéo', value: 'video' }, { label: 'Podcast', value: 'podcast' }, { label: 'Autre', value: 'other' }]"
             placeholder="Sélectionner le type" class="mb-2 w-full" icon="tabler-category" />
         </UFormField>
         <div class="flex flex-row gap-2">
