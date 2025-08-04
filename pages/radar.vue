@@ -1,8 +1,8 @@
 <template>
   <div class="container max-w-4xl mx-auto p-4 space-y-4">
-    <h1 class="text-3xl font-serif md:mt-4">La Veille</h1>
+    <h1 class="text-3xl font-serif md:mt-4">Radar</h1>
     <p>
-      La Veille est un espace de partage d'articles, vidéos, podcasts et autres contenus intéressants. Vous pouvez soumettre vos trouvailles pour les partager avec la communauté.
+      Radar est un espace de partage d'articles, vidéos, podcasts et autres contenus intéressants. Vous pouvez soumettre vos trouvailles pour les partager avec la communauté.
     </p>
     <section>
       <!-- Send Article Form -->
@@ -354,12 +354,12 @@ onUnmounted(() => {
 
 // SEO setup
 useSeoMeta({
-  title: 'La Veille - Sursaut!',
-  description: 'La Veille de Sursaut! : découvrez une sélection de contenus d\'autres médias à lire, à écouter, à suivre. Partagez et votez pour vos trouvailles.',
+  title: 'Radar - Sursaut!',
+  description: 'Radar de Sursaut! : découvrez une sélection de contenus d\'autres médias à lire, à écouter, à suivre. Partagez et votez pour vos trouvailles.',
   keywords: 'veille, articles, médias, partage, Bordeaux, luttes sociales, politique',
   
   // Open Graph
-  ogTitle: 'La Veille - Sursaut!',
+  ogTitle: 'Radar - Sursaut!',
   ogDescription: 'Une sélection de contenus d\'autres médias à lire, à écouter, à suivre. Partagez et votez pour vos trouvailles.',
   ogImage: 'https://sursaut-revue.fr/icon-512x512.png',
   ogUrl: 'https://sursaut-revue.fr/la-veille',
@@ -369,7 +369,7 @@ useSeoMeta({
   
   // Twitter
   twitterCard: 'summary_large_image',
-  twitterTitle: 'La Veille - Sursaut!',
+  twitterTitle: 'Radar - Sursaut!',
   twitterDescription: 'Une sélection de contenus d\'autres médias à lire, à écouter, à suivre.',
   twitterImage: 'https://sursaut-revue.fr/icon-512x512.png',
 })

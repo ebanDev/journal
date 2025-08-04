@@ -2,7 +2,7 @@
   <div class="h-full flex flex-col">
     <div class="flex-none px-4 py-6 border-b border-gray-200">
       <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Gestionnaire La Veille</h1>
+        <h1 class="text-2xl font-bold">Gestionnaire Radar</h1>
         <div class="flex items-center gap-3">
           <UBadge 
             v-if="displayedPendingCount > 0" 

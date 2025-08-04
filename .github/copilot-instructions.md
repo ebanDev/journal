@@ -1,7 +1,7 @@
 # Journal - AI Coding Assistant Instructions
 
 ## Project Overview
-This is a **newspaper/content management system** built with **Nuxt 3**, **Supabase**, and **TailwindCSS**. The architecture supports article publishing, content curation ("La Veille"), user management, and AI-powered search with embeddings.
+This is a **newspaper/content management system** built with **Nuxt 3**, **Supabase**, and **TailwindCSS**. The architecture supports article publishing, content curation ("Radar"), user management, and AI-powered search with embeddings.
 
 ## Key Architecture Patterns
 
@@ -76,7 +76,7 @@ bun dev                    # Start development server
 
 ### Content Flow
 1. **Articles**: Draft → Review → Publish → Featured (optional)
-2. **La Veille**: Link submission → Vote aggregation → Editorial curation
+2. **Radar**: Link submission → Vote aggregation → Editorial curation
 3. **Issues**: Publication grouping with article associations
 4. **Categories**: Icon-tagged organization with many-to-many relationships
 

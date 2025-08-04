@@ -36,7 +36,7 @@ export default defineNuxtConfig({
     '/articles': { isr: 600, headers: { 'cache-control': 's-maxage=300' } },
     // Individual articles cached for 1 hour
     '/articles/**': { isr: 3600, headers: { 'cache-control': 's-maxage=1800' } },
-    // La veille page short-term cache (5 minutes)
+    // Radar page short-term cache (5 minutes)
     '/la-veille': { isr: 300, headers: { 'cache-control': 's-maxage=150' } },
     // Search page client-side only
     '/search': { prerender: false },

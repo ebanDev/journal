@@ -52,11 +52,11 @@ const navItems = computed(() => [{
   label: 'Articles',
   active: currentPath.value == '/articles' || currentPath.value.startsWith('/article/')
 }, {
-  href: '/la-veille',
+  href: '/radar',
   icon: 'mingcute-radar-line',
   iconActive: 'mingcute-radar-fill',
-  label: 'La veille',
-  active: currentPath.value == '/la-veille'
+  label: 'Radar',
+  active: currentPath.value == '/radar'
 }, {
   href: '/search',
   icon: 'mingcute-search-line',

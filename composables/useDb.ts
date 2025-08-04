@@ -6,7 +6,7 @@ export type ArticleWithCategories = Tables<'articles'> & {
   sources: Source[]
 } 
 
-// La Veille types
+// Radar types
 export type VeilleEntry = Tables<'laveille'> & {
   voteCount: number
   laveille_votes?: Array<{ id: string }>
@@ -374,7 +374,7 @@ export function useDb() {
     upsertCategory,
     setArticleCategories,
     getArticleCategories,
-    // La Veille functions
+    // Radar functions
     getVeilleEntries,
     getUserVeilleVotes,
     submitVeilleEntry,

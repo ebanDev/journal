@@ -76,7 +76,7 @@ const baseItems: NavigationMenuItem[] = [
   { 
     label: 'La Veille', 
     icon: 'mingcute-radar-line', 
-    to: '/internal/laveille',
+    to: '/internal/radar',
     ...(isEditor.value && pendingCount.value > 0 && {
       badge: pendingCount.value.toString()
     })
