@@ -8,7 +8,7 @@ useSeoMeta({
   // Open Graph
   ogTitle: 'Confirmation de connexion - Sursaut!',
   ogDescription: 'Confirmation de votre connexion à Sursaut!.',
-  ogImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
+  ogImage: 'https://sursaut-revue.fr/icon-512x512.png',
   ogType: 'website',
   ogSiteName: 'Sursaut!',
   ogLocale: 'fr_FR',

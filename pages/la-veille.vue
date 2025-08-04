@@ -381,8 +381,8 @@ useSeoMeta({
   // Open Graph
   ogTitle: 'La Veille - Sursaut!',
   ogDescription: 'Une sélection de contenus d\'autres médias à lire, à écouter, à suivre. Partagez et votez pour vos trouvailles.',
-  ogImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
-  ogUrl: 'https://journal-delta-rose.vercel.app/la-veille',
+  ogImage: 'https://sursaut-revue.fr/icon-512x512.png',
+  ogUrl: 'https://sursaut-revue.fr/la-veille',
   ogType: 'website',
   ogSiteName: 'Sursaut!',
   ogLocale: 'fr_FR',
@@ -391,13 +391,13 @@ useSeoMeta({
   twitterCard: 'summary_large_image',
   twitterTitle: 'La Veille - Sursaut!',
   twitterDescription: 'Une sélection de contenus d\'autres médias à lire, à écouter, à suivre.',
-  twitterImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
+  twitterImage: 'https://sursaut-revue.fr/icon-512x512.png',
 })
 
 // Canonical link
 useHead({
   link: [
-    { rel: 'canonical', href: 'https://journal-delta-rose.vercel.app/la-veille' }
+    { rel: 'canonical', href: 'https://sursaut-revue.fr/la-veille' }
   ]
 })
 </script>

@@ -40,8 +40,8 @@ onMounted(async () => {
     // Set up SEO for category page
     const title = `${category.value.name} - Sursaut!`
     const description = `Découvrez tous les articles de la catégorie "${category.value.name}" sur Sursaut!, le journal des luttes de Bordeaux.`
-    const categoryUrl = `https://journal-delta-rose.vercel.app/category/${category.value.name.toLowerCase().replace(/\s+/g, '-')}`
-    const imageUrl = category.value.cover || 'https://journal-delta-rose.vercel.app/icon-512x512.png'
+    const categoryUrl = `https://sursaut-revue.fr/category/${category.value.name.toLowerCase().replace(/\s+/g, '-')}`
+    const imageUrl = category.value.cover || 'https://sursaut-revue.fr/icon-512x512.png'
     
     useSeoMeta({
       title,

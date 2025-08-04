@@ -85,7 +85,7 @@ export default defineNuxtConfig({
   },
 
   site: {
-    url: process.env.NUXT_PUBLIC_SITE_URL || 'https://journal-delta-rose.vercel.app',
+    url: process.env.NUXT_PUBLIC_SITE_URL || 'https://sursaut-revue.fr',
     name: 'Revue Sursaut!',
     description: 'Le journal des luttes de Bordeaux, un espace pour partager et documenter les luttes sociales et politiques.',
     defaultLocale: 'fr',

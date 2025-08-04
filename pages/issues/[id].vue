@@ -46,8 +46,8 @@ onMounted(async () => {
     const title = `${issue.value.title} - Sursaut!`
     const description = issue.value.description || 
       `Découvrez l'édition "${issue.value.title}" de Sursaut!, le journal des luttes de Bordeaux.`
-    const issueUrl = `https://journal-delta-rose.vercel.app/issues/${issue.value.slug}`
-    const imageUrl = issue.value.cover || 'https://journal-delta-rose.vercel.app/icon-512x512.png'
+    const issueUrl = `https://sursaut-revue.fr/issues/${issue.value.slug}`
+    const imageUrl = issue.value.cover || 'https://sursaut-revue.fr/icon-512x512.png'
     
     useSeoMeta({
       title,

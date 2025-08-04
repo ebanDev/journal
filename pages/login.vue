@@ -90,8 +90,8 @@ useSeoMeta({
   // Open Graph
   ogTitle: 'Se connecter - Sursaut!',
   ogDescription: 'Connectez-vous à votre espace membre de Sursaut!.',
-  ogImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
-  ogUrl: 'https://journal-delta-rose.vercel.app/login',
+  ogImage: 'https://sursaut-revue.fr/icon-512x512.png',
+  ogUrl: 'https://sursaut-revue.fr/login',
   ogType: 'website',
   ogSiteName: 'Sursaut!',
   ogLocale: 'fr_FR',
@@ -100,13 +100,13 @@ useSeoMeta({
   twitterCard: 'summary_large_image',
   twitterTitle: 'Se connecter - Sursaut!',
   twitterDescription: 'Connectez-vous à votre espace membre de Sursaut!.',
-  twitterImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
+  twitterImage: 'https://sursaut-revue.fr/icon-512x512.png',
 })
 
 // Canonical link
 useHead({
   link: [
-    { rel: 'canonical', href: 'https://journal-delta-rose.vercel.app/login' }
+    { rel: 'canonical', href: 'https://sursaut-revue.fr/login' }
   ]
 })
 </script>

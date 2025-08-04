@@ -9,7 +9,7 @@ project_id = "journal"
   additional_redirect_urls = [
     "http://127.0.1:3000/**",
     "http://localhost:3000/**",
-    "https://journal-delta-rose.vercel.app/**"
+    "https://sursaut-revue.fr/**"
   ]
   enable_signup = false
   [auth.email]

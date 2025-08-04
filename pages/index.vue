@@ -195,8 +195,8 @@ useSeoMeta({
   // Open Graph
   ogTitle: 'Sursaut!, le journal des luttes de Bordeaux',
   ogDescription: 'Le journal des luttes de Bordeaux, un espace pour partager et documenter les luttes sociales et politiques.',
-  ogImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
-  ogUrl: 'https://journal-delta-rose.vercel.app',
+  ogImage: 'https://sursaut-revue.fr/icon-512x512.png',
+  ogUrl: 'https://sursaut-revue.fr',
   ogType: 'website',
   ogSiteName: 'Sursaut!',
   ogLocale: 'fr_FR',
@@ -205,13 +205,13 @@ useSeoMeta({
   twitterCard: 'summary_large_image',
   twitterTitle: 'Sursaut!, le journal des luttes de Bordeaux',
   twitterDescription: 'Le journal des luttes de Bordeaux, un espace pour partager et documenter les luttes sociales et politiques.',
-  twitterImage: 'https://journal-delta-rose.vercel.app/icon-512x512.png',
+  twitterImage: 'https://sursaut-revue.fr/icon-512x512.png',
 })
 
 // Canonical link
 useHead({
   link: [
-    { rel: 'canonical', href: 'https://journal-delta-rose.vercel.app' }
+    { rel: 'canonical', href: 'https://sursaut-revue.fr' }
   ]
 })
 </script>
