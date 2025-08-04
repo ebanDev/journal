@@ -13,6 +13,10 @@ export default defineNuxtConfig({
     }
   },
 
+  sitemap: {
+    exclude: ['/internal/**', '/confirm', '/login'],
+  },
+
   // Performance optimizations
   experimental: {
     payloadExtraction: false // Reduce JS payload size
