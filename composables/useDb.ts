@@ -196,6 +196,38 @@ export function useDb() {
     return data
   }
 
+  // Get categories that have at least one published article
+  async function getCategoriesWithArticles() {
+    const { data, error } = await supabase
+      .from('categories')
+      .select(`
+        *,
+        article_categories!inner(
+          articles!inner(id)
+        )
+      `)
+      .eq('article_categories.articles.draft', false)
+      .not('article_categories.articles.published_at', 'is', null)
+      .order('name')
+    
+    if (error) throw error
+    
+    // Remove duplicates that may occur due to multiple articles per category
+    const uniqueCategories = data?.reduce((acc, category) => {
+      if (!acc.find(c => c.id === category.id)) {
+        acc.push({
+          id: category.id,
+          name: category.name,
+          icon: category.icon,
+          cover: category.cover
+        })
+      }
+      return acc
+    }, [] as any[])
+    
+    return uniqueCategories || []
+  }
+
   // Add a category if it doesn't exist, return its id
   async function upsertCategory(name: string) {
     let { data: cat } = await supabase.from('categories').select('id').eq('name', name).single()
@@ -338,6 +370,7 @@ export function useDb() {
     deleteIssueById,
     deleteArticleById,
     getCategories,
+    getCategoriesWithArticles,
     upsertCategory,
     setArticleCategories,
     getArticleCategories,

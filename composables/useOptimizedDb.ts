@@ -5,7 +5,7 @@ import type { ArticleWithCategories } from '~/composables/useDb'
  * Provides instant navigation by pre-caching data and using stale-while-revalidate strategy
  */
 export function useOptimizedDb() {
-  const { getArticles, getCategories, getIssues, getVeilleEntries, getUserVeilleVotes } = useDb()
+  const { getArticles, getCategories, getCategoriesWithArticles, getIssues, getVeilleEntries, getUserVeilleVotes } = useDb()
 
   // Cache keys for consistent data management
   const CACHE_KEYS = {
@@ -49,6 +49,23 @@ export function useOptimizedDb() {
   async function getOptimizedCategories() {
     const { data, refresh } = await useAsyncData(CACHE_KEYS.categories,
       () => getCategories(),
+      {
+        default: () => [],
+        server: true,
+        lazy: false,
+        transform: (data: any[]) => data || []
+      }
+    )
+
+    return { data, refresh }
+  }
+
+  /**
+   * Get categories that have articles with long-term caching
+   */
+  async function getOptimizedCategoriesWithArticles() {
+    const { data, refresh } = await useAsyncData(`${CACHE_KEYS.categories}-with-articles`,
+      () => getCategoriesWithArticles(),
       {
         default: () => [],
         server: true,
@@ -176,7 +193,8 @@ export function useOptimizedDb() {
 
   return {
     getOptimizedArticles,
-    getOptimizedCategories,  
+    getOptimizedCategories,
+    getOptimizedCategoriesWithArticles,
     getOptimizedIssues,
     getOptimizedVeille,
     getOptimizedVeilleVotes,

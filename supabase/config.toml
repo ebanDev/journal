@@ -5,11 +5,10 @@ project_id = "journal"
 
 [auth]
   # Disable open signups so only invites work
-  site_url = "http://localhost:3000"
+  site_url = "https://sursaut-revue.fr"
   additional_redirect_urls = [
     "http://127.0.1:3000/**",
     "http://localhost:3000/**",
-    "https://sursaut-revue.fr/**"
   ]
   enable_signup = false
   [auth.email]

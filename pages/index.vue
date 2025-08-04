@@ -137,12 +137,12 @@ import { useSupabaseClient, useAsyncData } from '#imports'
 import { useOptimizedDb } from '~/composables/useOptimizedDb'
 import type { ArticleWithCategories } from '~/composables/useDb'
 
-const { getOptimizedIssues, getOptimizedCategories, getFeaturedArticles, getLatestEdition } = useOptimizedDb()
+const { getOptimizedIssues, getOptimizedCategoriesWithArticles, getFeaturedArticles, getLatestEdition } = useOptimizedDb()
 const client = useSupabaseClient()
 
 // Use optimized data fetching with SSR and caching
 const { data: issues } = await getOptimizedIssues()
-const { data: categories } = await getOptimizedCategories()
+const { data: categories } = await getOptimizedCategoriesWithArticles()
 const { data: featuredArticles } = await getFeaturedArticles()
 const { data: latestEdition } = await getLatestEdition()
 
