@@ -3,6 +3,6 @@ VALUES (
   'ebanrami@mailo.com',
   'Eban Rami',
   '1A',
-  '0637935385',
+  '0600000000',
   'admin'
 );
