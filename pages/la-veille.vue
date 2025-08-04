@@ -270,38 +270,31 @@ async function submitEntry() {
 }
 
 let veilleChannel: RealtimeChannel
-let votesChannel: RealtimeChannel
 async function vote(id: string) {
   const isVoted = votedIds.value.has(id)
-  // optimistic update
-  if (isVoted) {
-    votedIds.value.delete(id)
-    const entry = entries.value.find(e => e.id === id)
-    if (entry) entry.voteCount--
-  } else {
-    votedIds.value.add(id)
-    const entry = entries.value.find(e => e.id === id)
-    if (entry) entry.voteCount++
-  }
   
   try {
     if (isVoted) {
       await db.unvoteVeilleEntry(id, user.value?.id)
-    } else {
-      await db.voteVeilleEntry(id, user.value?.id)
-    }
-  } catch (err) {
-    console.error(err)
-    // revert on error
-    if (isVoted) {
-      votedIds.value.add(id)
-      const entry = entries.value.find(e => e.id === id)
-      if (entry) entry.voteCount++
-    } else {
+      // Update UI after successful database operation
       votedIds.value.delete(id)
       const entry = entries.value.find(e => e.id === id)
       if (entry) entry.voteCount--
+    } else {
+      await db.voteVeilleEntry(id, user.value?.id)
+      // Update UI after successful database operation
+      votedIds.value.add(id)
+      const entry = entries.value.find(e => e.id === id)
+      if (entry) entry.voteCount++
     }
+  } catch (err) {
+    console.error('Vote error:', err)
+    toast.add({
+      title: 'Erreur',
+      color: 'error',
+      description: 'Impossible de traiter votre vote. Veuillez réessayer.',
+      icon: 'mingcute-alert-line',
+    })
   }
 }
 
@@ -351,16 +344,12 @@ onMounted(() => {
       if ((payload.new as any)?.status === 'approved') fetchEntries()
     })
     .subscribe()
-  // subscribe to vote changes
-  votesChannel = supabase
-    .channel('public:laveille_votes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'laveille_votes' }, () => fetchEntries())
-    .subscribe()
+  // Don't subscribe to vote changes to avoid conflicts with optimistic updates
+  // Votes will be refreshed when the page is reloaded
 })
 
 onUnmounted(() => {
   supabase.removeChannel(veilleChannel)
-  supabase.removeChannel(votesChannel)
 })
 
 // SEO setup
