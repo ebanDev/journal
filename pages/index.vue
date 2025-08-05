@@ -2,7 +2,7 @@
   <div class="container mx-auto px-4 pt-4 md:py-8 flex flex-col lg:flex-row gap-4 lg:gap-12">
     <!-- À la une section -->
     <section class="flex-[3] w-full lg:w-auto">
-      <h1 class="font-serif text-3xl md:text-4xl mb-1 md:mb-2">À la une</h1>
+      <h2 class="font-serif text-3xl md:text-4xl mb-1 md:mb-2">À la une</h2>
       <p v-if="latestEdition" class="text-gray-600 mb-3">Dernière édition : {{ latestEdition.title }}</p>
       <p v-else class="text-gray-600 mb-3">Aucune édition publiée</p>
 
@@ -85,12 +85,12 @@
 
   <!-- Other articles section below -->
   <section class="container mx-auto mt-10 p-4 hidden md:block">
-    <h1 class="font-serif text-3xl md:text-4xl mb-8 md:text-center">Autres articles</h1>
+    <h2 class="font-serif text-3xl md:text-4xl mb-8 md:text-center">Autres articles</h2>
     <ArticlesWall :articles="limitedOtherArticles" :width="300" :gap="16" :coverFrequency="2" />
   </section>
 
   <section class="container mx-auto mt-10 p-4">
-    <h1 class="font-serif text-3xl md:text-4xl mb-8 md:text-center">Catégories</h1>
+    <h2 class="font-serif text-3xl md:text-4xl mb-8 md:text-center">Catégories</h2>
     <div class="relative">
       <div class="flex gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4">
         <NuxtLink v-for="cat in categories" :key="cat.id"

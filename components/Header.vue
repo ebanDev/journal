@@ -2,7 +2,7 @@
   <header class="flex justify-between px-8 w-screen items-center py-4 bg-[#FFFDFD]">
     <NuxtLink to="/">
       <h1 class="font-serif text-3xl text-black">Sursaut<span class="text-primary-600">!</span></h1>
-      <h2 class="font-bold text-base text-black">Le journal des luttes de Bordeaux</h2>
+      <p class="font-bold text-base text-black">Le journal des luttes de Bordeaux</p>
     </NuxtLink>
     <div class="relative">
       <UInput class="w-96" v-model="searchQuery" @input="onSearch" @focus="onFocus" @blur="onBlur"

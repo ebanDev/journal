@@ -1,6 +1,6 @@
 <template>
   <nav class="fixed bottom-0 left-0 right-0 bg-[#FFFDFD] py-3 flex gap-1 justify-center z-150 flex-col items-center">
-    <h1 class="text-base font-serif text-gray-800">Sursaut<span class="text-primary-600">!</span></h1>
+    <span class="text-base font-serif text-gray-800">Sursaut<span class="text-primary-600">!</span></span>
     <div class="flex justify-around items-center w-full">
       <NuxtLink
         v-for="item in navItems"
