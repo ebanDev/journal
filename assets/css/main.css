@@ -35,3 +35,24 @@
 
   text-size-adjust: 100%;
 }
+
+/* Grammar checker decorations */
+.lt-underline {
+  cursor: help;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 2px;
+}
+
+.lt-underline.lt-spelling {
+  text-decoration: underline wavy;
+  text-decoration-color: #f22217; /* red-400 */
+}
+
+.lt-underline.lt-grammar {
+  text-decoration: underline wavy;
+  text-decoration-color: #ba8a4a; /* amber-600 */
+}
+
+.lt-underline:hover {
+  background-color: rgba(248, 243, 237, 0.5); /* amber-150 with opacity */
+}

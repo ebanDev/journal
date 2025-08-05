@@ -5,6 +5,7 @@
       <NuxtPage />
     </NuxtLayout>
     <PwaInstallPrompt />
+    <NotificationPrompt />
   </UApp>
 </template>
 

@@ -1,28 +1,18 @@
 <template>
-  <div v-if="showInstallBanner && isMobile" ref="installBannerRef"
-    class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-white border border-amber-200 rounded-lg shadow-lg p-4 z-200"
-    :class="{
-      'transition-transform duration-300': !isDragging,
-      'animate-spring-up': hasTriggered && showInstallBanner
-    }" :style="{ transform: `translateY(${swipeOffset}px)` }" @touchstart="handleTouchStart"
-    @touchmove="handleTouchMove" @touchend="handleTouchEnd">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <Icon name="mingcute:download-line" class="text-amber-600 text-xl" />
-        <div>
-          <h3 class="font-medium text-gray-900">Installer l'application</h3>
-          <p class="text-sm text-gray-600">Accès rapide et notifications</p>
-        </div>
-      </div>
-      <div class="flex space-x-2">
-        <UButton size="xs" @click="installApp" :loading="installing">
-          Installer
-        </UButton>
-      </div>
-    </div>
-    <!-- Swipe indicator -->
-    <div class="absolute top-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-300 rounded-full"></div>
-  </div>
+  <BaseActionPopup
+    v-if="isMobile"
+    :visible="showInstallBanner"
+    :has-triggered="hasTriggered"
+    :loading="installing"
+    :stack-index="0"
+    title="Installer l'application"
+    description="Accès rapide et lecture hors ligne"
+    icon="mingcute:download-line"
+    dismissal-key="pwa-install-dismissed-date"
+    :primary-action="{ label: 'Installer', action: installApp }"
+    @dismiss="dismissInstallPrompt"
+    @update:has-triggered="hasTriggered = $event"
+  />
 
   <!-- Update prompt -->
   <div v-if="$pwa?.needRefresh"
@@ -55,8 +45,7 @@
         <div class="text-center">
           <Icon name="mingcute:apple-line" class="text-amber-600 text-4xl mx-auto mb-2" />
           <h3 class="text-lg font-semibold text-gray-900 mb-2">Installation sur iOS</h3>
-          <p class="text-gray-600 text-sm">Suivez ces étapes simples pour installer l'application sur votre iPhone ou
-            iPad</p>
+          <p class="text-gray-600 text-sm">Suivez ces étapes simples pour installer l'application sur votre iPhone ou iPad</p>
         </div>
 
         <div class="space-y-4">
@@ -108,12 +97,10 @@
 <script setup lang="ts">
 import { UDrawer } from '#components'
 const { $pwa } = useNuxtApp()
-import { useOneSignal } from "@onesignal/onesignal-vue3";
 
 const showInstallBanner = ref(false)
 const installing = ref(false)
 const updating = ref(false)
-const installBannerRef = ref<HTMLElement>()
 const hasTriggered = ref(false)
 const hasScrolled = ref(false)
 const isMobile = ref(false)
@@ -123,35 +110,7 @@ const showIosInstructions = ref(false)
 const deferredPrompt = ref<any>(null)
 const canInstall = ref(false)
 
-// Swipe functionality
-const swipeOffset = ref(0)
-const startY = ref(0)
-const isDragging = ref(false)
-const SWIPE_THRESHOLD = 75 // pixels to swipe before dismissing
 const SCROLL_THRESHOLD = 1 // pixels to scroll before showing prompt
-
-// Local storage keys
-const DISMISSED_DATE_KEY = 'pwa-install-dismissed-date'
-
-// Check if prompt was dismissed today
-function wasDismissedToday(): boolean {
-  if (import.meta.client) {
-    const dismissedDate = localStorage.getItem(DISMISSED_DATE_KEY)
-    const today = new Date().toDateString()
-    if (dismissedDate) {
-      return dismissedDate === today
-    }
-  }
-  return false
-}
-
-// Set dismissed date to today
-function setDismissedToday(): void {
-  if (import.meta.client) {
-    const today = new Date().toDateString()
-    localStorage.setItem(DISMISSED_DATE_KEY, today)
-  }
-}
 
 // Check scroll position and show banner if conditions are met
 function checkScrollTrigger(): void {
@@ -169,31 +128,36 @@ function checkScrollTrigger(): void {
 
     // For iOS Safari, show banner regardless of $pwa.showInstallPrompt
     // since iOS handles PWA installation differently
-    const shouldShowForPWA = (canInstall.value || $pwa?.showInstallPrompt) && !$pwa?.isPWAInstalled && !wasDismissedToday()
-    const shouldShowForIOS = isIOSSafari && !wasDismissedToday()
+    const shouldShowForPWA = (canInstall.value || $pwa?.showInstallPrompt) && !$pwa?.isPWAInstalled
+    const shouldShowForIOS = isIOSSafari
 
-    // Show banner after scroll if PWA is installable and not dismissed today
+    // Show banner after scroll if PWA is installable
     if (shouldShowForPWA || shouldShowForIOS) {
       setTimeout(() => {
         hasTriggered.value = true
         showInstallBanner.value = true
-      }, 500) // Small delay for better UX
+      }, 1000) // Show PWA prompt 500ms after notification prompt (it will be on top)
     }
   }
 }
 
-// Show install prompt based on scroll and dismissal state
+// Show install prompt based on scroll
 watchEffect(() => {
   if (import.meta.client && $pwa && isMobile.value) {
-    // Only show if PWA is installable, not dismissed today, user has scrolled, and on mobile
+    // Only show if PWA is installable, user has scrolled, on mobile, and not dismissed today
+    const wasDismissedToday = localStorage.getItem('pwa-install-dismissed-date') === new Date().toDateString()
     const shouldShow = (canInstall.value || $pwa.showInstallPrompt) &&
       !$pwa.isPWAInstalled &&
-      !wasDismissedToday() &&
-      hasScrolled.value
+      hasScrolled.value &&
+      !wasDismissedToday
 
     if (shouldShow && !showInstallBanner.value) {
       hasTriggered.value = true
       showInstallBanner.value = true
+    } else if (wasDismissedToday && showInstallBanner.value) {
+      // Hide if it was dismissed today
+      showInstallBanner.value = false
+      hasTriggered.value = false
     }
   }
 })
@@ -254,13 +218,8 @@ onMounted(() => {
       appInstalledListener = (e: Event) => {
         // Track PWA installation
         umTrackEvent('pwa-installed')
-
-        // After successful installation, prompt for notifications on mobile
-        if (isMobile.value) {
-          setTimeout(() => {
-            promptForNotifications()
-          }, 500)
-        }      // Reset the deferred prompt
+        
+        // Reset the deferred prompt
         deferredPrompt.value = null
         canInstall.value = false
         showInstallBanner.value = false
@@ -278,54 +237,6 @@ onUnmounted(() => {
     removeEventListeners()
   }
 })
-
-function handleTouchStart(event: TouchEvent) {
-  // Don't interfere with button clicks
-  const target = event.target as HTMLElement
-  if (target?.tagName === 'BUTTON' || target?.closest('button')) {
-    return
-  }
-
-  startY.value = event.touches[0].clientY
-  isDragging.value = true
-  swipeOffset.value = 0
-  // Prevent page scrolling while swiping the banner
-  event.preventDefault()
-}
-
-function handleTouchMove(event: TouchEvent) {
-  if (!isDragging.value) return
-
-  // Don't interfere with button interactions
-  const target = event.target as HTMLElement
-  if (target?.tagName === 'BUTTON' || target?.closest('button')) {
-    return
-  }
-
-  const currentY = event.touches[0].clientY
-  const deltaY = currentY - startY.value
-
-  // Only allow downward swipes (positive deltaY)
-  if (deltaY > 0) {
-    swipeOffset.value = deltaY
-    // Prevent page scrolling during swipe
-    event.preventDefault()
-  }
-}
-
-function handleTouchEnd() {
-  if (!isDragging.value) return
-
-  isDragging.value = false
-
-  // If swiped down far enough, dismiss the banner
-  if (swipeOffset.value > SWIPE_THRESHOLD) {
-    dismissInstallPrompt()
-  } else {
-    // Snap back to original position
-    swipeOffset.value = 0
-  }
-}
 
 async function installApp() {
   // Check if this is iOS Safari
@@ -351,13 +262,6 @@ async function installApp() {
       if (choiceResult.outcome === 'accepted') {
         // Track PWA installation
         umTrackEvent('pwa-installed')
-
-        // After successful installation, prompt for notifications on mobile
-        if (isMobile.value) {
-          setTimeout(() => {
-            promptForNotifications()
-          }, 300)
-        }
         showInstallBanner.value = false
       }
 
@@ -381,11 +285,8 @@ function dismissInstallPrompt() {
   if ($pwa?.cancelInstall) {
     $pwa.cancelInstall()
   }
-
-  // Set dismissed date and hide banner
-  setDismissedToday()
   showInstallBanner.value = false
-  swipeOffset.value = 0
+  hasTriggered.value = false
 }
 
 async function updateApp() {
@@ -400,42 +301,4 @@ async function updateApp() {
     updating.value = false
   }
 }
-
-// Simple notification prompt for mobile PWA users
-async function promptForNotifications() {
-  if (import.meta.client && isMobile.value) {
-    // Check if OneSignal is available (injected by the plugin)
-    const onesignal = useOneSignal()
-    if (onesignal) {
-      await onesignal.Notifications.requestPermission()
-    }
-  }
-}
 </script>
-
-<style scoped>
-@keyframes spring-up {
-  0% {
-    transform: translateY(200px);
-    opacity: 0;
-  }
-
-  60% {
-    transform: translateY(-10px);
-    opacity: 1;
-  }
-
-  80% {
-    transform: translateY(5px);
-  }
-
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.animate-spring-up {
-  animation: spring-up 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-</style>

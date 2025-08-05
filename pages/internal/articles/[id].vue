@@ -18,12 +18,13 @@
         <UButton v-else-if="saveState === 'error'" icon="mingcute-warning-line" variant="ghost" color="error"
           title="Erreur lors de la sauvegarde" />
         <UButton v-else icon="i-mingcute-checkbox-line" variant="ghost" color="neutral" title="Sauvegardé" />
+
         <UButton icon="mingcute-settings-2-line" variant="ghost" color="neutral" @click="isPanelOpen = !isPanelOpen"
           :title="isPanelOpen ? 'Masquer les propriétés' : 'Afficher les propriétés'" />
       </div>
 
       <!-- Title -->
-      <textarea v-model="title" placeholder="Titre de l´article..." ref="titleRef" @input="autoResize" rows="1"
+      <textarea v-model="title" placeholder="Titre de l´article..." ref="titleRef" @input="autoResize" rows="1" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
         class="w-full text-4xl font-extrabold bg-transparent border-none focus:outline-none my-4 resize-none overflow-hidden whitespace-pre-line break-words" />
 
       <!-- Bubble Menu -->
@@ -91,7 +92,18 @@
       <!-- Content -->
       <EditorContent :editor="editor"
         class="prose prose-headings:text-stone-700 prose-h1:text-3xl prose-h2:font-extrabold max-w-full w-[800px] min-h-full"
+        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" 
         @click="editor?.chain().focus().run()" />
+        
+      <!-- Grammar Suggestion Popup -->
+      <GrammarSuggestion
+        ref="grammarSuggestionRef"
+        :position="grammarSuggestionPosition"
+        :grammar-data="grammarSuggestionData"
+        :on-apply-replacement="applyGrammarReplacement"
+        :on-ignore="ignoreGrammarError"
+        @close="closeGrammarSuggestion"
+      />
     </div>
 
     <!-- Properties Panel -->
@@ -148,6 +160,23 @@
               <USwitch v-model="meta.featured" />
             </UFormField>
 
+            <UFormField label="Vérification grammaticale (session)">
+              <USwitch v-model="meta.grammarCheckEnabled" />
+            </UFormField>
+
+            <div v-if="!meta.grammarCheckEnabled" class="text-sm text-amber-600 bg-amber-50 p-2 rounded">
+              <Icon name="i-mingcute-information-line" class="mr-1" />
+              La vérification grammaticale est désactivée pour cette session
+            </div>
+
+            <div v-if="meta.grammarCheckEnabled" class="text-sm text-gray-600 bg-gray-50 p-2 rounded">
+              <Icon name="i-mingcute-magic-2-line" class="mr-1" />
+              Vérification grammaticale française active
+              <div class="text-xs mt-1 text-gray-500">
+                Propulsé par <a href="https://languagetool.org" target="_blank" class="underline">LanguageTool</a>
+              </div>
+            </div>
+
             <div>
               <span class="font-medium">Nombre de mots&nbsp;: </span>{{ wordCount }}
             </div>
@@ -203,12 +232,14 @@ import { useSupabaseClient, useSupabaseUser, useToast } from '#imports'
 import { EditorContent, useEditor } from '@tiptap/vue-3'
 // @ts-ignore
 import { BubbleMenu } from '@tiptap/vue-3/menus'
+import { DecorationSet } from 'prosemirror-view'
+import { PluginKey } from 'prosemirror-state'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import CharacterCount from '@tiptap/extension-character-count'
-import Link from '@tiptap/extension-link'
 import { DragHandle } from '@tiptap/extension-drag-handle'
 import { Source } from '~/extensions/source'
+import { GrammarCheck, LT_PLUGIN_KEY, triggerFullGrammarCheck } from '~/extensions/grammar-check'
 import debounce from 'lodash/debounce'
 import { useDb } from '~/composables/useDb'
 import type { Source as SourceType } from '~/composables/useSources'
@@ -224,6 +255,22 @@ const { getCategories, setArticleCategories, getArticleCategories } = useDb()
 // State
 const title = ref('')
 const titleRef = ref<HTMLTextAreaElement | null>(null)
+const grammarCheckExtension = GrammarCheck.configure({
+  language: 'fr',
+  level: 'picky',
+  debounceMs: 1000,
+  modificationThreshold: 60000, // Check only paragraphs modified in last 1 minute
+  isEnabled: () => meta.grammarCheckEnabled,
+  onShowSuggestion: (position: { x: number; y: number }, data: any, range: { from: number; to: number }) => {
+    grammarSuggestionPosition.value = position
+    grammarSuggestionData.value = data
+    grammarReplacementRange.value = range
+    nextTick(() => {
+      grammarSuggestionRef.value?.show()
+    })
+  },
+})
+
 const editor = useEditor({
   extensions: [
     StarterKit,
@@ -231,6 +278,7 @@ const editor = useEditor({
     CharacterCount.configure({ limit: 50000 }),
     DragHandle,
     Source,
+    grammarCheckExtension,
   ],
   content: '',
   autofocus: 'end',
@@ -242,11 +290,16 @@ const meta = reactive({
   description: '',
   featured: false,
   publishedAt: null as string | null,
-  sources: [] as SourceType[]
+  sources: [] as SourceType[],
+  grammarCheckEnabled: true // Session-only setting, enabled by default
 })
 const categories = ref<string[]>([])
 const selectedCategories = ref<string[]>([])
 const sourcesManager = ref<any>(null)
+const grammarSuggestionRef = ref<any>(null)
+const grammarSuggestionData = ref<any>(null)
+const grammarSuggestionPosition = ref({ x: 0, y: 0 })
+const grammarReplacementRange = ref<{ from: number; to: number } | null>(null)
 // Link popover state
 const linkUrl = ref<string>('')
 const selectedSourceIdx = ref<number | undefined>(undefined)
@@ -281,6 +334,73 @@ function onCreateCategory(item: string) {
 const onSourcesChanged = (sources: SourceType[]) => {
   meta.sources = sources
   debouncedSave()
+}
+
+// Grammar suggestion handlers
+const applyGrammarReplacement = (replacement: string) => {
+  if (!editor.value || !grammarReplacementRange.value) return
+  
+  const { from, to } = grammarReplacementRange.value
+  
+  // Apply the replacement first
+  const tr = editor.value.state.tr.insertText(replacement, from, to)
+  editor.value.view.dispatch(tr)
+  
+  // Then remove the decoration (with error handling)
+  try {
+    removeGrammarDecoration(from, to)
+  } catch (error) {
+    console.warn('Error removing grammar decoration:', error)
+  }
+  
+  // Clear the suggestion data
+  grammarSuggestionData.value = null
+  grammarReplacementRange.value = null
+}
+
+const ignoreGrammarError = () => {
+  if (!editor.value || !grammarReplacementRange.value) return
+  
+  const { from, to } = grammarReplacementRange.value
+  
+  // Remove the decoration (with error handling)
+  try {
+    removeGrammarDecoration(from, to)
+  } catch (error) {
+    console.warn('Error removing grammar decoration:', error)
+  }
+  
+  // Clear the suggestion data
+  grammarSuggestionData.value = null
+  grammarReplacementRange.value = null
+}
+
+const removeGrammarDecoration = (from: number, to: number) => {
+  if (!editor.value) return
+  
+  // Get current decorations and remove only the specific range
+  const currentDecorations = LT_PLUGIN_KEY.getState(editor.value.state) as DecorationSet
+  
+  // Check if decorations exist
+  if (!currentDecorations || typeof currentDecorations.find !== 'function') {
+    console.warn('Grammar decorations not available or not initialized')
+    return
+  }
+  
+  const decorationsToRemove = currentDecorations.find(from, to)
+  let newDecorations = currentDecorations
+  
+  decorationsToRemove.forEach(deco => {
+    newDecorations = newDecorations.remove([deco])
+  })
+  
+  const tr = editor.value.state.tr.setMeta(LT_PLUGIN_KEY, { set: newDecorations })
+  editor.value.view.dispatch(tr)
+}
+
+const closeGrammarSuggestion = () => {
+  grammarSuggestionData.value = null
+  grammarReplacementRange.value = null
 }
 
 // Publication status management
@@ -517,6 +637,16 @@ const fetchData = async () => {
   lastSavedDate.value = data.published_at ? new Date(data.published_at) : null
   selectedCategories.value = await getArticleCategories(id)
   autoResize()
+  
+  // Run initial grammar check if enabled and content exists
+  if (meta.grammarCheckEnabled && data.content && data.content.trim()) {
+    // Wait a bit for the editor to be fully initialized
+    setTimeout(() => {
+      if (editor.value && editor.value.view) {
+        triggerFullGrammarCheck(editor.value.view)
+      }
+    }, 1000)
+  }
 }
 
 const publish = () => {
@@ -620,6 +750,22 @@ watch(() => meta.sources, (newSources) => {
     sourcesManager.value.loadSources(newSources)
   }
 }, { deep: true })
+
+// Watch grammar check toggle to enable/disable the extension
+watch(() => meta.grammarCheckEnabled, (enabled) => {
+  if (!editor.value) return
+  
+  if (enabled) {
+    // Re-enable by updating the editor extensions if needed
+    // The extension will automatically start checking on next edit
+    console.log('Grammar check enabled')
+  } else {
+    // Clear all grammar decorations when disabled
+    const tr = editor.value.state.tr.setMeta(LT_PLUGIN_KEY, { set: DecorationSet.empty })
+    editor.value.view.dispatch(tr)
+    console.log('Grammar check disabled, decorations cleared')
+  }
+})
 </script>
 
 <style scoped>
