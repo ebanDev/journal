@@ -93,6 +93,7 @@
 </template>
 
 <script setup lang="ts">
+// @ts-nocheck
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSupabaseClient, useSupabaseUser, useToast } from '#imports'

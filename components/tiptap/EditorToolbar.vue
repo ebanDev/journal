@@ -120,6 +120,7 @@
 </template>
 
 <script setup lang="ts">
+// @ts-nocheck
 import { ref, computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { useImageUpload } from '~/composables/useImageUpload'

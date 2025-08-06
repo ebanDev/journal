@@ -160,6 +160,7 @@ export function useDb() {
         .filter(Boolean),
       sources: data.sources ? (() => {
         try {
+          // @ts-ignore: data.sources may be Json, ignore typing for JSON.parse
           return JSON.parse(data.sources)
         } catch {
           return []
@@ -182,6 +183,7 @@ export function useDb() {
       categories: article.categories || [],
       sources: article.sources ? (() => {
         try {
+          // @ts-ignore: article.sources may be Json, ignore typing for JSON.parse
           return JSON.parse(article.sources)
         } catch {
           return []
