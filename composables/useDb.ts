@@ -174,7 +174,7 @@ export function useDb() {
       .rpc('get_article_for_preview', { article_id: id })
     
     if (error) throw error
-    if (!data || data.length === 0) return null
+    if (!data) return null
     
     const article = data[0]
     return {
