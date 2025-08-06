@@ -120,7 +120,8 @@
     <ArticlePropertiesPanel
       :is-open="isPanelOpen"
       :editor="editor"
-      v-model:meta="meta"
+      :meta="meta"
+      @update:meta="updateMeta"
       v-model:selected-categories="selectedCategories"
       v-model:publication-status="publicationStatus"
       :categories="categories"

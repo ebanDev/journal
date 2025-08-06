@@ -1,4 +1,6 @@
 import type { ArticleWithCategories } from '~/composables/useDb'
+import { useDb } from '~/composables/useDb'
+import { useAsyncData, clearNuxtData } from '#imports'
 
 /**
  * Enhanced database composable with optimized caching and SSR support
