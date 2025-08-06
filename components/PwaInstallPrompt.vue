@@ -5,7 +5,7 @@
     :has-triggered="hasTriggered"
     :loading="installing"
     :stack-index="0"
-    title="Installer l'application"
+    title="Installer l\'application"
     description="Accès rapide et lecture hors ligne"
     icon="mingcute:download-line"
     dismissal-key="pwa-install-dismissed-date"
@@ -45,7 +45,7 @@
         <div class="text-center">
           <Icon name="mingcute:apple-line" class="text-amber-600 text-4xl mx-auto mb-2" />
           <h3 class="text-lg font-semibold text-gray-900 mb-2">Installation sur iOS</h3>
-          <p class="text-gray-600 text-sm">Suivez ces étapes simples pour installer l'application sur votre iPhone ou iPad</p>
+          <p class="text-gray-600 text-sm">Suivez ces étapes simples pour installer l\'application sur votre iPhone ou iPad</p>
         </div>
 
         <div class="space-y-4">
@@ -66,8 +66,8 @@
               class="flex-shrink-0 w-6 h-6 bg-amber-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
               2</div>
             <div>
-              <p class="font-medium text-gray-900">Ajouter à l'écran d'accueil</p>
-              <p class="text-sm text-gray-600 mt-1">Faites défiler et sélectionnez "Ajouter à l'écran d'accueil"
+              <p class="font-medium text-gray-900">Ajouter à l\'écran d\'accueil</p>
+              <p class="text-sm text-gray-600 mt-1">Faites défiler et sélectionnez "Ajouter à l\'écran d\'accueil"
                 <Icon name="mingcute:add-square-line" class="inline" />
               </p>
             </div>
@@ -78,8 +78,8 @@
               class="flex-shrink-0 w-6 h-6 bg-amber-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
               3</div>
             <div>
-              <p class="font-medium text-gray-900">Confirmer l'installation</p>
-              <p class="text-sm text-gray-600 mt-1">Appuyez sur "Ajouter" en haut à droite pour terminer l'installation
+              <p class="font-medium text-gray-900">Confirmer l\'installation</p>
+              <p class="text-sm text-gray-600 mt-1">Appuyez sur "Ajouter" en haut à droite pour terminer l\'installation
               </p>
             </div>
           </div>
@@ -95,7 +95,6 @@
 </template>
 
 <script setup lang="ts">
-import { UDrawer } from '#components'
 const { $pwa } = useNuxtApp()
 
 const showInstallBanner = ref(false)

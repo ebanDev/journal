@@ -37,7 +37,7 @@ export default defineNuxtConfig({
     // Individual articles cached for 1 hour
     '/articles/**': { isr: 3600, headers: { 'cache-control': 's-maxage=1800' } },
     // Radar page short-term cache (5 minutes)
-    '/la-veille': { isr: 300, headers: { 'cache-control': 's-maxage=150' } },
+    '/radar': { isr: 300, headers: { 'cache-control': 's-maxage=150' } },
     // Search page client-side only
     '/search': { prerender: false },
     // Admin pages always server-side rendered
@@ -191,7 +191,7 @@ export default defineNuxtConfig({
         },
       ],
       share_target: {
-        action: '/la-veille',
+        action: '/radar',
         method: 'GET',
         enctype: 'application/x-www-form-urlencoded',
         params: {

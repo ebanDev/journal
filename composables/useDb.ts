@@ -262,7 +262,7 @@ export function useDb() {
 
   // LA VEILLE FUNCTIONS
   
-  // Get all approved la-veille entries with vote counts
+  // Get all approved radar entries with vote counts
   async function getVeilleEntries() {
     const { data, error } = await supabase
       .from('laveille')
@@ -281,7 +281,7 @@ export function useDb() {
     })) as VeilleEntry[]
   }
 
-  // Get user's votes for la-veille entries (updated for anonymous users)
+  // Get user's votes for radar entries (updated for anonymous users)
   async function getUserVeilleVotes(userId?: string) {
     const anonymousId = getAnonymousId()
     
@@ -300,7 +300,7 @@ export function useDb() {
     return new Set((data || []).map(v => v.article_id))
   }
 
-  // Submit a new la-veille entry (updated for anonymous users and auto-approval for authenticated users)
+  // Submit a new radar entry (updated for anonymous users and auto-approval for authenticated users)
   async function submitVeilleEntry(entry: VeilleInsert) {
     const anonymousId = getAnonymousId()
     
@@ -320,7 +320,7 @@ export function useDb() {
     return data
   }
 
-  // Vote on a la-veille entry (updated for anonymous users)
+  // Vote on a radar entry (updated for anonymous users)
   async function voteVeilleEntry(articleId: string, userId?: string) {
     const anonymousId = getAnonymousId()
     
@@ -339,7 +339,7 @@ export function useDb() {
     return data
   }
 
-  // Remove vote from a la-veille entry (updated for anonymous users)
+  // Remove vote from a radar entry (updated for anonymous users)
   async function unvoteVeilleEntry(articleId: string, userId?: string) {
     const anonymousId = getAnonymousId()
     

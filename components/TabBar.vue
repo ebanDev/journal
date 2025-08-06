@@ -30,7 +30,7 @@ const { prefetchEssentialData } = useOptimizedDb()
 // Preload all essential data and routes when TabBar mounts for instant navigation
 onMounted(() => {
   // Preload all TabBar routes immediately
-  const routes = ['/', '/articles', '/la-veille', '/search']
+  const routes = ['/', '/articles', '/radar', '/search']
   routes.forEach(route => {
     preloadRouteComponents(route).catch(() => {})
   })

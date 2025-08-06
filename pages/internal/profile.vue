@@ -119,7 +119,7 @@ onMounted(loadProfile)
           to="/" 
           variant="outline" 
           size="sm"
-          icon="mingcute-home-line"
+          icon="mingcute-home-3-line"
         >
           Accueil
         </UButton>
@@ -130,7 +130,7 @@ onMounted(loadProfile)
       <!-- Section En-tête -->
       <div class="text-center mb-6 md:mb-8">
         <div class="w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-primary-500 to-secondary-700 rounded-full mx-auto mb-4 flex items-center justify-center">
-          <UIcon name="heroicons:user" class="w-8 h-8 md:w-12 md:h-12 text-white" />
+          <UIcon name="mingcute:user-1-line" class="w-8 h-8 md:w-16 md:h-16 text-xl text-white" />
         </div>
         <h1 class="text-2xl md:text-3xl font-bold text-gray-900">{{ profile.full_name || 'Votre Profil' }}</h1>
         <p class="text-gray-600 mt-2">{{ translateRole(profile.role) || 'Membre' }}</p>
@@ -148,7 +148,7 @@ onMounted(loadProfile)
               <UButton 
                 v-if="!isEditing"
                 size="sm"
-                icon="heroicons:pencil"
+                icon="mingcute:pencil-line"
                 variant="outline"
                 @click="enableEdit"
               >
@@ -166,7 +166,7 @@ onMounted(loadProfile)
               :disabled="!isEditing"
             >
               <template #leading>
-                <UIcon name="heroicons:user" class="w-4 h-4 text-gray-400" />
+                <UIcon name="mingcute:user-1-line" class="w-4 h-4 text-gray-400" />
               </template>
             </UInput>
           </UFormField>
@@ -174,7 +174,7 @@ onMounted(loadProfile)
           <UFormField name="email" label="Adresse email">
             <UInput v-model="profile.email" disabled>
               <template #leading>
-                <UIcon name="heroicons:envelope" class="w-4 h-4 text-gray-400" />
+                <UIcon name="mingcute:mail-line" class="w-4 h-4 text-gray-400" />
               </template>
             </UInput>
           </UFormField>
@@ -186,7 +186,7 @@ onMounted(loadProfile)
               :disabled="!isEditing"
             >
               <template #leading>
-                <UIcon name="heroicons:academic-cap" class="w-4 h-4 text-gray-400" />
+                <UIcon name="mingcute:calendar-line" class="w-4 h-4 text-gray-400" />
               </template>
             </UInput>
           </UFormField>
@@ -198,7 +198,7 @@ onMounted(loadProfile)
               :disabled="!isEditing"
             >
               <template #leading>
-                <UIcon name="heroicons:phone" class="w-4 h-4 text-gray-400" />
+                <UIcon name="mingcute:phone-line" class="w-4 h-4 text-gray-400" />
               </template>
             </UInput>
           </UFormField>
@@ -209,7 +209,7 @@ onMounted(loadProfile)
             <div v-if="isEditing" class="flex flex-col sm:flex-row gap-2">
               <UButton 
                 label="Enregistrer" 
-                icon="heroicons:check"
+                icon="mingcute:check-line"
                 color="primary"
                 :loading="isSaving"
                 @click="saveProfile"
@@ -217,7 +217,7 @@ onMounted(loadProfile)
               />
               <UButton 
                 label="Annuler" 
-                icon="heroicons:x-mark"
+                icon="mingcute:close-line"
                 variant="outline"
                 :disabled="isSaving"
                 @click="cancelEdit"
@@ -227,7 +227,7 @@ onMounted(loadProfile)
             <div v-else></div>
             <UButton 
               label="Se déconnecter" 
-              icon="heroicons:arrow-right-on-rectangle" 
+              icon="mingcute:align-arrow-right-line" 
               color="error" 
               variant="outline"
               @click="logout"

@@ -57,7 +57,7 @@
     <section class="flex-[1] w-full lg:flex-[1] lg:w-auto">
       <div class="flex items-center justify-between mb-3">
         <h2 class="font-serif text-3xl md:text-2xl">Radar</h2>
-        <NuxtLink to="/la-veille" class="text-sm hover:underline">Voir tout</NuxtLink>
+        <NuxtLink to="/radar" class="text-sm hover:underline">Voir tout</NuxtLink>
       </div>
       <p class="text-gray-600 mb-6">Une sélection de contenus d'autres médias à lire, à écouter, à suivre.</p>
 

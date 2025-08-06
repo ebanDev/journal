@@ -362,7 +362,7 @@ useSeoMeta({
   ogTitle: 'Radar - Sursaut!',
   ogDescription: 'Une sélection de contenus d\'autres médias à lire, à écouter, à suivre. Partagez et votez pour vos trouvailles.',
   ogImage: 'https://sursaut-revue.fr/icon-512x512.png',
-  ogUrl: 'https://sursaut-revue.fr/la-veille',
+  ogUrl: 'https://sursaut-revue.fr/radar',
   ogType: 'website',
   ogSiteName: 'Sursaut!',
   ogLocale: 'fr_FR',
@@ -377,7 +377,7 @@ useSeoMeta({
 // Canonical link
 useHead({
   link: [
-    { rel: 'canonical', href: 'https://sursaut-revue.fr/la-veille' }
+    { rel: 'canonical', href: 'https://sursaut-revue.fr/radar' }
   ]
 })
 </script>

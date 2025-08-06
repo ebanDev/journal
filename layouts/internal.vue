@@ -74,7 +74,7 @@ const baseItems: NavigationMenuItem[] = [
   { label: 'Articles', icon: 'mingcute-news-line', to: '/internal/articles' },
   { label: 'Catégories', icon: 'mingcute-folder-2-line', to: '/internal/categories' },
   { 
-    label: 'La Veille', 
+    label: 'Radar', 
     icon: 'mingcute-radar-line', 
     to: '/internal/radar',
     ...(isEditor.value && pendingCount.value > 0 && {

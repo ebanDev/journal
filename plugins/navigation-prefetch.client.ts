@@ -12,7 +12,7 @@ export default defineNuxtPlugin(() => {
   prefetchEssentialData()
 
   // TabBar routes that should be preloaded immediately for mobile navigation
-  const tabBarRoutes = ['/', '/articles', '/la-veille', '/search']
+  const tabBarRoutes = ['/', '/articles', '/radar', '/search']
   
   // Preload all TabBar routes immediately
   function preloadTabBarRoutes() {

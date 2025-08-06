@@ -9,7 +9,7 @@ export default defineNuxtRouteMiddleware((to) => {
   const { prefetchEssentialData } = useOptimizedDb()
   
   // Prefetch data based on destination route
-  if (to.path === '/' || to.path === '/articles' || to.path === '/la-veille') {
+  if (to.path === '/' || to.path === '/articles' || to.path === '/radar') {
     // Prefetch in background without blocking navigation
     prefetchEssentialData().catch(() => {
       // Ignore prefetch errors
