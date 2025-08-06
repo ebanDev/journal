@@ -9,7 +9,6 @@ export default defineNuxtConfig({
   ssr: true,
   nitro: {
     prerender: {
-      failOnError: false,
       routes: ['/sitemap.xml', '/robots.txt']
     }
   },
@@ -32,7 +31,7 @@ export default defineNuxtConfig({
   // Enhanced caching and performance headers
   routeRules: {
     // Homepage pre-rendered at build time
-    '/': { prerender: true, headers: { 'cache-control': 's-maxage=60' } },
+    '/': { isr: 300, headers: { 'cache-control': 's-maxage=60' } },
     // Articles page cached for 10 minutes with ISR
     '/articles': { isr: 600, headers: { 'cache-control': 's-maxage=300' } },
     // Individual articles cached for 1 hour
