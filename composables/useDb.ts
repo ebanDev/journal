@@ -168,6 +168,28 @@ export function useDb() {
     }
   }
 
+  // Get a single article by id for preview (bypasses RLS for draft articles)
+  async function getArticleByIdForPreview(id: string) {
+    const { data, error } = await supabase
+      .rpc('get_article_for_preview', { article_id: id })
+    
+    if (error) throw error
+    if (!data || data.length === 0) return null
+    
+    const article = data[0]
+    return {
+      ...article,
+      categories: article.categories || [],
+      sources: article.sources ? (() => {
+        try {
+          return JSON.parse(article.sources)
+        } catch {
+          return []
+        }
+      })() : []
+    }
+  }
+
   // Delete an issue by id
   async function deleteIssueById(id: string) {
     const { error } = await supabase
@@ -367,6 +389,7 @@ export function useDb() {
     getIssueById,
     getArticleById,
     getArticleBySlug,
+    getArticleByIdForPreview,
     deleteIssueById,
     deleteArticleById,
     getCategories,

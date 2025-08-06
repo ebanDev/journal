@@ -107,7 +107,29 @@
               v-model="publicationStatus" 
               :items="publicationStatusOptions"
               @change="$emit('publication-status-change')" 
+              class="w-full"
             />
+          </UFormField>
+
+          <UFormField label="Partager l'article">
+            <UInput 
+              disabled
+              :value="publicationStatus === 'published' ? 'https://sursaut-revue.fr/article/' + meta.slug : 'https://sursaut-revue.fr/preview/' + meta.id"
+              class="w-full"
+            >
+              <template #trailing>
+                <UButton 
+                  icon="mingcute:external-link-line" 
+                  size="sm" 
+                  @click="navigateTo(publicationStatus === 'published' ? '/article/' + meta.slug : '/preview/' + meta.id, {
+                    external: true,
+                    open: {
+                      target: '_blank'
+                    }
+                  })"
+                />
+              </template>
+          </UInput>
           </UFormField>
 
           <div v-if="publicationStatus === 'published'" class="text-sm text-green-600">
@@ -164,6 +186,7 @@ import { useImageUpload } from '~/composables/useImageUpload'
 
 interface ArticleMeta {
   slug: string
+  id: string
   cover: string
   description: string
   featured: boolean
@@ -246,6 +269,14 @@ const onCreateCategory = (item: string) => {
 
 const triggerCoverUpload = () => {
   coverFileInput.value?.click()
+}
+
+const copyToClipboard = (text: string) => {
+  navigator.clipboard.writeText(text).then(() => {
+    console.log('Copied to clipboard:', text)
+  }).catch(err => {
+    console.error('Failed to copy:', err)
+  })
 }
 
 const handleCoverUpload = async (event: Event) => {

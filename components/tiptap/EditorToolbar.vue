@@ -93,6 +93,18 @@
           @click.stop="$emit('open-source-popover', $event)" 
         />
       </UTooltip>
+
+      <!-- Chart button -->
+      <UTooltip text="Graphique">
+        <UButton 
+          icon="i-mingcute-chart-bar-line" 
+          size="xs" 
+          variant="ghost" 
+          color="neutral"
+          :class="editor && editor.isActive('chart') ? 'bg-amber-100 text-amber-700' : ''"
+          @click.stop="$emit('open-chart-popover', $event)" 
+        />
+      </UTooltip>
     </div>
 
     <!-- Hidden file input -->
@@ -120,6 +132,7 @@ const props = defineProps<Props>()
 
 const emit = defineEmits<{
   'open-source-popover': [event: MouseEvent]
+  'open-chart-popover': [event: MouseEvent]
 }>()
 
 const { uploadImage, isUploading } = useImageUpload()

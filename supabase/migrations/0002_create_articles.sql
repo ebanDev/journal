@@ -137,3 +137,51 @@ CREATE POLICY "Delete article_categories as admin" ON public.article_categories
   FOR DELETE USING (
     public.has_role(auth.uid(), 'admin')
   );
+
+-- Create function to get article for preview (bypasses RLS)
+CREATE OR REPLACE FUNCTION public.get_article_for_preview(article_id UUID)
+RETURNS TABLE (
+  id UUID,
+  title TEXT,
+  content TEXT,
+  author_id UUID,
+  published_at TIMESTAMPTZ,
+  draft BOOLEAN,
+  slug TEXT,
+  cover TEXT,
+  description TEXT,
+  featured BOOLEAN,
+  issue_id UUID,
+  sources JSONB,
+  categories JSONB
+)
+LANGUAGE SQL
+SECURITY DEFINER AS $$
+  SELECT 
+    a.id,
+    a.title,
+    a.content,
+    a.author_id,
+    a.published_at,
+    a.draft,
+    a.slug,
+    a.cover,
+    a.description,
+    a.featured,
+    a.issue_id,
+    a.sources,
+    COALESCE(
+      jsonb_agg(
+        jsonb_build_object(
+          'name', c.name,
+          'icon', c.icon
+        )
+      ) FILTER (WHERE c.name IS NOT NULL),
+      '[]'::jsonb
+    ) as categories
+  FROM public.articles a
+  LEFT JOIN public.article_categories ac ON a.id = ac.article_id
+  LEFT JOIN public.categories c ON ac.category_id = c.id
+  WHERE a.id = article_id
+  GROUP BY a.id, a.title, a.content, a.author_id, a.published_at, a.draft, a.slug, a.cover, a.description, a.featured, a.issue_id, a.sources;
+$$;

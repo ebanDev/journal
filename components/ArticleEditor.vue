@@ -69,7 +69,8 @@
         <EditorToolbar 
           v-if="editor" 
           :editor="editor" 
-          @open-source-popover="openSourcePopover" 
+          @open-source-popover="openSourcePopover"
+          @open-chart-popover="openChartPopover"
         />
       </div>
 
@@ -83,6 +84,14 @@
         @create-source="createNewSource"
         @cancel="cancelSourcePopover"
         @update:search-query="sourceSearchQuery = $event"
+      />
+
+      <!-- Chart Popover -->
+      <ChartPopover
+        :show="showChartPopover"
+        :position="chartPopoverPosition"
+        @create-chart="createChart"
+        @cancel="cancelChartPopover"
       />
 
       <!-- Content -->
@@ -142,6 +151,7 @@ import CharacterCount from '@tiptap/extension-character-count'
 import { DragHandle } from '@tiptap/extension-drag-handle'
 import { CustomImage } from '~/extensions/custom-image'
 import { Source } from '~/extensions/source'
+import { Chart } from '~/extensions/chart'
 import { GrammarCheck, LT_PLUGIN_KEY, triggerFullGrammarCheck } from '~/extensions/grammar-check'
 import debounce from 'lodash/debounce'
 import { useDb } from '~/composables/useDb'
@@ -151,6 +161,7 @@ import type { Source as SourceType } from '~/composables/useSources'
 // Components
 import EditorToolbar from '~/components/tiptap/EditorToolbar.vue'
 import SourcePopover from '~/components/tiptap/SourcePopover.vue'
+import ChartPopover from '~/components/tiptap/ChartPopover.vue'
 import ArticlePropertiesPanel from '~/components/ArticlePropertiesPanel.vue'
 
 const supabase = useSupabaseClient()
@@ -171,6 +182,7 @@ const saveState = ref<'default' | 'loading' | 'success' | 'error'>('default')
 
 // Article metadata
 const meta = reactive({
+  id,
   slug: '',
   cover: '',
   description: '',
@@ -197,6 +209,10 @@ const grammarReplacementRange = ref<{ from: number; to: number } | null>(null)
 const showSourcePopover = ref(false)
 const sourcePopoverPosition = ref({ x: 0, y: 0 })
 const sourceSearchQuery = ref('')
+
+// Chart popover
+const showChartPopover = ref(false)
+const chartPopoverPosition = ref({ x: 0, y: 0 })
 
 // References
 const propertiesPanel = ref<any>(null)
@@ -232,6 +248,7 @@ const editor = useEditor({
       }
     }),
     Source,
+    Chart,
     grammarCheckExtension,
   ],
   content: '',
@@ -496,6 +513,33 @@ const createNewSource = () => {
 const cancelSourcePopover = () => {
   sourceSearchQuery.value = ''
   showSourcePopover.value = false
+}
+
+// Chart popover handlers
+const openChartPopover = (event: MouseEvent) => {
+  const button = event.target as HTMLElement
+  const rect = button.getBoundingClientRect()
+  chartPopoverPosition.value = {
+    x: rect.left + rect.width / 2,
+    y: rect.bottom + 8
+  }
+  showChartPopover.value = true
+}
+
+const createChart = (chartData: { csvData: string, chartType: string, title: string }) => {
+  if (!editor.value) return
+  
+  editor.value.chain().focus().setChart({
+    csvData: chartData.csvData,
+    chartType: chartData.chartType as any,
+    title: chartData.title
+  }).run()
+
+  cancelChartPopover()
+}
+
+const cancelChartPopover = () => {
+  showChartPopover.value = false
 }
 
 // Event handlers
