@@ -1,18 +1,9 @@
 <template>
-  <BaseActionPopup
-    v-if="isMobile"
-    :visible="showInstallBanner"
-    :has-triggered="hasTriggered"
-    :loading="installing"
-    :stack-index="0"
-    title="Installer l\'application"
-    description="Accès rapide et lecture hors ligne"
-    icon="mingcute:download-line"
-    dismissal-key="pwa-install-dismissed-date"
-    :primary-action="{ label: 'Installer', action: installApp }"
-    @dismiss="dismissInstallPrompt"
-    @update:has-triggered="hasTriggered = $event"
-  />
+  <BaseActionPopup v-if="isMobile" :visible="showInstallBanner" :has-triggered="hasTriggered" :loading="installing"
+    :stack-index="0" title="Installer l'application" description="Accès rapide et lecture hors ligne"
+    icon="mingcute:download-line" dismissal-key="pwa-install-dismissed-date"
+    :primary-action="{ label: 'Installer', action: installApp }" @dismiss="dismissInstallPrompt"
+    @update:has-triggered="hasTriggered = $event" />
 
   <!-- Update prompt -->
   <div v-if="$pwa?.needRefresh"
@@ -39,59 +30,64 @@
   </div>
 
   <!-- iOS Installation Instructions Drawer -->
-  <UDrawer v-model:open="showIosInstructions" title="">
-    <template #body>
-      <div class="flex flex-col space-y-6">
-        <div class="text-center">
-          <Icon name="mingcute:apple-line" class="text-amber-600 text-4xl mx-auto mb-2" />
-          <h3 class="text-lg font-semibold text-gray-900 mb-2">Installation sur iOS</h3>
-          <p class="text-gray-600 text-sm">Suivez ces étapes simples pour installer l\'application sur votre iPhone ou iPad</p>
+  <ClientOnly>
+    <UDrawer v-model:open="showIosInstructions" title="">
+      <template #body>
+        <div class="flex flex-col space-y-6">
+          <div class="text-center">
+            <Icon name="mingcute:apple-line" class="text-amber-600 text-4xl mx-auto mb-2" />
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Installation sur iOS</h3>
+            <p class="text-gray-600 text-sm">Suivez ces étapes simples pour installer l'application sur votre iPhone ou
+              iPad</p>
+          </div>
+
+          <div class="space-y-4">
+            <div class="flex items-start space-x-3 p-3 bg-amber-50 rounded-lg">
+              <div
+                class="flex-shrink-0 w-6 h-6 bg-amber-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                1</div>
+              <div>
+                <p class="font-medium text-gray-900">Ouvrez le menu de partage</p>
+                <p class="text-sm text-gray-600 mt-1">Appuyez sur le bouton de partage
+                  <Icon name="mingcute:share-3-line" class="inline" /> en bas de votre écran Safari
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-3 p-3 bg-amber-50 rounded-lg">
+              <div
+                class="flex-shrink-0 w-6 h-6 bg-amber-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                2</div>
+              <div>
+                <p class="font-medium text-gray-900">Ajouter à l'écran d'accueil</p>
+                <p class="text-sm text-gray-600 mt-1">Faites défiler et sélectionnez "Ajouter à l'écran d'accueil"
+                  <Icon name="mingcute:add-square-line" class="inline" />
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-3 p-3 bg-amber-50 rounded-lg">
+              <div
+                class="flex-shrink-0 w-6 h-6 bg-amber-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                3</div>
+              <div>
+                <p class="font-medium text-gray-900">Confirmer l'installation</p>
+                <p class="text-sm text-gray-600 mt-1">Appuyez sur "Ajouter" en haut à droite pour terminer
+                  l'installation
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <div class="space-y-4">
-          <div class="flex items-start space-x-3 p-3 bg-amber-50 rounded-lg">
-            <div
-              class="flex-shrink-0 w-6 h-6 bg-amber-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
-              1</div>
-            <div>
-              <p class="font-medium text-gray-900">Ouvrez le menu de partage</p>
-              <p class="text-sm text-gray-600 mt-1">Appuyez sur le bouton de partage
-                <Icon name="mingcute:share-3-line" class="inline" /> en bas de votre écran Safari
-              </p>
-            </div>
-          </div>
-
-          <div class="flex items-start space-x-3 p-3 bg-amber-50 rounded-lg">
-            <div
-              class="flex-shrink-0 w-6 h-6 bg-amber-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
-              2</div>
-            <div>
-              <p class="font-medium text-gray-900">Ajouter à l\'écran d\'accueil</p>
-              <p class="text-sm text-gray-600 mt-1">Faites défiler et sélectionnez "Ajouter à l\'écran d\'accueil"
-                <Icon name="mingcute:add-square-line" class="inline" />
-              </p>
-            </div>
-          </div>
-
-          <div class="flex items-start space-x-3 p-3 bg-amber-50 rounded-lg">
-            <div
-              class="flex-shrink-0 w-6 h-6 bg-amber-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
-              3</div>
-            <div>
-              <p class="font-medium text-gray-900">Confirmer l\'installation</p>
-              <p class="text-sm text-gray-600 mt-1">Appuyez sur "Ajouter" en haut à droite pour terminer l\'installation
-              </p>
-            </div>
-          </div>
+      </template>
+      <template #footer>
+        <div class="flex justify-center">
+          <UButton label="J'ai compris" @click="showIosInstructions = false" class="flex-1"
+            icon="mingcute:check-line" />
         </div>
-      </div>
-    </template>
-    <template #footer>
-      <div class="flex justify-center">
-        <UButton label="J'ai compris" @click="showIosInstructions = false" class="flex-1" icon="mingcute:check-line" />
-      </div>
-    </template>
-  </UDrawer>
+      </template>
+    </UDrawer>
+  </ClientOnly>
 </template>
 
 <script setup lang="ts">
@@ -217,7 +213,7 @@ onMounted(() => {
       appInstalledListener = (e: Event) => {
         // Track PWA installation
         umTrackEvent('pwa-installed')
-        
+
         // Reset the deferred prompt
         deferredPrompt.value = null
         canInstall.value = false

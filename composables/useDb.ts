@@ -238,7 +238,7 @@ export function useDb() {
     
     // Remove duplicates that may occur due to multiple articles per category
     const uniqueCategories = data?.reduce((acc, category) => {
-      if (!acc.find(c => c.id === category.id)) {
+      if (!acc.find((c: any) => c.id === category.id)) {
         acc.push({
           id: category.id,
           name: category.name,
