@@ -61,13 +61,143 @@ interface Props {
   options?: string
   colors?: string
   seriesNames?: string
+  icons?: string
 }
 
 const props = defineProps<Props>()
 
 const { parseCSVToChartData, formatPieChartData, generateChartOptions, CHART_COLORS } = useChart()
 
-// Chart components mapping
+// Cache for loaded icon images
+const iconImageCache = new Map<string, HTMLImageElement>()
+
+// Function to load SVG icon and convert to image
+async function loadIconImage(iconName: string): Promise<HTMLImageElement | null> {
+  // Check cache first
+  if (iconImageCache.has(iconName)) {
+    return iconImageCache.get(iconName)!
+  }
+
+  try {
+    // Fetch SVG from Iconify API
+    const response = await fetch(`https://api.iconify.design/mingcute/${iconName}.svg?color=%23374151&width=32&height=32`)
+    if (!response.ok) throw new Error('Failed to fetch icon')
+    
+    const svgText = await response.text()
+    
+    // Create image from SVG
+    const img = new Image()
+    const svgBlob = new Blob([svgText], { type: 'image/svg+xml' })
+    const url = URL.createObjectURL(svgBlob)
+    
+    return new Promise((resolve) => {
+      img.onload = () => {
+        URL.revokeObjectURL(url)
+        iconImageCache.set(iconName, img)
+        resolve(img)
+      }
+      img.onerror = () => {
+        URL.revokeObjectURL(url)
+        resolve(null)
+      }
+      img.src = url
+    })
+  } catch (error) {
+    console.warn('Failed to load icon:', iconName, error)
+    return null
+  }
+}
+
+// Chart.js plugin for rendering icons in pie charts
+const iconPlugin = {
+  id: 'iconPlugin',
+  async beforeDraw(chart: any) {
+    if (chart.config.type !== 'pie') return
+    
+    const savedIcons = chart.config.options.plugins?.iconPlugin?.icons
+    if (!savedIcons) return
+    
+    // Preload all required icons
+    const iconPromises = Object.values(savedIcons).map((iconName: any) => {
+      if (iconName && typeof iconName === 'string') {
+        return loadIconImage(iconName.replace('mingcute:', ''))
+      }
+      return Promise.resolve(null)
+    })
+    
+    await Promise.all(iconPromises)
+  },
+  afterDraw(chart: any) {
+    if (chart.config.type !== 'pie') return
+    
+    const ctx = chart.ctx
+    const meta = chart.getDatasetMeta(0)
+    const savedIcons = chart.config.options.plugins?.iconPlugin?.icons
+    
+    if (!savedIcons || !meta.data) return
+    
+    meta.data.forEach((segment: any, index: number) => {
+      const iconName = savedIcons[index]
+      if (!iconName) return
+      
+      // Get the center point of the segment
+      const { x, y } = segment.getCenterPoint()
+      
+      // Draw a white circle as background for the icon
+      ctx.save()
+      ctx.fillStyle = 'white'
+      ctx.beginPath()
+      ctx.arc(x, y, 24, 0, 2 * Math.PI)
+      ctx.fill()
+      
+      // Add subtle border to the circle
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)'
+      ctx.lineWidth = 1
+      ctx.stroke()
+      
+      // Draw the icon image if available
+      const cleanIconName = iconName.replace('mingcute:', '')
+      const iconImage = iconImageCache.get(cleanIconName)
+      
+      if (iconImage) {
+        const iconSize = 20
+        ctx.drawImage(
+          iconImage,
+          x - iconSize / 2,
+          y - iconSize / 2,
+          iconSize,
+          iconSize
+        )
+      } else {
+        // Fallback to text if image not loaded
+        ctx.font = '10px sans-serif'
+        ctx.fillStyle = '#374151'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        const iconText = cleanIconName.split('-')[0]?.charAt(0)?.toUpperCase() || '?'
+        ctx.fillText(iconText, x, y)
+      }
+      
+      ctx.restore()
+    })
+  }
+}
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  ArcElement,
+  RadialLinearScale,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+  iconPlugin
+)
 const chartComponents = {
   bar: Bar,
   line: Line,
@@ -152,13 +282,26 @@ const computedOptions = computed(() => {
     console.warn('Invalid JSON in chart options:', e)
   }
 
-  return generateChartOptions(
+  const baseOptions = generateChartOptions(
     props.chartType,
     props.title,
     props.xLabel,
     props.yLabel,
     customOptions
   ) as any
+
+  // Add icon plugin for pie charts
+  if (props.chartType === 'pie' && props.icons) {
+    try {
+      const savedIcons = JSON.parse(props.icons)
+      if (!baseOptions.plugins) baseOptions.plugins = {}
+      baseOptions.plugins.iconPlugin = { icons: savedIcons }
+    } catch (e) {
+      console.warn('Error parsing saved icons:', e)
+    }
+  }
+
+  return baseOptions
 })
 
 // Set up chart defaults on mount

@@ -21,6 +21,7 @@ declare module '@tiptap/core' {
         options?: Record<string, any>
         colors?: Record<string, any>
         seriesNames?: Record<string, any>
+        icons?: Record<string, any>
       }) => ReturnType
       /**
        * Update chart attributes
@@ -34,6 +35,7 @@ declare module '@tiptap/core' {
         options?: Record<string, any>
         colors?: Record<string, any>
         seriesNames?: Record<string, any>
+        icons?: Record<string, any>
       }>) => ReturnType
       /**
        * Delete the current chart
@@ -136,6 +138,15 @@ export const Chart = Node.create<ChartOptions>({
           }
         },
       },
+      icons: {
+        default: '{}',
+        parseHTML: element => element.getAttribute('data-icons') || '{}',
+        renderHTML: attributes => {
+          return {
+            'data-icons': attributes.icons,
+          }
+        },
+      },
     }
   },
 
@@ -152,6 +163,7 @@ export const Chart = Node.create<ChartOptions>({
           options: element.getAttribute('data-options') || '{}',
           colors: element.getAttribute('data-colors') || '{}',
           seriesNames: element.getAttribute('data-series-names') || '{}',
+          icons: element.getAttribute('data-icons') || '{}',
         }),
       },
     ]
@@ -186,6 +198,9 @@ export const Chart = Node.create<ChartOptions>({
               seriesNames: typeof attributes.seriesNames === 'string'
                 ? attributes.seriesNames
                 : JSON.stringify(attributes.seriesNames || {}),
+              icons: typeof attributes.icons === 'string'
+                ? attributes.icons
+                : JSON.stringify(attributes.icons || {}),
             },
           })
         },
@@ -201,6 +216,9 @@ export const Chart = Node.create<ChartOptions>({
           }
           if (typeof attributes.seriesNames !== 'string' && attributes.seriesNames) {
             updateAttrs.seriesNames = JSON.stringify(attributes.seriesNames)
+          }
+          if (typeof attributes.icons !== 'string' && attributes.icons) {
+            updateAttrs.icons = JSON.stringify(attributes.icons)
           }
           return commands.updateAttributes(this.name, updateAttrs)
         },

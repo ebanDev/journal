@@ -143,6 +143,38 @@
             </div>
           </div>
 
+          <!-- Icon Customization for Pie Charts -->
+          <div v-if="selectedChartType === 'pie' && chartData && chartData.labels.length > 0" class="space-y-4">
+            <label class="block text-sm font-medium text-gray-700">Icônes des secteurs</label>
+            <div class="space-y-3">
+              <div v-for="(label, index) in chartData.labels" :key="index"
+                class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg">
+                <div class="flex items-center gap-2">
+                  <div class="w-4 h-4 rounded border border-gray-300"
+                    :style="{ backgroundColor: selectedColors[index] || CHART_COLORS[index % CHART_COLORS.length] }">
+                  </div>
+                  <span class="text-sm font-medium text-gray-700 flex-1">{{ label }}</span>
+                </div>
+
+                <!-- Icon picker -->
+                <div class="flex gap-2 items-center">
+                  <IconPicker
+                    v-model="selectedIcons[index]"
+                    :placeholder="`Icône pour ${label}`"
+                  />
+                  <!-- Clear icon button -->
+                  <button v-if="selectedIcons[index]" type="button"
+                    class="w-6 h-6 rounded border border-gray-300 bg-gray-50 hover:bg-gray-100 transition-colors text-gray-600 hover:text-gray-700"
+                    @click="selectedIcons[index] = ''" title="Supprimer l'icône">
+                    <svg class="w-3 h-3 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Color Customization for Other Chart Types -->
           <div v-else-if="chartData && chartData.datasets.length > 0" class="space-y-4">
             <label class="block text-sm font-medium text-gray-700">Couleurs des séries</label>
@@ -262,6 +294,122 @@ import {
 } from 'chart.js'
 import { Bar, Line, Pie } from 'vue-chartjs'
 import { useChart } from '~/composables/useChart'
+import IconPicker from '~/components/IconPicker.vue'
+
+// Cache for loaded icon images
+const iconImageCache = new Map<string, HTMLImageElement>()
+
+// Function to load SVG icon and convert to image
+async function loadIconImage(iconName: string): Promise<HTMLImageElement | null> {
+  // Check cache first
+  if (iconImageCache.has(iconName)) {
+    return iconImageCache.get(iconName)!
+  }
+
+  try {
+    // Fetch SVG from Iconify API
+    const response = await fetch(`https://api.iconify.design/mingcute/${iconName}.svg?color=%23374151&width=32&height=32`)
+    if (!response.ok) throw new Error('Failed to fetch icon')
+    
+    const svgText = await response.text()
+    
+    // Create image from SVG
+    const img = new Image()
+    const svgBlob = new Blob([svgText], { type: 'image/svg+xml' })
+    const url = URL.createObjectURL(svgBlob)
+    
+    return new Promise((resolve) => {
+      img.onload = () => {
+        URL.revokeObjectURL(url)
+        iconImageCache.set(iconName, img)
+        resolve(img)
+      }
+      img.onerror = () => {
+        URL.revokeObjectURL(url)
+        resolve(null)
+      }
+      img.src = url
+    })
+  } catch (error) {
+    console.warn('Failed to load icon:', iconName, error)
+    return null
+  }
+}
+
+// Chart.js plugin for rendering icons in pie charts
+const iconPlugin = {
+  id: 'iconPlugin',
+  async beforeDraw(chart: any) {
+    if (chart.config.type !== 'pie') return
+    
+    const savedIcons = chart.config.options.plugins?.iconPlugin?.icons
+    if (!savedIcons) return
+    
+    // Preload all required icons
+    const iconPromises = Object.values(savedIcons).map((iconName: any) => {
+      if (iconName && typeof iconName === 'string') {
+        return loadIconImage(iconName.replace('mingcute:', ''))
+      }
+      return Promise.resolve(null)
+    })
+    
+    await Promise.all(iconPromises)
+  },
+  afterDraw(chart: any) {
+    if (chart.config.type !== 'pie') return
+    
+    const ctx = chart.ctx
+    const meta = chart.getDatasetMeta(0)
+    const savedIcons = chart.config.options.plugins?.iconPlugin?.icons
+    
+    if (!savedIcons || !meta.data) return
+    
+    meta.data.forEach((segment: any, index: number) => {
+      const iconName = savedIcons[index]
+      if (!iconName) return
+      
+      // Get the center point of the segment
+      const { x, y } = segment.getCenterPoint()
+      
+      // Draw a white circle as background for the icon
+      ctx.save()
+      ctx.fillStyle = 'white'
+      ctx.beginPath()
+      ctx.arc(x, y, 24, 0, 2 * Math.PI)
+      ctx.fill()
+      
+      // Add subtle border to the circle
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)'
+      ctx.lineWidth = 1
+      ctx.stroke()
+      
+      // Draw the icon image if available
+      const cleanIconName = iconName.replace('mingcute:', '')
+      const iconImage = iconImageCache.get(cleanIconName)
+      
+      if (iconImage) {
+        const iconSize = 20
+        ctx.drawImage(
+          iconImage,
+          x - iconSize / 2,
+          y - iconSize / 2,
+          iconSize,
+          iconSize
+        )
+      } else {
+        // Fallback to text if image not loaded
+        ctx.font = '10px sans-serif'
+        ctx.fillStyle = '#374151'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        const iconText = cleanIconName.split('-')[0]?.charAt(0)?.toUpperCase() || '?'
+        ctx.fillText(iconText, x, y)
+      }
+      
+      ctx.restore()
+    })
+  }
+}
 
 // Register Chart.js components
 ChartJS.register(
@@ -275,7 +423,8 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
+  iconPlugin
 )
 
 ChartJS.defaults.color = 'oklch(55.3% 0.013 58.071)';
@@ -298,6 +447,70 @@ const yMin = ref<number | null>(null)
 const yMax = ref<number | null>(null)
 const showPoints = ref(true)
 const seriesNames = ref<Record<number, string>>({})
+const selectedIcons = ref<Record<number, string>>({})
+
+// Available icons for pie charts
+const availableIcons = [
+  { name: 'mingcute:user-line', unicode: '👤', label: 'Utilisateur' },
+  { name: 'mingcute:group-line', unicode: '👥', label: 'Groupe' },
+  { name: 'mingcute:home-line', unicode: '🏠', label: 'Maison' },
+  { name: 'mingcute:building-line', unicode: '🏢', label: 'Bâtiment' },
+  { name: 'mingcute:money-line', unicode: '💰', label: 'Argent' },
+  { name: 'mingcute:chart-line', unicode: '📈', label: 'Graphique' },
+  { name: 'mingcute:time-line', unicode: '⏰', label: 'Temps' },
+  { name: 'mingcute:star-line', unicode: '⭐', label: 'Étoile' },
+  { name: 'mingcute:heart-line', unicode: '❤️', label: 'Cœur' },
+  { name: 'mingcute:trophy-line', unicode: '🏆', label: 'Trophée' },
+  { name: 'mingcute:fire-line', unicode: '🔥', label: 'Feu' },
+  { name: 'mingcute:lightning-line', unicode: '⚡', label: 'Éclair' },
+  { name: 'mingcute:shield-line', unicode: '🛡️', label: 'Bouclier' },
+  { name: 'mingcute:rocket-line', unicode: '🚀', label: 'Fusée' },
+  { name: 'mingcute:gift-line', unicode: '🎁', label: 'Cadeau' },
+  { name: 'mingcute:camera-line', unicode: '📷', label: 'Caméra' },
+  { name: 'mingcute:music-line', unicode: '🎵', label: 'Musique' },
+  { name: 'mingcute:book-line', unicode: '📚', label: 'Livre' },
+  { name: 'mingcute:mail-line', unicode: '✉️', label: 'Mail' },
+  { name: 'mingcute:phone-line', unicode: '📞', label: 'Téléphone' },
+  { name: 'mingcute:car-line', unicode: '🚗', label: 'Voiture' },
+  { name: 'mingcute:plane-line', unicode: '✈️', label: 'Avion' },
+  { name: 'mingcute:earth-line', unicode: '🌍', label: 'Terre' },
+  { name: 'mingcute:sun-line', unicode: '☀️', label: 'Soleil' },
+  { name: 'mingcute:moon-line', unicode: '🌙', label: 'Lune' },
+  { name: 'mingcute:cloud-line', unicode: '☁️', label: 'Nuage' },
+  { name: 'mingcute:rain-line', unicode: '🌧️', label: 'Pluie' },
+  { name: 'mingcute:snow-line', unicode: '❄️', label: 'Neige' },
+  { name: 'mingcute:flower-line', unicode: '🌸', label: 'Fleur' },
+  { name: 'mingcute:tree-line', unicode: '🌳', label: 'Arbre' },
+  { name: 'mingcute:mountain-line', unicode: '⛰️', label: 'Montagne' },
+  { name: 'mingcute:water-line', unicode: '💧', label: 'Eau' },
+  { name: 'mingcute:coffee-line', unicode: '☕', label: 'Café' },
+  { name: 'mingcute:pizza-line', unicode: '🍕', label: 'Pizza' },
+  { name: 'mingcute:apple-line', unicode: '🍎', label: 'Pomme' },
+  { name: 'mingcute:game-line', unicode: '🎮', label: 'Jeu' },
+  { name: 'mingcute:education-line', unicode: '🎓', label: 'Éducation' },
+  { name: 'mingcute:medical-line', unicode: '⚕️', label: 'Médical' },
+  { name: 'mingcute:shopping-line', unicode: '🛒', label: 'Shopping' },
+  { name: 'mingcute:tool-line', unicode: '🔧', label: 'Outil' },
+  { name: 'mingcute:key-line', unicode: '🔑', label: 'Clé' },
+  { name: 'mingcute:lock-line', unicode: '🔒', label: 'Cadenas' },
+  { name: 'mingcute:warning-line', unicode: '⚠️', label: 'Attention' },
+  { name: 'mingcute:check-line', unicode: '✅', label: 'Valide' },
+  { name: 'mingcute:close-line', unicode: '❌', label: 'Fermer' },
+  { name: 'mingcute:add-line', unicode: '➕', label: 'Ajouter' },
+  { name: 'mingcute:minus-line', unicode: '➖', label: 'Moins' },
+  { name: 'mingcute:search-line', unicode: '🔍', label: 'Recherche' },
+  { name: 'mingcute:settings-line', unicode: '⚙️', label: 'Paramètres' },
+  { name: 'mingcute:bell-line', unicode: '🔔', label: 'Notification' },
+  { name: 'mingcute:calendar-line', unicode: '📅', label: 'Calendrier' },
+  { name: 'mingcute:folder-line', unicode: '📁', label: 'Dossier' },
+  { name: 'mingcute:file-line', unicode: '📄', label: 'Fichier' },
+  { name: 'mingcute:download-line', unicode: '⬇️', label: 'Télécharger' },
+  { name: 'mingcute:upload-line', unicode: '⬆️', label: 'Envoyer' },
+  { name: 'mingcute:link-line', unicode: '🔗', label: 'Lien' },
+  { name: 'mingcute:share-line', unicode: '📤', label: 'Partager' },
+  { name: 'mingcute:location-line', unicode: '📍', label: 'Localisation' },
+  { name: 'mingcute:map-line', unicode: '🗺️', label: 'Carte' }
+]
 
 // Drag and drop state
 const draggedIndex = ref<number | null>(null)
@@ -446,20 +659,33 @@ const computedOptions = computed(() => {
     console.warn('Invalid JSON in chart options:', e)
   }
 
-  return generateChartOptions(
+  const baseOptions = generateChartOptions(
     props.node.attrs.chartType,
     props.node.attrs.title,
     props.node.attrs.xLabel,
     props.node.attrs.yLabel,
     customOptions
   ) as any
+
+  // Add icon plugin for pie charts
+  if (props.node.attrs.chartType === 'pie' && props.node.attrs.icons) {
+    try {
+      const savedIcons = JSON.parse(props.node.attrs.icons)
+      if (!baseOptions.plugins) baseOptions.plugins = {}
+      baseOptions.plugins.iconPlugin = { icons: savedIcons }
+    } catch (e) {
+      console.warn('Error parsing saved icons:', e)
+    }
+  }
+
+  return baseOptions
 })
 
 const previewOptions = computed(() => {
   const isCircular = ['pie'].includes(selectedChartType.value)
   const isStacked = selectedChartType.value === 'stackedArea'
 
-  return {
+  const baseOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -519,6 +745,14 @@ const previewOptions = computed(() => {
       mode: 'index'
     } : undefined
   } as any
+
+  // Add icon plugin for pie charts with preview icons
+  if (selectedChartType.value === 'pie' && Object.keys(selectedIcons.value).length > 0) {
+    if (!baseOptions.plugins) baseOptions.plugins = {}
+    baseOptions.plugins.iconPlugin = { icons: selectedIcons.value }
+  }
+
+  return baseOptions
 })
 
 // Methods
@@ -776,6 +1010,9 @@ const saveChart = () => {
   const colorsToSave = Object.keys(selectedColors.value).length > 0
     ? JSON.stringify(selectedColors.value)
     : ''
+  const iconsToSave = Object.keys(selectedIcons.value).length > 0
+    ? JSON.stringify(selectedIcons.value)
+    : ''
   const opts: Record<string, any> = {
     gridX: showGridX.value,
     gridY: showGridY.value,
@@ -790,7 +1027,8 @@ const saveChart = () => {
     yLabel: yAxisLabel.value,
     colors: colorsToSave,
     options: JSON.stringify(opts),
-    seriesNames: JSON.stringify(seriesNames.value)
+    seriesNames: JSON.stringify(seriesNames.value),
+    icons: iconsToSave
   })
 
   showEditor.value = false
@@ -849,6 +1087,18 @@ watch(showEditor, (isOpen) => {
     try {
       seriesNames.value = JSON.parse(props.node.attrs.seriesNames || '{}')
     } catch { }
+
+    // Load saved icons
+    if (props.node.attrs.icons) {
+      try {
+        selectedIcons.value = JSON.parse(props.node.attrs.icons)
+      } catch (e) {
+        console.warn('Error parsing saved icons:', e)
+        selectedIcons.value = {}
+      }
+    } else {
+      selectedIcons.value = {}
+    }
   }
 })
 
@@ -858,6 +1108,20 @@ watch(selectedChartType, (newType) => {
     activeTab.value = 'general'
   }
 })
+
+// Watch for icon changes to preload them
+watch(selectedIcons, async (newIcons) => {
+  if (selectedChartType.value === 'pie' && Object.keys(newIcons).length > 0) {
+    // Preload icons when they change
+    const iconPromises = Object.values(newIcons).map((iconName: string) => {
+      if (iconName) {
+        return loadIconImage(iconName.replace('mingcute:', ''))
+      }
+      return Promise.resolve(null)
+    })
+    await Promise.all(iconPromises)
+  }
+}, { deep: true })
 
 // Initialize colors on mount if chart has data
 onMounted(() => {
