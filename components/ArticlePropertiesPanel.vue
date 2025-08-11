@@ -149,6 +149,7 @@
         <SourcesManager 
           ref="sourcesManager" 
           :editor="editor" 
+          :sources="meta.sources"
           @sources-changed="$emit('sources-changed', $event)" 
         />
       </div>

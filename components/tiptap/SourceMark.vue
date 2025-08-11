@@ -3,13 +3,6 @@
     <span class="source-mark inline-flex items-center gap-1 px-1 py-0.5 text-sm bg-amber-50 text-amber-800 rounded border border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer group">
       <Icon name="i-mingcute-book-2-line" class="text-xs" />
       <MarkViewContent />
-      <button 
-        @click.stop="deleteSource"
-        class="ml-1 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-red-100 rounded text-red-600 hover:text-red-800"
-        title="Supprimer la source et revenir au texte simple"
-      >
-        <Icon name="i-mingcute-close-line" class="text-xs" />
-      </button>
     </span>
     
     <template #content>

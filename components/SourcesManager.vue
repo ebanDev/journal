@@ -121,11 +121,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import { useSources, type Source } from '~/composables/useSources'
 
 interface Props {
   editor?: any // Tiptap editor instance
+  sources?: Source[] // Sources from article
 }
 
 const props = defineProps<Props>()
@@ -142,6 +143,13 @@ const {
   exportSources,
   loadSources: loadSourcesComposable
 } = useSources()
+
+// Watch props.sources and load them automatically
+watch(() => props.sources, (newSources) => {
+  if (newSources && Array.isArray(newSources)) {
+    loadSourcesComposable(newSources)
+  }
+}, { immediate: true, deep: true })
 
 const showAddForm = ref(false)
 const isLoadingMetadata = ref(false)
@@ -342,10 +350,6 @@ const handleRemoveSource = (sourceId: string) => {
 
 // Expose methods for parent component
 defineExpose({
-  loadSources: (sourcesData: Source[]) => {
-    console.log('SourcesManager.loadSources called with:', sourcesData)
-    loadSourcesComposable(sourcesData)
-  },
   getSources: exportSources,
   openNewSourceDialog: () => {
     showAddForm.value = true

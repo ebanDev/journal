@@ -507,8 +507,8 @@ const createNewSource = () => {
   propertiesPanel.value?.setActiveTab('1')
   
   nextTick(() => {
-    if (propertiesPanel.value?.sourcesManager) {
-      propertiesPanel.value.sourcesManager.openNewSourceDialog()
+    if (propertiesPanel.value?.sourcesManager?.value) {
+      propertiesPanel.value.sourcesManager.value.openNewSourceDialog()
     }
   })
 }

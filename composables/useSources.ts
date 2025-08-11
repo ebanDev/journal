@@ -73,15 +73,14 @@ export const useSources = () => {
 
   // Parse sources from JSON format (for loading from database)
   const loadSources = (sourcesJson: any[]): void => {
-    console.log('loadSources called with:', sourcesJson)
     if (Array.isArray(sourcesJson)) {
       // Clear existing sources first
       sources.value = []
       // Add new sources
-      sources.value = sourcesJson.filter(s => s && typeof s === 'object' && s.id)
-      console.log('Sources loaded, current sources:', sources.value)
+      const validSources = sourcesJson.filter(s => s && typeof s === 'object' && s.id)
+      sources.value = validSources
     } else {
-      console.warn('loadSources called with non-array:', sourcesJson)
+      console.warn('useSources.loadSources called with non-array:', sourcesJson)
     }
   }
 
