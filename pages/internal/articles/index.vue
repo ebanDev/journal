@@ -129,6 +129,15 @@
                       >
                         À la une
                       </UBadge>
+                      <UBadge 
+                        v-if="article.slug && analyticsData.has(article.slug)" 
+                        color="info" 
+                        size="sm" 
+                        variant="soft"
+                        :icon="loadingAnalytics ? 'i-mingcute-loading-line' : 'i-mingcute-eye-line'"
+                      >
+                        {{ analyticsData.get(article.slug)?.views || 0 }} vues
+                      </UBadge>
                     </div>
                   </div>
                 </div>
@@ -381,18 +390,22 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSupabaseClient, useToast } from '#imports'
 import { useDb } from '~/composables/useDb'
+import { useAnalytics } from '~/composables/useAnalytics'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import type { Tables } from '~/types/database.types'
 
 const supabase = useSupabaseClient()
 const { getIssues, deleteIssueById, getArticles } = useDb()
+const { getMultipleArticleViews } = useAnalytics()
 const router = useRouter()
 const toast = useToast()
 
 // State
 const selectedEdition = ref<Tables<'issues'> | null>(null)
 const articles = ref<any[]>([])
+const analyticsData = ref<Map<string, any>>(new Map())
 const loadingArticles = ref(false)
+const loadingAnalytics = ref(false)
 const showSettingsModal = ref(false)
 const showDeleteModal = ref(false)
 const showCreateModal = ref(false)
@@ -469,6 +482,7 @@ function getEditionActions(edition: Tables<'issues'>) {
 
 async function selectEdition(edition: Tables<'issues'>) {
   selectedEdition.value = edition
+  analyticsData.value.clear() // Clear previous analytics data
   await loadArticles(edition.id)
 }
 
@@ -476,6 +490,15 @@ async function loadArticles(editionId: string) {
   loadingArticles.value = true
   try {
     articles.value = await getArticles([{ type: 'issue', id: editionId }]) || []
+    
+    // Load analytics data for articles with slugs
+    const articlesWithSlugs = articles.value.filter(article => article.slug)
+    if (articlesWithSlugs.length > 0) {
+      loadingAnalytics.value = true
+      const slugs = articlesWithSlugs.map(article => article.slug)
+      analyticsData.value = await getMultipleArticleViews(slugs)
+      loadingAnalytics.value = false
+    }
   } catch (error) {
     console.error('Error loading articles:', error)
     articles.value = []
