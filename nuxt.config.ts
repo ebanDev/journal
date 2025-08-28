@@ -4,9 +4,10 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   css: ['~/assets/css/main.css'],
-  
+
   // Enable SSR and prerendering for better performance
   ssr: true,
+
   nitro: {
     prerender: {
       routes: ['/sitemap.xml', '/robots.txt']
@@ -204,5 +205,9 @@ export default defineNuxtConfig({
       type: 'module',
       navigateFallbackAllowlist: [/^\/$/]
     },
+  },
+
+  devtools: {
+    enabled: true
   }
 })

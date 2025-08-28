@@ -153,6 +153,7 @@ RETURNS TABLE (
   featured BOOLEAN,
   issue_id UUID,
   sources JSONB,
+  embedding VECTOR(1536),
   categories JSONB
 )
 LANGUAGE SQL
@@ -169,19 +170,22 @@ SECURITY DEFINER AS $$
     a.description,
     a.featured,
     a.issue_id,
-    a.sources,
+    COALESCE(a.sources, '[]'::jsonb) as sources,
+    a.embedding,
     COALESCE(
-      jsonb_agg(
-        jsonb_build_object(
-          'name', c.name,
-          'icon', c.icon
+      (
+        SELECT jsonb_agg(
+          jsonb_build_object(
+            'name', c.name,
+            'icon', c.icon
+          )
         )
-      ) FILTER (WHERE c.name IS NOT NULL),
+        FROM public.article_categories ac
+        JOIN public.categories c ON ac.category_id = c.id
+        WHERE ac.article_id = a.id
+      ),
       '[]'::jsonb
     ) as categories
   FROM public.articles a
-  LEFT JOIN public.article_categories ac ON a.id = ac.article_id
-  LEFT JOIN public.categories c ON ac.category_id = c.id
-  WHERE a.id = article_id
-  GROUP BY a.id, a.title, a.content, a.author_id, a.published_at, a.draft, a.slug, a.cover, a.description, a.featured, a.issue_id, a.sources;
+  WHERE a.id = article_id;
 $$;

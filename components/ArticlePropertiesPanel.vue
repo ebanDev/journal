@@ -184,6 +184,7 @@ import { ref, computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import type { Source as SourceType } from '~/composables/useSources'
 import { useImageUpload } from '~/composables/useImageUpload'
+import { navigateTo } from '#app'
 
 interface ArticleMeta {
   slug: string

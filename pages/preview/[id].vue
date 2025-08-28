@@ -84,10 +84,10 @@
       <p>Chargement...</p>
     </div>
     <div v-else class="text-center py-20">
-      <Icon name="mingcute:file-search-line" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
+      <Icon name="mingcute:file-search-line" class="w-16 h-16 text-gray-400 mx-auto mb-4 text-4xl" />
       <h2 class="text-2xl font-semibold text-gray-700 mb-2">Article non trouvé</h2>
       <p class="text-gray-500 mb-6">L'article que vous cherchez n'existe pas ou n'est plus disponible.</p>
-      <UButton label="Retour à l'accueil" icon="i-mingcute-home-line" to="/" />
+      <UButton label="Retour à l'accueil" icon="mingcute:home-3-line" to="/" />
     </div>
   </div>
 </template>

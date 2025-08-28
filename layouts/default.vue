@@ -6,7 +6,7 @@
     <div class="flex-grow w-full">
       <NuxtPage />
     </div>
-    <Footer class="pb-32 md:pb-0" />
+    <Footer class="pb-32 md:pb-6" />
     <TabBar class="md:hidden w-full shadow-t border-t border-gray-200" />
   </div>
 </template>
