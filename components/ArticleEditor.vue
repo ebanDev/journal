@@ -1,78 +1,80 @@
 <template>
-  <div class="flex h-screen overflow-auto">
+  <div class="flex h-screen">
     <!-- Editor Area -->
-    <div :class="['flex-1 px-8 py-6 transition-all', isPanelOpen ? 'mr-80' : 'mx-auto']">
-      <!-- Back Button -->
-      <div class="fixed top-4 left-60 z-20">
-        <UButton 
-          icon="i-mingcute-arrow-left-line" 
-          variant="ghost" 
-          color="neutral" 
-          :loading="saveState === 'loading'"
-          :disabled="saveState === 'loading'" 
-          @click="navigateBack"
-        >
-          <template v-if="saveState === 'loading'">En attente de la sauvegarde</template>
-          <template v-else></template>
-        </UButton>
-      </div>
+    <div :class="['flex-1 transition-all', isPanelOpen ? 'mr-80' : 'mx-auto']">
+      <div class="h-full overflow-auto">
+        <div class="px-8 py-6">
+          <!-- Back Button -->
+          <div class="fixed top-4 left-60 z-20">
+            <UButton 
+              icon="i-mingcute-arrow-left-line" 
+              variant="ghost" 
+              color="neutral" 
+              :loading="saveState === 'loading'"
+              :disabled="saveState === 'loading'" 
+              @click="navigateBack"
+            >
+              <template v-if="saveState === 'loading'">En attente de la sauvegarde</template>
+              <template v-else></template>
+            </UButton>
+          </div>
 
-      <!-- Floating Actions -->
-      <div class="fixed top-4 right-4 flex gap-2 z-20">
-        <UButton 
-          v-if="saveState === 'loading'" 
-          icon="i-mingcute-sandglass-line" 
-          variant="ghost" 
-          color="neutral"
-          title="Sauvegarde en cours" 
-        />
-        <UButton 
-          v-else-if="saveState === 'error'" 
-          icon="mingcute-warning-line" 
-          variant="ghost" 
-          color="error"
-          title="Erreur lors de la sauvegarde" 
-        />
-        <UButton 
-          v-else 
-          icon="i-mingcute-checkbox-line" 
-          variant="ghost" 
-          color="neutral" 
-          title="Sauvegardé" 
-        />
+          <!-- Floating Actions -->
+          <div class="fixed top-4 right-4 flex gap-2 z-20">
+            <UButton 
+              v-if="saveState === 'loading'" 
+              icon="i-mingcute-sandglass-line" 
+              variant="ghost" 
+              color="neutral"
+              title="Sauvegarde en cours" 
+            />
+            <UButton 
+              v-else-if="saveState === 'error'" 
+              icon="mingcute-warning-line" 
+              variant="ghost" 
+              color="error"
+              title="Erreur lors de la sauvegarde" 
+            />
+            <UButton 
+              v-else 
+              icon="i-mingcute-checkbox-line" 
+              variant="ghost" 
+              color="neutral" 
+              title="Sauvegardé" 
+            />
 
-        <UButton 
-          icon="mingcute-settings-2-line" 
-          variant="ghost" 
-          color="neutral" 
-          @click="isPanelOpen = !isPanelOpen"
-          :title="isPanelOpen ? 'Masquer les propriétés' : 'Afficher les propriétés'" 
-        />
-      </div>
+            <UButton 
+              icon="mingcute-settings-2-line" 
+              variant="ghost" 
+              color="neutral" 
+              @click="isPanelOpen = !isPanelOpen"
+              :title="isPanelOpen ? 'Masquer les propriétés' : 'Afficher les propriétés'" 
+            />
+          </div>
 
-      <!-- Title -->
-      <textarea 
-        v-model="title" 
-        placeholder="Titre de l´article..." 
-        ref="titleRef" 
-        @input="autoResize" 
-        rows="1" 
-        autocomplete="off" 
-        autocorrect="off" 
-        autocapitalize="off" 
-        spellcheck="false"
-        class="w-full text-4xl font-extrabold bg-transparent border-none focus:outline-none my-4 resize-none overflow-hidden whitespace-pre-line break-words" 
-      />
+          <!-- Title -->
+          <textarea 
+            v-model="title" 
+            placeholder="Titre de l´article..." 
+            ref="titleRef" 
+            @input="autoResize" 
+            rows="1" 
+            autocomplete="off" 
+            autocorrect="off" 
+            autocapitalize="off" 
+            spellcheck="false"
+            class="w-full text-4xl font-extrabold bg-transparent border-none focus:outline-none my-4 resize-none overflow-hidden whitespace-pre-line break-words" 
+          />
 
-      <!-- Sticky Toolbar -->
-      <div class="sticky top-2 z-10 mb-4">
-        <EditorToolbar 
-          v-if="editor" 
-          :editor="editor" 
-          @open-source-popover="openSourcePopover"
-          @open-chart-popover="openChartPopover"
-        />
-      </div>
+          <!-- Sticky Toolbar -->
+          <div class="sticky top-2 z-50 mb-4">
+            <EditorToolbar 
+              v-if="editor" 
+              :editor="editor" 
+              @open-source-popover="openSourcePopover"
+              @open-chart-popover="openChartPopover"
+            />
+          </div>
 
       <!-- Source Popover -->
       <SourcePopover
@@ -94,26 +96,28 @@
         @cancel="cancelChartPopover"
       />
 
-      <!-- Content -->
-      <EditorContent 
-        :editor="editor"
-        class="prose prose-headings:text-stone-700 prose-h1:text-3xl prose-h2:font-extrabold max-w-full w-[800px] min-h-full"
-        autocomplete="off" 
-        autocorrect="off" 
-        autocapitalize="off" 
-        spellcheck="false" 
-        @click="editor?.chain().focus().run()" 
-      />
-        
-      <!-- Grammar Suggestion Popup -->
-      <GrammarSuggestion
-        ref="grammarSuggestionRef"
-        :position="grammarSuggestionPosition"
-        :grammar-data="grammarSuggestionData"
-        :on-apply-replacement="applyGrammarReplacement"
-        :on-ignore="ignoreGrammarError"
-        @close="closeGrammarSuggestion"
-      />
+          <!-- Content -->
+          <EditorContent 
+            :editor="editor"
+            class="prose prose-headings:text-stone-700 prose-h1:text-3xl prose-h2:font-extrabold max-w-full w-[800px] min-h-full"
+            autocomplete="off" 
+            autocorrect="off" 
+            autocapitalize="off" 
+            spellcheck="false" 
+            @click="editor?.chain().focus().run()" 
+          />
+            
+          <!-- Grammar Suggestion Popup -->
+          <GrammarSuggestion
+            ref="grammarSuggestionRef"
+            :position="grammarSuggestionPosition"
+            :grammar-data="grammarSuggestionData"
+            :on-apply-replacement="applyGrammarReplacement"
+            :on-ignore="ignoreGrammarError"
+            @close="closeGrammarSuggestion"
+          />
+        </div>
+      </div>
     </div>
 
     <!-- Properties Panel -->

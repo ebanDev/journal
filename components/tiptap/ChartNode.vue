@@ -1080,6 +1080,8 @@ onMounted(() => {
 
 .chart-container {
   background: #fff;
+  position: relative;
+  z-index: 1;
 }
 
 .chart-display canvas {
