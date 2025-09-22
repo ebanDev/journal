@@ -41,8 +41,17 @@ export default defineNuxtConfig({
     '/radar': { isr: 300, headers: { 'cache-control': 's-maxage=150' } },
     // Search page client-side only
     '/search': { prerender: false },
-    // Admin pages always server-side rendered
-    '/internal/**': { headers: { 'cache-control': 'no-cache' } },
+    // Admin pages rendered fully on the client to avoid shared caching
+    '/internal/**': {
+      ssr: false,
+      prerender: false,
+      headers: { 'cache-control': 'no-store, max-age=0' }
+    },
+    '/login': {
+      ssr: false,
+      prerender: false,
+      headers: { 'cache-control': 'no-store, max-age=0' }
+    },
     // API routes with appropriate caching
     '/api/**': { cors: true, headers: { 'cache-control': 's-maxage=60' } },
     // Specific nuxt icon API route
