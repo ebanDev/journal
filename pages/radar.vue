@@ -40,30 +40,32 @@
           placeholder="Trier" class="w-40" icon="tabler-arrows-sort" />
       </div>
 
-      <div v-if="entries.length">
-        <div v-for="item in displayedEntries" :key="item.id" class="flex items-start p-4 rounded-lg bg-white shadow mb-4">
-          <!-- votes -->
-          <div class="flex flex-col items-center mr-4">
-            <UButton size="sm" :icon="votedIds.has(item.id) ? 'tabler-heart-off' : 'tabler-heart'"
-              :color="votedIds.has(item.id) ? 'secondary' : 'primary'" @click="vote(item.id)" />
-            <span class="mt-1 text-sm">{{ item.voteCount }}</span>
-          </div>
-          <!-- content -->
-          <NuxtLink :to="item.url || '#'" target="_blank" class="flex-1">
-            <div class="flex justify-between items-center">
-              <h3 class="md:text-lg text-base font-medium">{{ item.title }}</h3>
-              <h4 v-if="item.source" class="text-sm text-gray-600">{{ item.source }}</h4>
-              <div class="flex items-center space-x-2">
-                <UBadge :label="item.type" color="secondary" />
-              </div>
+      <ClientOnly>
+        <div v-if="entries.length">
+          <div v-for="item in displayedEntries" :key="item.id" class="flex items-start p-4 rounded-lg bg-white shadow mb-4">
+            <!-- votes -->
+            <div class="flex flex-col items-center mr-4">
+              <UButton size="sm" :icon="votedIds.has(item.id) ? 'tabler-heart-off' : 'tabler-heart'"
+                :color="votedIds.has(item.id) ? 'secondary' : 'primary'" @click="vote(item.id)" />
+              <span class="mt-1 text-sm">{{ item.voteCount }}</span>
             </div>
-            <p v-if="item.description" class="text-gray-600 mt-1 text-sm line-clamp-4">{{ item.description }}</p>
-          </NuxtLink>
+            <!-- content -->
+            <NuxtLink :to="item.url || '#'" target="_blank" class="flex-1">
+              <div class="flex justify-between items-center">
+                <h3 class="md:text-lg text-base font-medium">{{ item.title }}</h3>
+                <h4 v-if="item.source" class="text-sm text-gray-600">{{ item.source }}</h4>
+                <div class="flex items-center space-x-2">
+                  <UBadge :label="item.type" color="secondary" />
+                </div>
+              </div>
+              <p v-if="item.description" class="text-gray-600 mt-1 text-sm line-clamp-4">{{ item.description }}</p>
+            </NuxtLink>
+          </div>
         </div>
-      </div>
-      <div v-else class="text-gray-500 text-center py-10">Aucun article trouvé.</div>
-    </section>
-  </div>
+        <div v-else class="text-gray-500 text-center py-10">Aucun article trouvé.</div>
+      </section>
+    </div>
+  </ClientOnly>
 
   <component v-model:open="openSubmitModal" title="Envoyer un article" :loading="fetchingMetadata" :is="isMobile ? UDrawer : UModal">
     <template #body>
