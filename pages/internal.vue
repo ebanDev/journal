@@ -6,6 +6,7 @@
 
 <script setup lang="ts">
 definePageMeta({
-  layout: 'internal'
+  layout: 'internal',
+  ssr: false
 })
 </script>
