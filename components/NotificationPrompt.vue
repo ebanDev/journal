@@ -48,7 +48,7 @@ function checkIsMobile() {
 
 // Check if notifications are already granted
 function areNotificationsGranted(): boolean {
-  if (import.meta.client) {
+  if (import.meta.client && 'Notification' in window) {
     return Notification.permission === 'granted'
   }
   return false
