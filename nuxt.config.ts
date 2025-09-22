@@ -1,6 +1,19 @@
 // @ts-ignore
 import tailwindcss from "@tailwindcss/vite";
 
+const sensitiveRouteHeaders = {
+  'cache-control': 'private, no-store, max-age=0, must-revalidate',
+  'pragma': 'no-cache',
+  'surrogate-control': 'no-store',
+  'vary': 'cookie, authorization'
+} as const
+
+const sensitiveRouteRule = {
+  cache: false,
+  prerender: false,
+  headers: sensitiveRouteHeaders
+} as const
+
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   css: ['~/assets/css/main.css'],
@@ -42,16 +55,8 @@ export default defineNuxtConfig({
     // Search page client-side only
     '/search': { prerender: false },
     // Admin pages rendered fully on the client to avoid shared caching
-    '/internal/**': {
-      ssr: false,
-      prerender: false,
-      headers: { 'cache-control': 'no-store, max-age=0' }
-    },
-    '/login': {
-      ssr: false,
-      prerender: false,
-      headers: { 'cache-control': 'no-store, max-age=0' }
-    },
+    '/internal/**': sensitiveRouteRule,
+    '/login': sensitiveRouteRule,
     // API routes with appropriate caching
     '/api/**': { cors: true, headers: { 'cache-control': 's-maxage=60' } },
     // Specific nuxt icon API route
