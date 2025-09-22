@@ -16,13 +16,22 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { email, redirectTo } = await req.json();
+    const { email } = await req.json();
+
+    if (typeof email !== "string" || !email.trim()) {
+      return new Response(JSON.stringify({ error: "invalid_email" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
+    }
+
+    const targetEmail = email.trim().toLowerCase();
 
     // 1) Verify membership
     const { data: members, error: selErr } = await supabaseAdmin
       .from("members")
       .select("user_id")
-      .eq("email", email)
+      .eq("email", targetEmail)
       .limit(1);
 
     if (selErr) throw selErr;
@@ -33,37 +42,26 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 2) Check if user already exists in auth system by looking if the members has a user_id
-    // If user_id is null, it means the user has linked their email to the auth system
+    // 2) Decide which OTP flow to trigger based on whether the member already has an auth.user
   
-    console.log(Deno.env.get("SUPABASE_REDIRECT_URL"));
-    // If user exists, send login magic link
-    if (members[0].user_id) {
-      // User exists, send login magic link
-      const { data: inviteData, error: inviteErr } =
-        await supabaseAdmin.auth.signInWithOtp({
-          email,
-          options: {
-            emailRedirectTo: redirectTo,
-            shouldCreateUser: false,
-          },
-        });
+    const otpType = members[0].user_id ? "email" : "invite";
+
+    if (otpType === "email") {
+      const { error: otpErr } = await supabaseAdmin.auth.signInWithOtp({
+        email: targetEmail,
+        options: {
+          shouldCreateUser: false,
+        },
+      });
+
+      if (otpErr) throw otpErr;
+    } else {
+      const { error: inviteErr } = await supabaseAdmin.auth.admin.inviteUserByEmail(targetEmail);
 
       if (inviteErr) throw inviteErr;
-      return new Response(JSON.stringify(inviteData), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
     }
 
-    // 3) Send invite link if user does not exist
-    const { data: inviteData, error: inviteErr } =
-      await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-        emailRedirectTo: redirectTo,
-      });
-
-    if (inviteErr) throw inviteErr;
-    return new Response(JSON.stringify(inviteData), {
+    return new Response(JSON.stringify({ otpType }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
