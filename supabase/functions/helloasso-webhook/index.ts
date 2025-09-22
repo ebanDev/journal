@@ -19,8 +19,17 @@ Deno.serve(async (req)=>{
     if (payload.eventType !== "Order") return new Response(null, {
       status: 204
     });
+    const rawEmail = payload?.data?.payer?.email;
+    const normalizedEmail = typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : "";
+    if (!normalizedEmail) {
+      return new Response(JSON.stringify({
+        error: "Missing payer email"
+      }), {
+        status: 400
+      });
+    }
     const profile = {
-      email: payload.data.payer.email,
+      email: normalizedEmail,
       full_name: `${payload.data.items[0].user.firstName || ""} ${payload.data.items[0].user.lastName || ""}`,
       phone: payload?.data?.items?.[0]?.customFields?.find((field)=>typeof field?.name === "string" && /phone/i.test(field.name))?.answer ?? null,
       uni_year: payload?.data?.items?.[0]?.customFields?.find((field)=>typeof field?.name === "string" && /L1/i.test(field.name))?.answer ?? null,
