@@ -143,8 +143,11 @@ async function deleteMember(email: string) {
 async function inviteUser() {
   const email = prompt('Email de l\'utilisateur à inviter:')
   if (!email) return
-  
-  const { error } = await supabase.functions.invoke('send-invite', { body: { email } })
+
+  const normalizedEmail = email.trim().toLowerCase()
+  if (!normalizedEmail) return
+
+  const { error } = await supabase.functions.invoke('send-invite', { body: { email: normalizedEmail } })
   
   if (error) {
     console.error(error)

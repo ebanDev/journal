@@ -19,8 +19,10 @@ const translateErrorCode = (errorCode: string) => {
   }
 }
 
+const getNormalizedEmail = () => email.value.trim().toLowerCase()
+
 const sendInvite = async () => {
-  const normalizedEmail = email.value.trim().toLowerCase()
+  const normalizedEmail = getNormalizedEmail()
   if (!normalizedEmail) {
     toast.add({
       title: 'Adresse e-mail manquante',
@@ -31,6 +33,7 @@ const sendInvite = async () => {
     return
   }
 
+  email.value = normalizedEmail
   loading.value = true
   const { data: response, error } = await supabase.functions.invoke('send-invite', { body: { email: normalizedEmail } })
   const errorCode = (await error?.context.json())?.error
@@ -61,7 +64,7 @@ const sendInvite = async () => {
 }
 
 const verifyOtpCode = async () => {
-  const normalizedEmail = email.value.trim().toLowerCase()
+  const normalizedEmail = getNormalizedEmail()
   if (!normalizedEmail || !otpSent.value) {
     toast.add({
       title: 'Code introuvable',
