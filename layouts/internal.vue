@@ -1,73 +1,61 @@
 <template>
   <!-- Mobile profile experience -->
-  <div class="md:hidden min-h-screen bg-[#FCFAF8] text-[#1d1c1c]">
-    <div class="max-w-md mx-auto px-4 sm:px-6 py-8 flex flex-col gap-6">
-      <header class="flex items-start justify-between">
-        <div>
-          <p class="font-serif text-2xl font-bold leading-tight">Sursaut!</p>
-          <p class="text-sm text-gray-500">Espace interne</p>
-        </div>
-        <UButton 
-          to="/" 
-          variant="outline" 
-          size="sm"
-          icon="mingcute-home-3-line"
-        >
-          Accueil
-        </UButton>
-      </header>
-
-      <div class="bg-white rounded-2xl shadow-sm p-6 space-y-6">
-        <div class="flex flex-col items-center text-center gap-3">
-          <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-secondary-700 rounded-full flex items-center justify-center">
-            <UIcon name="mingcute:user-1-line" class="w-8 h-8 text-white" />
-          </div>
+  <div class="md:hidden min-h-screen bg-[#FCFAF8] text-[#1d1c1c] flex flex-col pb-24">
+    <div class="flex-1 overflow-y-auto">
+      <div class="max-w-md mx-auto px-4 sm:px-6 py-8 flex flex-col gap-6 pb-10">
+        <header class="flex items-start justify-between">
           <div>
-            <p class="text-xl font-semibold text-gray-900">{{ profileName }}</p>
-            <p class="text-sm text-gray-500">{{ profileEmail }}</p>
+            <p class="font-serif text-2xl font-bold leading-tight">Sursaut!</p>
+            <p class="text-sm text-gray-500">Espace interne</p>
           </div>
-          <UBadge :color="profileRoleColor" class="uppercase tracking-wide">{{ profileRoleLabel }}</UBadge>
+        </header>
+
+        <div class="bg-white rounded-2xl shadow-sm p-6 space-y-6">
+          <div class="flex flex-col items-center text-center gap-3">
+            <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-secondary-700 rounded-full flex items-center justify-center">
+              <UIcon name="mingcute:user-1-line" class="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <p class="text-xl font-semibold text-gray-900">{{ profileName }}</p>
+              <p class="text-sm text-gray-500">{{ profileEmail }}</p>
+            </div>
+            <UBadge :color="profileRoleColor" class="uppercase tracking-wide">{{ profileRoleLabel }}</UBadge>
+          </div>
+
+          <div class="space-y-4 text-sm">
+            <div class="flex items-start justify-between gap-4">
+              <p class="text-gray-500">Année universitaire</p>
+              <p class="font-medium text-right text-gray-900">{{ profileUniYear }}</p>
+            </div>
+            <div class="flex items-start justify-between gap-4">
+              <p class="text-gray-500">Téléphone</p>
+              <p class="font-medium text-right text-gray-900">{{ profilePhone }}</p>
+            </div>
+          </div>
+
+          <div class="rounded-xl bg-primary-50 text-primary-700 p-4 text-sm leading-relaxed">
+            <p>Vous consultez une version simplifiée de votre profil.</p>
+            <p class="mt-2">Les autres sections de l'espace interne sont disponibles depuis un ordinateur.</p>
+            <p class="mt-2">Pour mettre à jour vos informations, utilisez l'espace interne sur desktop.</p>
+          </div>
+
+          <div class="flex flex-col gap-3">
+            <AdminMembersSheet v-if="isAdmin" />
+            <UButton
+              variant="ghost"
+              color="error"
+              icon="mingcute-logout-line"
+              @click="logout"
+            >
+              Se déconnecter
+            </UButton>
+          </div>
         </div>
 
-        <div class="space-y-4 text-sm">
-          <div class="flex items-start justify-between gap-4">
-            <p class="text-gray-500">Année universitaire</p>
-            <p class="font-medium text-right text-gray-900">{{ profileUniYear }}</p>
-          </div>
-          <div class="flex items-start justify-between gap-4">
-            <p class="text-gray-500">Téléphone</p>
-            <p class="font-medium text-right text-gray-900">{{ profilePhone }}</p>
-          </div>
-        </div>
-
-        <div class="rounded-xl bg-primary-50 text-primary-700 p-4 text-sm leading-relaxed">
-          <p>Vous consultez une version simplifiée de votre profil.</p>
-          <p class="mt-2">Les autres sections de l'espace interne sont disponibles depuis un ordinateur.</p>
-          <p class="mt-2">Pour mettre à jour vos informations, utilisez l'espace interne sur desktop.</p>
-        </div>
-
-        <div class="flex flex-col gap-3">
-          <UButton 
-            variant="outline"
-            color="primary"
-            icon="mingcute-arrow-left-line"
-            to="/"
-          >
-            Retour à l'accueil
-          </UButton>
-          <UButton 
-            variant="ghost"
-            color="error"
-            icon="mingcute-logout-line"
-            @click="logout"
-          >
-            Se déconnecter
-          </UButton>
-        </div>
+        <p class="text-xs text-center text-gray-400">Besoin d'accéder à l'ensemble des outils&nbsp;? Connectez-vous depuis un ordinateur.</p>
       </div>
-
-      <p class="text-xs text-center text-gray-400">Besoin d'accéder à l'ensemble des outils&nbsp;? Connectez-vous depuis un ordinateur.</p>
     </div>
+    <TabBar class="md:hidden w-full shadow-t border-t border-gray-200" />
   </div>
 
   <!-- Desktop layout -->
@@ -228,3 +216,9 @@ watch(pendingCount, (newCount) => {
   }
 })
 </script>
+
+<style scoped>
+.shadow-t {
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+</style>
