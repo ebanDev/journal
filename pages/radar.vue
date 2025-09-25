@@ -63,9 +63,9 @@
           </div>
         </div>
         <div v-else class="text-gray-500 text-center py-10">Aucun article trouvé.</div>
-      </section>
-    </div>
-  </ClientOnly>
+      </ClientOnly>
+    </section>
+  </div>
 
   <component v-model:open="openSubmitModal" title="Envoyer un article" :loading="fetchingMetadata" :is="isMobile ? UDrawer : UModal">
     <template #body>
