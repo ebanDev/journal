@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -283,19 +283,22 @@ export type Database = {
       get_article_for_preview: {
         Args: { article_id: string }
         Returns: {
-          id: string
-          title: string
-          content: string
           author_id: string
-          published_at: string
-          draft: boolean
-          slug: string
-          cover: string
-          description: string
-          featured: boolean
-          issue_id: string
-          sources: Json
           categories: Json
+          content: string
+          cover: string
+          cover_crop: string
+          cover_label: string
+          description: string
+          draft: boolean
+          embedding: string
+          featured: boolean
+          id: string
+          issue_id: string
+          published_at: string
+          slug: string
+          sources: Json
+          title: string
         }[]
       }
       halfvec_avg: {
@@ -335,7 +338,7 @@ export type Database = {
         Returns: unknown
       }
       is_self: {
-        Args: { uid: string; mem_email: string }
+        Args: { mem_email: string; uid: string }
         Returns: boolean
       }
       ivfflat_bit_support: {
@@ -356,7 +359,7 @@ export type Database = {
       }
       l2_normalize: {
         Args: { "": string } | { "": unknown } | { "": unknown }
-        Returns: string
+        Returns: unknown
       }
       query_embeddings: {
         Args: { embedding: string; match_threshold: number }
@@ -364,6 +367,8 @@ export type Database = {
           author_id: string
           content: string
           cover: string | null
+          cover_crop: string
+          cover_label: string | null
           description: string | null
           draft: boolean
           embedding: string | null
@@ -377,8 +382,12 @@ export type Database = {
         }[]
       }
       role_unchanged: {
-        Args: { uid: string; mem_email: string; new_role: string }
+        Args: { mem_email: string; new_role: string; uid: string }
         Returns: boolean
+      }
+      send_issue_notification: {
+        Args: { issue_uuid: string }
+        Returns: Json
       }
       sparsevec_out: {
         Args: { "": unknown }
