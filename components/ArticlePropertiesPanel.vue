@@ -27,7 +27,17 @@
 
           <!-- Cover preview -->
           <div v-if="meta.cover" class="mb-4">
-            <img :src="meta.cover" alt="Aperçu de l'illustration" class="w-full h-auto rounded" />
+            <div class="w-full rounded overflow-hidden bg-gray-100 aspect-[3/2]">
+              <img
+                :src="meta.cover"
+                alt="Aperçu de l'illustration"
+                class="w-full h-full object-cover"
+                :class="coverObjectPositionClass"
+              />
+            </div>
+            <p v-if="meta.coverLabel" class="mt-2 text-xs text-gray-500 italic truncate">
+              {{ meta.coverLabel }}
+            </p>
           </div>
 
           <UFormField label="URL de l'illustration">
@@ -51,10 +61,18 @@
             </div>
           </UFormField>
 
+          <UFormField label="Source de l'illustration">
+            <UInput v-model="meta.coverLabel" placeholder="Crédit photo..." class="w-full" />
+          </UFormField>
+
+          <UFormField label="Recadrage de l'illustration">
+            <USelect v-model="meta.coverCrop" :items="coverCropOptions" class="w-full" />
+          </UFormField>
+
           <UFormField label="Description">
-            <UTextarea 
-              v-model="meta.description" 
-              placeholder="Courte description..." 
+            <UTextarea
+              v-model="meta.description"
+              placeholder="Courte description..."
               class="w-full resize-none" 
             />
           </UFormField>
@@ -190,6 +208,8 @@ interface ArticleMeta {
   slug: string
   id: string
   cover: string
+  coverLabel: string
+  coverCrop: 'top' | 'middle' | 'bottom'
   description: string
   featured: boolean
   publishedAt: string | null
@@ -245,6 +265,12 @@ const publicationStatusOptions = [
   { label: 'Publié', value: 'published' }
 ]
 
+const coverCropOptions = [
+  { label: 'Haut', value: 'top' },
+  { label: 'Milieu', value: 'middle' },
+  { label: 'Bas', value: 'bottom' }
+]
+
 const activeTab = ref('0')
 const activePropertiesTab = ref('0')
 
@@ -280,6 +306,17 @@ const copyToClipboard = (text: string) => {
     console.error('Failed to copy:', err)
   })
 }
+
+const coverObjectPositionClass = computed(() => {
+  switch (meta.value.coverCrop) {
+    case 'top':
+      return 'object-top'
+    case 'bottom':
+      return 'object-bottom'
+    default:
+      return 'object-center'
+  }
+})
 
 const handleCoverUpload = async (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0]

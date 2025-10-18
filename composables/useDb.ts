@@ -155,6 +155,8 @@ export function useDb() {
     if (error) throw error
     return {
       ...data,
+      cover_crop: data.cover_crop || 'middle',
+      cover_label: data.cover_label || null,
       categories: (data.article_categories || [])
         .map((ac: any) => ac.categories && { name: ac.categories.name, icon: ac.categories.icon })
         .filter(Boolean),
@@ -180,6 +182,8 @@ export function useDb() {
     const article = data[0]
     return {
       ...article,
+      cover_crop: article.cover_crop || 'middle',
+      cover_label: article.cover_label || null,
       categories: article.categories || [],
       sources: article.sources ? (() => {
         try {
