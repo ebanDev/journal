@@ -49,6 +49,8 @@ export type Database = {
           author_id: string
           content: string
           cover: string | null
+          cover_crop: string
+          cover_label: string | null
           description: string | null
           draft: boolean
           embedding: string | null
@@ -64,6 +66,8 @@ export type Database = {
           author_id: string
           content: string
           cover?: string | null
+          cover_crop?: string
+          cover_label?: string | null
           description?: string | null
           draft?: boolean
           embedding?: string | null
@@ -79,6 +83,8 @@ export type Database = {
           author_id?: string
           content?: string
           cover?: string | null
+          cover_crop?: string
+          cover_label?: string | null
           description?: string | null
           draft?: boolean
           embedding?: string | null

@@ -44,7 +44,17 @@
       </div>
 
       <div v-if="article.cover" class="mb-6">
-        <img :src="article.cover" alt="Cover" class="w-full rounded max-h-80 object-cover" />
+        <div class="w-full rounded overflow-hidden bg-gray-100 aspect-[3/2]">
+          <img
+            :src="article.cover"
+            alt="Cover"
+            class="w-full h-full object-cover"
+            :class="coverObjectPositionClass"
+          />
+        </div>
+        <p v-if="article.cover_label" class="mt-2 text-sm text-gray-500 italic">
+          {{ article.cover_label }}
+        </p>
       </div>
 
       <div @click="handleCitationClick" @mouseover="handleSourceHover" @mouseleave="handleSourceLeave">
@@ -126,6 +136,18 @@ const canEdit = computed(() => {
 })
 
 const formatDate = (date: string) => new Date(date).toLocaleDateString()
+
+const coverObjectPositionClass = computed(() => {
+  if (!article.value) return 'object-center'
+  switch (article.value.cover_crop) {
+    case 'top':
+      return 'object-top'
+    case 'bottom':
+      return 'object-bottom'
+    default:
+      return 'object-center'
+  }
+})
 
 const openSourceUrl = () => {
   if (hoveredSource.value && hoveredSource.value.url) {
