@@ -3,8 +3,12 @@ ALTER TABLE public.articles
   ADD COLUMN IF NOT EXISTS cover_label TEXT,
   ADD COLUMN IF NOT EXISTS cover_crop TEXT NOT NULL DEFAULT 'middle' CHECK (cover_crop IN ('top', 'middle', 'bottom'));
 
+-- Drop existing preview helper if it exists
+
+DROP FUNCTION IF EXISTS public.get_article_for_preview(UUID);
+
 -- Update preview helper to expose the new fields
-CREATE OR REPLACE FUNCTION public.get_article_for_preview(article_id UUID)
+CREATE FUNCTION public.get_article_for_preview(article_id UUID)
 RETURNS TABLE (
   id UUID,
   title TEXT,
