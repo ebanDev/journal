@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { debounce } from 'lodash-es'
+import { debounce } from '~/utils/debounce'
 import { ref, computed } from 'vue'
 const supabase = useSupabaseClient()
 const searchQuery = ref('')
