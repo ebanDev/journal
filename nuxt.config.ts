@@ -16,6 +16,10 @@ const sensitiveRouteRule = {
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
+  srcDir: 'app',
+  dir: {
+    app: 'app',
+  },
   css: ['~/assets/css/main.css'],
 
   // Enable SSR and prerendering for better performance
@@ -94,7 +98,12 @@ export default defineNuxtConfig({
   },
 
   typescript: {
-    typeCheck: true
+    typeCheck: true,
+    tsConfig: {
+      compilerOptions: {
+        noUncheckedIndexedAccess: false,
+      },
+    },
   },
 
   ui: {
