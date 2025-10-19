@@ -699,7 +699,7 @@ watch(() => newEdition.value.status, (newStatus, oldStatus) => {
 })
 
 // Realtime subscriptions
-let issuesChannel: RealtimeChannel
+let issuesChannel: RealtimeChannel | null = null
 
 onMounted(() => {
   issuesChannel = supabase
@@ -709,7 +709,10 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  supabase.removeChannel(issuesChannel)
+  if (issuesChannel) {
+    supabase.removeChannel(issuesChannel)
+    issuesChannel = null
+  }
 })
 </script>
 

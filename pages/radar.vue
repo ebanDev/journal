@@ -271,7 +271,7 @@ async function submitEntry() {
   }
 }
 
-let veilleChannel: RealtimeChannel
+let veilleChannel: RealtimeChannel | null = null
 async function vote(id: string) {
   const isVoted = votedIds.value.has(id)
   
@@ -351,7 +351,10 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  supabase.removeChannel(veilleChannel)
+  if (veilleChannel) {
+    supabase.removeChannel(veilleChannel)
+    veilleChannel = null
+  }
 })
 
 // SEO setup

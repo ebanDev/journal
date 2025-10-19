@@ -65,7 +65,7 @@ const supabase = useSupabaseClient()
 const toast = useToast()
 const members = ref<Tables<'members'>[]>([])
 const loading = ref(true)
-let membersChannel: RealtimeChannel
+let membersChannel: RealtimeChannel | null = null
 
 async function fetchMembers() {
   loading.value = true
@@ -176,6 +176,9 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  supabase.removeChannel(membersChannel)
+  if (membersChannel) {
+    supabase.removeChannel(membersChannel)
+    membersChannel = null
+  }
 })
 </script>

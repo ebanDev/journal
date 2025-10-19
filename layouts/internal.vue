@@ -177,7 +177,7 @@ if (isAdmin.value) {
 const items = ref<NavigationMenuItem[][]>([baseItems])
 
 // Real-time subscription for laveille changes
-let laveilleChannel: RealtimeChannel
+let laveilleChannel: RealtimeChannel | null = null
 
 onMounted(() => {
   if (isEditor.value) {
@@ -199,6 +199,7 @@ onMounted(() => {
 onUnmounted(() => {
   if (laveilleChannel) {
     client.removeChannel(laveilleChannel)
+    laveilleChannel = null
   }
 })
 

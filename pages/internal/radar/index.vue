@@ -584,7 +584,7 @@ async function deleteSubmission() {
 }
 
 // Real-time subscription for laveille changes
-let laveilleChannel: RealtimeChannel
+let laveilleChannel: RealtimeChannel | null = null
 
 onMounted(() => {
   fetchSubmissions()
@@ -605,6 +605,7 @@ onMounted(() => {
 onUnmounted(() => {
   if (laveilleChannel) {
     supabase.removeChannel(laveilleChannel)
+    laveilleChannel = null
   }
   if (searchTimeout) {
     clearTimeout(searchTimeout)
