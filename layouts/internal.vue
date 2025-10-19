@@ -44,7 +44,7 @@
             <UButton
               variant="ghost"
               color="error"
-              icon="mingcute-logout-line"
+              icon="mingcute-exit-line"
               @click="logout"
             >
               Se déconnecter

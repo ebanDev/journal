@@ -227,7 +227,7 @@ onMounted(loadProfile)
             <div v-else></div>
             <UButton 
               label="Se déconnecter" 
-              icon="mingcute:align-arrow-right-line" 
+              icon="mingcute:exit-line" 
               color="error" 
               variant="outline"
               @click="logout"
