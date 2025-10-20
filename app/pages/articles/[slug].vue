@@ -32,7 +32,7 @@
       </div>
 
       <div v-if="article.cover" class="mb-6">
-        <div class="w-full rounded overflow-hidden bg-gray-100 aspect-[3/2]">
+        <div class="w-full rounded overflow-hidden bg-gray-100 aspect-[2/1]">
           <img
             :src="article.cover"
             alt="Cover"
