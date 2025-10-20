@@ -425,6 +425,8 @@ const creatingEdition = ref(false)
 const fileInputSettings = ref<HTMLInputElement>()
 const fileInputCreate = ref<HTMLInputElement>()
 
+let analyticsRequestToken = 0
+
 // Load editions with proper typing
 const { data: editions, pending: pendingEditions, refresh: refreshEditions } = await useAsyncData('editions', async () => {
   try {
@@ -482,7 +484,9 @@ function getEditionActions(edition: Tables<'issues'>) {
 
 async function selectEdition(edition: Tables<'issues'>) {
   selectedEdition.value = edition
-  analyticsData.value.clear() // Clear previous analytics data
+  analyticsRequestToken++ // invalidate any in-flight analytics requests
+  analyticsData.value = new Map()
+  loadingAnalytics.value = false
   await loadArticles(edition.id)
 }
 
@@ -490,20 +494,46 @@ async function loadArticles(editionId: string) {
   loadingArticles.value = true
   try {
     articles.value = await getArticles([{ type: 'issue', id: editionId }]) || []
-    
-    // Load analytics data for articles with slugs
-    const articlesWithSlugs = articles.value.filter(article => article.slug)
-    if (articlesWithSlugs.length > 0) {
-      loadingAnalytics.value = true
-      const slugs = articlesWithSlugs.map(article => article.slug)
-      analyticsData.value = await getMultipleArticleViews(slugs)
-      loadingAnalytics.value = false
-    }
   } catch (error) {
     console.error('Error loading articles:', error)
     articles.value = []
   } finally {
     loadingArticles.value = false
+  }
+
+  scheduleAnalyticsLoad(editionId)
+}
+
+function scheduleAnalyticsLoad(editionId: string) {
+  const requestId = ++analyticsRequestToken
+  const articlesWithSlugs = articles.value.filter(article => article.slug)
+
+  if (!articlesWithSlugs.length) {
+    analyticsData.value = new Map()
+    loadingAnalytics.value = false
+    return
+  }
+
+  analyticsData.value = new Map()
+  loadingAnalytics.value = true
+
+  const slugs = articlesWithSlugs.map(article => article.slug)
+  void fetchAnalyticsForEdition(slugs, editionId, requestId)
+}
+
+async function fetchAnalyticsForEdition(slugs: string[], editionId: string, requestId: number) {
+  try {
+    const data = await getMultipleArticleViews(slugs)
+
+    if (analyticsRequestToken === requestId && selectedEdition.value?.id === editionId) {
+      analyticsData.value = new Map(data)
+    }
+  } catch (error) {
+    console.error('Error loading analytics data:', error)
+  } finally {
+    if (analyticsRequestToken === requestId) {
+      loadingAnalytics.value = false
+    }
   }
 }
 
