@@ -185,6 +185,13 @@ const textStyleButtons = computed(() => [
     command: () => props.editor?.chain().focus().toggleStrike().run(),
     active: () => props.editor?.isActive('strike') ?? false,
     title: 'Barré'
+  },
+  {
+    icon: 'i-mingcute-braces-line',
+    // @ts-ignore
+    command: () => props.editor?.chain().focus().toggleCode().run(),
+    active: () => props.editor?.isActive('code') ?? false,
+    title: 'Code'
   }
 ])
 
