@@ -27,7 +27,7 @@
 
           <!-- Cover preview -->
           <div v-if="meta.cover" class="mb-4">
-            <div class="w-full rounded overflow-hidden bg-gray-100 aspect-[3/2]">
+            <div class="w-full rounded overflow-hidden bg-gray-100 aspect-[2/1]">
               <img
                 :src="meta.cover"
                 alt="Aperçu de l'illustration"
