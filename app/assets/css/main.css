@@ -6,6 +6,7 @@
 @theme {
   --font-sans: 'Sen', sans-serif;
   --font-serif: 'Gravitas One', serif; 
+  --font-mono: 'Inconsolata', monospace;
 }
 
 :root {
