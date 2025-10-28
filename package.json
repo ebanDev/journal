@@ -26,6 +26,7 @@
     "@tiptap/extension-link": "^3.7.2",
     "@tiptap/extension-placeholder": "^3.7.2",
     "@tiptap/extension-strike": "^3.7.2",
+    "@tiptap/extension-typography": "^3.9.0",
     "@tiptap/extensions": "^3.7.2",
     "@tiptap/pm": "^3.7.2",
     "@tiptap/starter-kit": "^3.7.2",

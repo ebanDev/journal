@@ -154,6 +154,7 @@ import { PluginKey } from 'prosemirror-state'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import CharacterCount from '@tiptap/extension-character-count'
+import Typography from '@tiptap/extension-typography'
 import { DragHandle } from '@tiptap/extension-drag-handle'
 import { CustomImage } from '~/extensions/custom-image'
 import { Source } from '~/extensions/source'
@@ -262,6 +263,12 @@ const editor = useEditor({
     Source,
     Chart,
     grammarCheckExtension,
+    Typography.configure({
+      openDoubleQuote: false,
+      closeDoubleQuote: false,
+      openSingleQuote: false,
+      closeSingleQuote: false
+    })
   ],
   content: '',
   autofocus: 'end',
