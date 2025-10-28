@@ -2,7 +2,7 @@ import { Extension } from '@tiptap/core'
 import { Plugin, PluginKey } from 'prosemirror-state'
 import { Decoration, DecorationSet } from 'prosemirror-view'
 import type { EditorView } from 'prosemirror-view'
-import type { Command } from '@tiptap/core'
+import type { Node as PMNode } from '@tiptap/pm/model'
 
 type LTMatch = {
   message: string
@@ -14,11 +14,13 @@ type LTMatch = {
 }
 
 type ParagraphInfo = {
+  node: PMNode
   text: string
   offset: number
   from: number
   to: number
   lastModified: number
+  mathNodes: Array<{ textOffset: number; docStart: number; docEnd: number }>
 }
 
 export const LT_PLUGIN_KEY = new PluginKey('lt-grammar-check')
@@ -54,6 +56,27 @@ function extractParagraphs(view: EditorView, modifiedPositions: Set<number>): Pa
       const text = node.textContent
       const from = pos + 1 // Start of paragraph content
       const to = pos + node.nodeSize - 1 // End of paragraph content
+
+      const mathNodes: Array<{ textOffset: number; docStart: number; docEnd: number }> = []
+      let textOffset = 0
+
+      node.forEach((child, childOffset) => {
+        const docStart = from + childOffset
+
+        if (child.type && (child.type.name === 'inlineMath' || child.type.name === 'blockMath')) {
+          mathNodes.push({
+            textOffset,
+            docStart,
+            docEnd: docStart + child.nodeSize
+          })
+        }
+
+        const childTextLength = child.isText
+          ? child.text?.length ?? 0
+          : child.textContent.length
+
+        textOffset += childTextLength
+      })
       
       // Check if this paragraph was recently modified
       const wasModified = Array.from(modifiedPositions).some(modPos => 
@@ -61,11 +84,13 @@ function extractParagraphs(view: EditorView, modifiedPositions: Set<number>): Pa
       )
       
       paragraphs.push({
+        node,
         text,
         offset: globalOffset,
         from,
         to,
-        lastModified: wasModified ? now : 0
+        lastModified: wasModified ? now : 0,
+        mathNodes
       })
       
       globalOffset += text.length + 1 // +1 for paragraph separator
@@ -91,10 +116,64 @@ function mapOffsetsToPositions(
     return null
   }
   
-  return {
-    from: paragraph.from + localStart,
-    to: paragraph.from + localEnd
+  let fromPos: number | null = null
+  let toPos: number | null = null
+  let textCursor = 0
+
+  paragraph.node.forEach((child, childOffset) => {
+    if (fromPos !== null && toPos !== null) {
+      return
+    }
+
+    const childText = child.isText ? child.text ?? '' : child.textContent
+    const childLength = childText.length
+
+    if (childLength === 0) {
+      return
+    }
+
+    const childTextStart = textCursor
+    const childTextEnd = textCursor + childLength
+
+    if (fromPos === null && localStart >= childTextStart && localStart <= childTextEnd) {
+      const innerOffset = localStart - childTextStart
+      fromPos = paragraph.from + childOffset + innerOffset
+    }
+
+    if (localEnd >= childTextStart && localEnd <= childTextEnd) {
+      const innerOffset = localEnd - childTextStart
+      toPos = paragraph.from + childOffset + innerOffset
+    }
+
+    textCursor = childTextEnd
+  })
+
+  if (fromPos === null) {
+    fromPos = paragraph.from
   }
+
+  if (toPos === null) {
+    toPos = paragraph.to
+  }
+
+  if (fromPos >= toPos) {
+    return null
+  }
+
+  return { from: fromPos, to: toPos }
+}
+
+function matchesNearMathNode(paragraph: ParagraphInfo, from: number, to: number): boolean {
+  if (paragraph.mathNodes.length === 0) {
+    return false
+  }
+
+  const buffer = 1
+  return paragraph.mathNodes.some(({ docStart, docEnd }) => {
+    const bufferedStart = Math.max(paragraph.from, docStart - buffer)
+    const bufferedEnd = Math.min(paragraph.to, docEnd + buffer)
+    return from <= bufferedEnd && to >= bufferedStart
+  })
 }
 
 async function checkWithLT(
@@ -262,7 +341,11 @@ export const GrammarCheck = Extension.create<GrammarCheckOptions>({
                 
                 const positions = mapOffsetsToPositions(adjustedMatch, mapping.paragraph)
                 if (!positions || positions.to <= positions.from) continue
-                
+
+                if (matchesNearMathNode(mapping.paragraph, positions.from, positions.to)) {
+                  continue
+                }
+
                 const severity = match.rule?.issueType || 'misspelling'
                 const className = severity === 'misspelling' ? 'lt-spelling' : 'lt-grammar'
                 

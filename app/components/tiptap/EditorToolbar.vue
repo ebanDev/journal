@@ -63,6 +63,7 @@
           @click="button.command" 
         />
       </UTooltip>
+
     </div>
 
     <!-- Separator -->
@@ -105,6 +106,19 @@
           @click.stop="$emit('open-chart-popover', $event)" 
         />
       </UTooltip>
+
+      <!-- Math button -->
+      <UTooltip text="Formule mathématique">
+        <UButton 
+          icon="i-tabler-math-function" 
+          size="xs" 
+          variant="ghost" 
+          color="neutral"
+          :class="isMathActive ? 'bg-amber-100 text-amber-700' : ''"
+          :disabled="!editor"
+          @click="insertMath"
+        />
+      </UTooltip>
     </div>
 
     <!-- Hidden file input -->
@@ -138,6 +152,11 @@ const emit = defineEmits<{
 
 const { uploadImage, isUploading } = useImageUpload()
 const fileInput = ref<HTMLInputElement | null>(null)
+const isMathActive = computed(() => {
+  const editorInstance = props.editor
+  if (!editorInstance) return false
+  return editorInstance.isActive('blockMath') || editorInstance.isActive('inlineMath')
+})
 
 // Format buttons configuration organized by groups
 const headingButtons = computed(() => [
@@ -252,6 +271,26 @@ const handleImageUpload = async (event: Event) => {
     if (fileInput.value) {
       fileInput.value.value = ''
     }
+  }
+}
+
+const insertMath = () => {
+  if (!props.editor) return
+  const latex = window.prompt('Entrez la formule LaTeX')
+  if (!latex) return
+
+  const { $from } = props.editor.state.selection
+  const isInlineContext = $from.parent.inlineContent
+  const chain = props.editor.chain().focus()
+
+  if (isInlineContext) {
+    chain.insertInlineMath({ latex }).run()
+    return
+  }
+
+  if (!chain.insertBlockMath({ latex }).run()) {
+    // fallback to inline if block insertion failed
+    props.editor.chain().focus().insertInlineMath({ latex }).run()
   }
 }
 </script>

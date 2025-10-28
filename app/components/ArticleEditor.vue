@@ -156,6 +156,7 @@ import Placeholder from '@tiptap/extension-placeholder'
 import CharacterCount from '@tiptap/extension-character-count'
 import Typography from '@tiptap/extension-typography'
 import { DragHandle } from '@tiptap/extension-drag-handle'
+import { Mathematics } from '@tiptap/extension-mathematics'
 import { CustomImage } from '~/extensions/custom-image'
 import { Source } from '~/extensions/source'
 import { Chart } from '~/extensions/chart'
@@ -164,6 +165,7 @@ import { debounce } from '~/utils/debounce'
 import { useDb } from '~/composables/useDb'
 import { useImageUpload } from '~/composables/useImageUpload'
 import type { Source as SourceType } from '~/composables/useSources'
+import 'katex/dist/katex.min.css'
 
 // Components
 import EditorToolbar from '~/components/tiptap/EditorToolbar.vue'
@@ -254,6 +256,31 @@ const editor = useEditor({
     Placeholder.configure({ placeholder: 'Rédigez...' }),
     CharacterCount.configure({ limit: 50000 }),
     DragHandle,
+    Mathematics.configure({
+      inlineOptions: {
+        onClick: (node, pos) => {
+          const currentEditor = editor.value
+          if (!currentEditor) return
+          const latex = window.prompt('Modifier la formule', node.attrs.latex)
+          if (latex !== null) {
+            currentEditor.chain().setNodeSelection(pos).updateInlineMath({ latex }).focus().run()
+          }
+        }
+      },
+      blockOptions: {
+        onClick: (node, pos) => {
+          const currentEditor = editor.value
+          if (!currentEditor) return
+          const latex = window.prompt('Modifier la formule', node.attrs.latex)
+          if (latex !== null) {
+            currentEditor.chain().setNodeSelection(pos).updateBlockMath({ latex }).focus().run()
+          }
+        }
+      },
+      katexOptions: {
+        throwOnError: false
+      }
+    }),
     CustomImage.configure({
       onUpload: uploadImage,
       HTMLAttributes: {
