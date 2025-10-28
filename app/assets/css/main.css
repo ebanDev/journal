@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 @plugin '@tailwindcss/typography';
+@plugin 'tailwind-scrollbar';
 
 @theme {
   --font-sans: 'Sen', sans-serif;
@@ -34,6 +35,8 @@
   --color-amber-950: #161008;
 
   text-size-adjust: 100%;
+
+  @apply scroll-smooth scrollbar scrollbar-thumb-[#906937] scrollbar-track-[#f1e7da];
 }
 
 /* Grammar checker decorations */
