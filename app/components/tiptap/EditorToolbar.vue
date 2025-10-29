@@ -106,19 +106,6 @@
           @click.stop="$emit('open-chart-popover', $event)" 
         />
       </UTooltip>
-
-      <!-- Math button -->
-      <UTooltip text="Formule mathématique">
-        <UButton 
-          icon="i-tabler-math-function" 
-          size="xs" 
-          variant="ghost" 
-          color="neutral"
-          :class="isMathActive ? 'bg-amber-100 text-amber-700' : ''"
-          :disabled="!editor"
-          @click="insertMath"
-        />
-      </UTooltip>
     </div>
 
     <!-- Hidden file input -->
@@ -211,6 +198,13 @@ const textStyleButtons = computed(() => [
     command: () => props.editor?.chain().focus().toggleCode().run(),
     active: () => props.editor?.isActive('code') ?? false,
     title: 'Code'
+  },
+  {
+    icon: 'mingcute:formula-line',
+    // @ts-ignore
+    command: insertMath,
+    active: () => isMathActive.value,
+    title: 'Formule mathématique'
   }
 ])
 
