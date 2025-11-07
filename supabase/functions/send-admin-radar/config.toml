@@ -1,0 +1,8 @@
+name = "send-admin-radar"
+type = "edge_function"
+
+[env]
+SUPABASE_URL              = "env(SUPABASE_URL)"
+SUPABASE_SERVICE_ROLE_KEY = "env(SUPABASE_SERVICE_ROLE_KEY)"
+RADAR_SECRET              = "env(RADAR_SECRET)"
+
