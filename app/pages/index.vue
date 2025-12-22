@@ -66,10 +66,9 @@
           <NuxtLink :to="item.url || ''" target="_blank"
             class="block hover:bg-[var(--color-amber-150)] transition-colors rounded-lg">
             <div class="flex items-center gap-2">
-              <div class="size-20 md:size-28 rounded-lg bg-gray-100 flex shrink-0 items-center justify-center">
-                <img v-if="item.cover" :src="item.cover" class="object-cover rounded-lg w-full h-full"
+              <div v-if="item.cover" class="size-20 md:size-28 rounded-lg bg-gray-100 flex shrink-0 items-center justify-center">
+                <img :src="item.cover" class="object-cover rounded-lg w-full h-full"
                   :alt="item.title" />
-                <span v-else class="text-gray-400">No image</span>
               </div>
               <div class="flex flex-col gap-1 p-2">
                 <UBadge v-if="item.type" color="secondary" :label="item.type" class="w-max" />
