@@ -41,7 +41,7 @@
       </template>
       <template #footer>
         <UButton label="Enregistrer" @click="saveCategory" :loading="submitting" />
-        <UButton label="Annuler" color="secondary" @click="modalOpen = false" />
+        <UButton v-if="editingId" label="Supprimer" color="error" icon="tabler-trash" @click="deleteCategory" :loading="deleting" />
       </template>
     </UModal>
   </div>
@@ -58,10 +58,11 @@ const toast = useToast()
 const categories = ref<Tables<'categories'>[]>([])
 const modalOpen = ref(false)
 const submitting = ref(false)
+const deleting = ref(false)
 const uploading = ref(false)
 const fileInput = ref<HTMLInputElement>()
 const form = reactive({ name: '', icon: '', cover: '' })
-let editingId: string | null = null
+const editingId = ref<string | null>(null)
 
 async function fetchCategories() {
   const { data } = await client.from('categories').select('*').order('name')
@@ -69,7 +70,7 @@ async function fetchCategories() {
 }
 
 function openAddModal() {
-  editingId = null
+  editingId.value = null
   form.name = ''
   form.icon = ''
   form.cover = ''
@@ -77,7 +78,7 @@ function openAddModal() {
 }
 
 function editCategory(cat: Tables<'categories'>) {
-  editingId = cat.id || null
+  editingId.value = cat.id || null
   form.name = cat.name
   form.icon = cat.icon || ''
   form.cover = cat.cover || ''
@@ -87,8 +88,8 @@ function editCategory(cat: Tables<'categories'>) {
 async function saveCategory() {
   submitting.value = true
   try {
-    if (editingId) {
-      const { error } = await client.from('categories').update({ name: form.name, icon: form.icon, cover: form.cover }).eq('id', editingId)
+    if (editingId.value) {
+      const { error } = await client.from('categories').update({ name: form.name, icon: form.icon, cover: form.cover }).eq('id', editingId.value)
       if (error) throw error
       
       toast.add({
@@ -121,6 +122,42 @@ async function saveCategory() {
     })
   } finally {
     submitting.value = false
+  }
+}
+
+async function deleteCategory() {
+  if (!editingId.value) return
+  const confirmed = window.confirm('Supprimer cette catégorie ?')
+  if (!confirmed) return
+
+  const idToDelete = editingId.value
+  const previousCategories = [...categories.value]
+  deleting.value = true
+  modalOpen.value = false
+  editingId.value = null
+  categories.value = categories.value.filter((cat) => cat.id !== idToDelete)
+
+  try {
+    const { error } = await client.from('categories').delete().eq('id', idToDelete)
+    if (error) throw error
+
+    toast.add({
+      title: 'Catégorie supprimée',
+      color: 'success',
+      icon: 'tabler-check',
+      description: 'La catégorie a été supprimée avec succès.'
+    })
+  } catch (error: any) {
+    categories.value = previousCategories
+    console.error('Error deleting category:', error)
+    toast.add({
+      title: 'Erreur',
+      color: 'error',
+      icon: 'tabler-x',
+      description: error.message || 'Une erreur est survenue lors de la suppression de la catégorie.'
+    })
+  } finally {
+    deleting.value = false
   }
 }
 
