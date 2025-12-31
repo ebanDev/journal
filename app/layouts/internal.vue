@@ -74,8 +74,37 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import type { NavigationMenuItem } from '@nuxt/ui'
-import { useSupabaseClient, useSupabaseUser, useAsyncData, useToast } from '#imports'
+import { useSupabaseClient, useSupabaseUser, useAsyncData, useToast, useRoute, useSeoMeta, useHead } from '#imports'
 import type { RealtimeChannel } from '@supabase/supabase-js'
+
+const route = useRoute()
+
+const internalTitle = 'Espace interne - Sursaut!'
+const internalDescription = 'Espace interne pour les membres de Sursaut!, le journal des luttes de Bordeaux.'
+const internalUrl = computed(() => `https://sursaut-revue.fr${route.path}`)
+
+useSeoMeta({
+  title: internalTitle,
+  description: internalDescription,
+  robots: 'noindex, nofollow',
+  ogTitle: internalTitle,
+  ogDescription: internalDescription,
+  ogImage: 'https://sursaut-revue.fr/icon-512x512.png',
+  ogUrl: internalUrl,
+  ogType: 'website',
+  ogSiteName: 'Sursaut!',
+  ogLocale: 'fr_FR',
+  twitterCard: 'summary_large_image',
+  twitterTitle: internalTitle,
+  twitterDescription: internalDescription,
+  twitterImage: 'https://sursaut-revue.fr/icon-512x512.png',
+})
+
+useHead({
+  link: [
+    { rel: 'canonical', href: internalUrl }
+  ]
+})
 
 // Fetch current member role
 const client = useSupabaseClient()

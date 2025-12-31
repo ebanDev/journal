@@ -316,6 +316,7 @@ const setupSEO = (articleData: ArticleWithCategories) => {
   
   const categories = articleData.categories?.map(cat => cat.name).join(', ') || ''
   const imageUrl = articleData.cover || 'https://sursaut-revue.fr/icon-512x512.png'
+  const previewUrl = `https://sursaut-revue.fr/preview/${articleData.id}`
   
   useSeoMeta({
     title,
@@ -327,6 +328,7 @@ const setupSEO = (articleData: ArticleWithCategories) => {
     ogTitle: title,
     ogDescription: description,
     ogImage: imageUrl,
+    ogUrl: previewUrl,
     ogType: 'article',
     ogSiteName: 'Sursaut!',
     ogLocale: 'fr_FR',
@@ -343,6 +345,9 @@ const setupSEO = (articleData: ArticleWithCategories) => {
   
   // Add noindex directive
   useHead({
+    link: [
+      { rel: 'canonical', href: previewUrl }
+    ],
     meta: [
       { name: 'robots', content: 'noindex, nofollow' }
     ]
