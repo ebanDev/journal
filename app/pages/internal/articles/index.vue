@@ -22,8 +22,14 @@
             v-for="edition in editions" 
             :key="edition.id"
             class="group flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-            :class="{ 'bg-primary-50 border border-primary-200': selectedEdition?.id === edition.id }"
+            :class="{
+              'bg-primary-50 border border-primary-200': selectedEdition?.id === edition.id,
+              'ring-2 ring-primary-300 bg-primary-50': dragOverEditionId === edition.id && dragSourceEditionId !== edition.id
+            }"
             @click="selectEdition(edition)"
+            @dragover="onEditionDragOver($event, edition)"
+            @dragleave="onEditionDragLeave(edition)"
+            @drop="onEditionDrop($event, edition)"
           >
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-1">
@@ -36,6 +42,12 @@
                   {{ translateEditionStatus(edition.status) }}
                 </UBadge>
               </div>
+              <p
+                v-if="dragOverEditionId === edition.id && dragSourceEditionId !== edition.id"
+                class="text-xs text-primary-600 font-medium"
+              >
+                Relacher pour deplacer ici
+              </p>
               <p class="text-xs text-gray-500 truncate">
                 {{ edition.description || 'Pas de description' }}
               </p>
@@ -108,6 +120,9 @@
               :key="article.id"
               class="cursor-pointer hover:shadow-md transition-shadow flex flex-col h-full"
               @click="router.push(`/internal/articles/${article.id}`)"
+              draggable="true"
+              @dragstart="onArticleDragStart($event, article)"
+              @dragend="onArticleDragEnd"
             >
               <template #header>
                 <div class="flex items-start justify-between">
@@ -424,6 +439,9 @@ const deleting = ref(false)
 const creatingEdition = ref(false)
 const fileInputSettings = ref<HTMLInputElement>()
 const fileInputCreate = ref<HTMLInputElement>()
+const draggingArticleId = ref<string | null>(null)
+const dragSourceEditionId = ref<string | null>(null)
+const dragOverEditionId = ref<string | null>(null)
 
 let analyticsRequestToken = 0
 
@@ -521,6 +539,83 @@ function scheduleAnalyticsLoad(editionId: string) {
   void fetchAnalyticsForEdition(slugs, editionId, requestId)
 }
 
+function onArticleDragStart(event: DragEvent, article: any) {
+  if (!selectedEdition.value) return
+  draggingArticleId.value = article.id
+  dragSourceEditionId.value = selectedEdition.value.id
+  dragOverEditionId.value = null
+  event.dataTransfer?.setData('text/plain', article.id)
+  event.dataTransfer?.setData('application/x-issue-id', selectedEdition.value.id)
+  event.dataTransfer?.setData('application/x-article-title', article.title || '')
+  if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move'
+}
+
+function onArticleDragEnd() {
+  draggingArticleId.value = null
+  dragSourceEditionId.value = null
+  dragOverEditionId.value = null
+}
+
+function onEditionDragOver(event: DragEvent, edition: Tables<'issues'>) {
+  if (!draggingArticleId.value) return
+  if (edition.id === dragSourceEditionId.value) return
+  event.preventDefault()
+  if (event.dataTransfer) event.dataTransfer.dropEffect = 'move'
+  dragOverEditionId.value = edition.id
+}
+
+function onEditionDragLeave(edition: Tables<'issues'>) {
+  if (dragOverEditionId.value === edition.id) {
+    dragOverEditionId.value = null
+  }
+}
+
+async function onEditionDrop(event: DragEvent, edition: Tables<'issues'>) {
+  event.preventDefault()
+  const articleId = draggingArticleId.value || event.dataTransfer?.getData('text/plain')
+  const sourceEditionId = dragSourceEditionId.value || event.dataTransfer?.getData('application/x-issue-id')
+  if (!articleId || !sourceEditionId || edition.id === sourceEditionId) {
+    onArticleDragEnd()
+    return
+  }
+
+  const previousArticles = [...articles.value]
+  const articleIndex = articles.value.findIndex(article => article.id === articleId)
+  if (articleIndex !== -1) {
+    articles.value.splice(articleIndex, 1)
+  }
+
+  try {
+    const { error } = await supabase
+      .from('articles')
+      .update({ issue_id: edition.id })
+      .eq('id', articleId)
+    if (error) throw error
+
+    toast.add({
+      title: 'Article déplacé',
+      color: 'success',
+      icon: 'tabler-check',
+      description: `L'article a été déplacé vers ${edition.title}.`
+    })
+
+    if (selectedEdition.value) {
+      await loadArticles(selectedEdition.value.id)
+    }
+  } catch (error) {
+    console.error('Error moving article:', error)
+    articles.value = previousArticles
+    toast.add({
+      title: 'Erreur',
+      color: 'error',
+      icon: 'tabler-x',
+      description: 'Impossible de déplacer cet article pour le moment.'
+    })
+  } finally {
+    onArticleDragEnd()
+  }
+}
+
 async function fetchAnalyticsForEdition(slugs: string[], editionId: string, requestId: number) {
   try {
     const data = await getMultipleArticleViews(slugs)
@@ -602,22 +697,32 @@ function openCreateEditionModal() {
 
 async function confirmDelete() {
   if (!editionToDelete.value) return
-  
+
+  const deletedId = editionToDelete.value.id
+  const previousEditions = editions.value ? [...editions.value] : []
+  if (editions.value) {
+    editions.value = editions.value.filter((edition: Tables<'issues'>) => edition.id !== deletedId)
+  }
+  if (selectedEdition.value?.id === deletedId) {
+    selectedEdition.value = null
+    articles.value = []
+  }
+
   deleting.value = true
   try {
-    await deleteIssueById(editionToDelete.value.id)
+    await deleteIssueById(deletedId)
     showDeleteModal.value = false
-    const deletedId = editionToDelete.value.id
     editionToDelete.value = null
     await refreshEditions()
-    
-    // Clear selection if deleted edition was selected
-    if (selectedEdition.value?.id === deletedId) {
-      selectedEdition.value = null
-      articles.value = []
-    }
   } catch (error) {
     console.error('Error deleting edition:', error)
+    editions.value = previousEditions
+    toast.add({
+      title: 'Erreur',
+      color: 'error',
+      icon: 'tabler-x',
+      description: 'Impossible de supprimer cette édition pour le moment.'
+    })
   } finally {
     deleting.value = false
   }
