@@ -172,6 +172,12 @@ useHead({
       <p class="text-gray-600 mb-6 max-w-lg mt-2">Veuillez entrer votre adresse e-mail pour recevoir un code de
         connexion. Celle-ci doit être identique à celle utilisée lors de votre adhésion. En cas de problème contactez <a
           href="mailto:solidairesetu33@gmail.com" class="underline">solidairesetu33@gmail.com</a>.</p>
+      <div
+        class="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800"
+        role="alert"
+      >
+        Pensez à vérifier votre dossier spam.
+      </div>
       <UInput label="E-Mail" placeholder="jean@dupont.fr" v-model="email" type="email" class="mb-4"
         :disabled="loading || verifying" />
       <UButton @click="sendInvite" icon="tabler:mail" class="mb-6" :loading="loading"
