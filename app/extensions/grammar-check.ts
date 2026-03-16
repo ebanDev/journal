@@ -93,7 +93,7 @@ function extractParagraphs(view: EditorView, modifiedPositions: Set<number>): Pa
         mathNodes
       })
       
-      globalOffset += text.length + 1 // +1 for paragraph separator
+      globalOffset += text.length + 2
     }
     return true
   })
@@ -102,14 +102,14 @@ function extractParagraphs(view: EditorView, modifiedPositions: Set<number>): Pa
 }
 
 /**
- * Map LanguageTool offsets back to ProseMirror positions within a paragraph
+ * Map a paragraph-local character range to ProseMirror document positions.
  */
 function mapOffsetsToPositions(
-  match: LTMatch, 
+  localStart: number,
+  length: number,
   paragraph: ParagraphInfo
 ): { from: number; to: number } | null {
-  const localStart = match.offset - paragraph.offset
-  const localEnd = localStart + match.length
+  const localEnd = localStart + length
   
   // Ensure the match is within this paragraph
   if (localStart < 0 || localEnd > paragraph.text.length) {
@@ -333,13 +333,8 @@ export const GrammarCheck = Extension.create<GrammarCheckOptions>({
                 
                 if (!mapping) continue
                 
-                // Adjust the match offset to be relative to the paragraph
-                const adjustedMatch = {
-                  ...match,
-                  offset: match.offset - mapping.startOffset + mapping.paragraph.offset
-                }
-                
-                const positions = mapOffsetsToPositions(adjustedMatch, mapping.paragraph)
+                const localStart = match.offset - mapping.startOffset
+                const positions = mapOffsetsToPositions(localStart, match.length, mapping.paragraph)
                 if (!positions || positions.to <= positions.from) continue
 
                 if (matchesNearMathNode(mapping.paragraph, positions.from, positions.to)) {
@@ -358,8 +353,6 @@ export const GrammarCheck = Extension.create<GrammarCheckOptions>({
                       replacements: (match.replacements || []).map(r => r.value).slice(0, 5),
                       ruleId: match.rule?.id,
                     }),
-                    'data-from': positions.from.toString(),
-                    'data-to': positions.to.toString(),
                   })
                 )
               }
@@ -389,7 +382,9 @@ export const GrammarCheck = Extension.create<GrammarCheckOptions>({
               view.dispatch(tr)
               
               // Clear modified positions for checked paragraphs
-              if (!forceFullCheck) {
+              if (forceFullCheck) {
+                modifiedPositions.clear()
+              } else {
                 paragraphsToCheck.forEach(paragraph => {
                   for (let pos = paragraph.from; pos <= paragraph.to; pos++) {
                     modifiedPositions.delete(pos)
@@ -432,30 +427,28 @@ export const GrammarCheck = Extension.create<GrammarCheckOptions>({
           // Handle clicks on grammar suggestions
           handleClick(view, pos, event) {
             const target = event.target as HTMLElement
-            if (target.classList.contains('lt-underline')) {
-              const ltData = target.getAttribute('data-lt')
-              const fromAttr = target.getAttribute('data-from')
-              const toAttr = target.getAttribute('data-to')
-              
-              if (ltData && fromAttr && toAttr && onShowSuggestion) {
-                try {
-                  const data = JSON.parse(ltData)
-                  const from = parseInt(fromAttr)
-                  const to = parseInt(toAttr)
-                  
-                  // Get click position for popup
-                  const rect = target.getBoundingClientRect()
-                  const position = {
-                    x: rect.left + rect.width / 2,
-                    y: rect.bottom + 8
-                  }
-                  
-                  onShowSuggestion(position, data, { from, to })
-                  return true
-                } catch (e) {
-                  console.warn('Failed to parse grammar data:', e)
-                }
-              }
+            if (!target.classList.contains('lt-underline')) return false
+
+            const ltData = target.getAttribute('data-lt')
+            if (!ltData || !onShowSuggestion) return false
+
+            const decoState = LT_PLUGIN_KEY.getState(view.state) as DecorationSet
+            const decos = decoState.find(pos, pos)
+            const deco = decos.find(d => (d.spec as any)?.class?.includes('lt-underline'))
+
+            if (!deco) return false
+
+            try {
+              const data = JSON.parse(ltData)
+              const rect = target.getBoundingClientRect()
+              onShowSuggestion(
+                { x: rect.left + rect.width / 2, y: rect.bottom + 8 },
+                data,
+                { from: deco.from, to: deco.to }
+              )
+              return true
+            } catch (e) {
+              console.warn('Failed to parse grammar data:', e)
             }
             return false
           },
