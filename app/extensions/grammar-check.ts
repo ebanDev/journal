@@ -3,6 +3,7 @@ import { Plugin, PluginKey } from 'prosemirror-state'
 import { Decoration, DecorationSet } from 'prosemirror-view'
 import type { EditorView } from 'prosemirror-view'
 import type { Node as PMNode } from '@tiptap/pm/model'
+import { useVocabulary } from '~/composables/useVocabulary'
 
 type LTMatch = {
   message: string
@@ -231,6 +232,7 @@ export const GrammarCheck = Extension.create<GrammarCheckOptions>({
   
   addProseMirrorPlugins() {
     const { endpoint, language, level, debounceMs, modificationThreshold, isEnabled, onShowSuggestion } = this.options
+    const { isAllowed } = useVocabulary()
     let modifiedPositions = new Set<number>()
     let lastCheckTime = 0
 
@@ -341,6 +343,13 @@ export const GrammarCheck = Extension.create<GrammarCheckOptions>({
                   continue
                 }
 
+                // Extract the exact word/phrase that was flagged so we can
+                // offer "add to vocabulary" and filter it later.
+                const matchedWord = mapping.paragraph.text.slice(localStart, localStart + match.length)
+
+                // Skip matches whose flagged word is in the user's vocabulary.
+                if (isAllowed(matchedWord)) continue
+
                 const severity = match.rule?.issueType || 'misspelling'
                 const className = severity === 'misspelling' ? 'lt-spelling' : 'lt-grammar'
                 
@@ -352,6 +361,7 @@ export const GrammarCheck = Extension.create<GrammarCheckOptions>({
                       message: match.message,
                       replacements: (match.replacements || []).map(r => r.value).slice(0, 5),
                       ruleId: match.rule?.id,
+                      word: matchedWord,
                     }),
                   })
                 )

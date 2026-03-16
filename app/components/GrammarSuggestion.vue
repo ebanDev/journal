@@ -42,7 +42,7 @@
               "{{ replacement }}"
             </UButton>
             
-            <!-- Ignore option -->
+            <!-- Ignore -->
             <UButton
               @click="ignoreError"
               variant="outline"
@@ -54,10 +54,24 @@
               <Icon name="i-mingcute-close-line" class="mr-1" />
               Ignorer
             </UButton>
+
+            <!-- Add to vocabulary (only shown for spelling errors that have an actual word) -->
+            <UButton
+              v-if="grammarData.word"
+              @click="addToVocabulary"
+              variant="outline"
+              color="neutral"
+              size="sm"
+              block
+              class="justify-start"
+            >
+              <Icon name="i-mingcute-book-2-line" class="mr-1" />
+              Ajouter « {{ grammarData.word }} » au vocabulaire
+            </UButton>
           </div>
         </div>
         
-        <!-- If no suggestions, show only ignore option -->
+        <!-- If no suggestions, show ignore + add to vocabulary -->
         <div v-else class="space-y-2">
           <div class="text-xs font-medium text-gray-600 uppercase tracking-wide">
             Actions
@@ -73,6 +87,19 @@
             >
               <Icon name="i-mingcute-close-line" class="mr-1" />
               Ignorer
+            </UButton>
+
+            <UButton
+              v-if="grammarData.word"
+              @click="addToVocabulary"
+              variant="outline"
+              color="neutral"
+              size="sm"
+              block
+              class="justify-start"
+            >
+              <Icon name="i-mingcute-book-2-line" class="mr-1" />
+              Ajouter « {{ grammarData.word }} » au vocabulaire
             </UButton>
           </div>
         </div>
@@ -93,6 +120,8 @@ export interface GrammarData {
   message: string
   replacements: string[]
   ruleId?: string
+  /** The literal text that was flagged, used for "add to vocabulary". */
+  word?: string
 }
 
 export interface GrammarSuggestionProps {
@@ -100,6 +129,7 @@ export interface GrammarSuggestionProps {
   grammarData: GrammarData | null
   onApplyReplacement: (replacement: string) => void
   onIgnore: () => void
+  onAddToVocabulary: (word: string) => void
 }
 
 const props = defineProps<GrammarSuggestionProps>()
@@ -128,6 +158,13 @@ const applyReplacement = (replacement: string) => {
 
 const ignoreError = () => {
   props.onIgnore()
+  close()
+}
+
+const addToVocabulary = () => {
+  if (props.grammarData?.word) {
+    props.onAddToVocabulary(props.grammarData.word)
+  }
   close()
 }
 

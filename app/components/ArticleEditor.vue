@@ -114,6 +114,7 @@
             :grammar-data="grammarSuggestionData"
             :on-apply-replacement="applyGrammarReplacement"
             :on-ignore="ignoreGrammarError"
+            :on-add-to-vocabulary="addToVocabulary"
             @close="closeGrammarSuggestion"
           />
         </div>
@@ -161,6 +162,7 @@ import { CustomImage } from '~/extensions/custom-image'
 import { Source } from '~/extensions/source'
 import { Chart } from '~/extensions/chart'
 import { GrammarCheck, LT_PLUGIN_KEY, triggerFullGrammarCheck } from '~/extensions/grammar-check'
+import { useVocabulary } from '~/composables/useVocabulary'
 import { debounce } from '~/utils/debounce'
 import { useDb } from '~/composables/useDb'
 import { useImageUpload } from '~/composables/useImageUpload'
@@ -219,6 +221,7 @@ const grammarSuggestionRef = ref<any>(null)
 const grammarSuggestionData = ref<any>(null)
 const grammarSuggestionPosition = ref({ x: 0, y: 0 })
 const grammarReplacementRange = ref<{ from: number; to: number } | null>(null)
+const { addWord: addWordToVocabulary } = useVocabulary()
 
 // Source popover
 const showSourcePopover = ref(false)
@@ -521,6 +524,24 @@ const removeGrammarDecoration = (from: number, to: number) => {
 }
 
 const closeGrammarSuggestion = () => {
+  grammarSuggestionData.value = null
+  grammarReplacementRange.value = null
+}
+
+const addToVocabulary = (word: string) => {
+  addWordToVocabulary(word)
+
+  // Immediately remove the decoration for this word so the underline
+  // disappears without waiting for the next check cycle.
+  if (editor.value && grammarReplacementRange.value) {
+    const { from, to } = grammarReplacementRange.value
+    try {
+      removeGrammarDecoration(from, to)
+    } catch (error) {
+      console.warn('Error removing grammar decoration after vocabulary add:', error)
+    }
+  }
+
   grammarSuggestionData.value = null
   grammarReplacementRange.value = null
 }
