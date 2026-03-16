@@ -530,18 +530,10 @@ const closeGrammarSuggestion = () => {
 
 const addToVocabulary = (word: string) => {
   addWordToVocabulary(word)
-
-  // Immediately remove the decoration for this word so the underline
-  // disappears without waiting for the next check cycle.
   if (editor.value && grammarReplacementRange.value) {
     const { from, to } = grammarReplacementRange.value
-    try {
-      removeGrammarDecoration(from, to)
-    } catch (error) {
-      console.warn('Error removing grammar decoration after vocabulary add:', error)
-    }
+    removeGrammarDecoration(from, to)
   }
-
   grammarSuggestionData.value = null
   grammarReplacementRange.value = null
 }

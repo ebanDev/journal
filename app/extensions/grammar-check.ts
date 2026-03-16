@@ -31,8 +31,8 @@ export interface GrammarCheckOptions {
   language: string
   level?: 'default' | 'picky'
   debounceMs?: number
-  modificationThreshold?: number // Only check paragraphs modified within this time (ms)
-  isEnabled?: () => boolean // Function to check if grammar checking is enabled
+  modificationThreshold?: number
+  isEnabled?: () => boolean
   onShowSuggestion?: (position: { x: number; y: number }, data: any, range: { from: number; to: number }) => void
 }
 
@@ -44,9 +44,6 @@ function debounce<F extends (...args: any[]) => void>(fn: F, ms: number) {
   }
 }
 
-/**
- * Extract paragraphs from the document with their positions and modification times
- */
 function extractParagraphs(view: EditorView, modifiedPositions: Set<number>): ParagraphInfo[] {
   const paragraphs: ParagraphInfo[] = []
   let globalOffset = 0
@@ -55,46 +52,29 @@ function extractParagraphs(view: EditorView, modifiedPositions: Set<number>): Pa
   view.state.doc.descendants((node, pos) => {
     if (node.type.name === 'paragraph' && node.textContent.trim()) {
       const text = node.textContent
-      const from = pos + 1 // Start of paragraph content
-      const to = pos + node.nodeSize - 1 // End of paragraph content
+      const from = pos + 1
+      const to = pos + node.nodeSize - 1
 
       const mathNodes: Array<{ textOffset: number; docStart: number; docEnd: number }> = []
       let textOffset = 0
 
       node.forEach((child, childOffset) => {
         const docStart = from + childOffset
-
         if (child.type && (child.type.name === 'inlineMath' || child.type.name === 'blockMath')) {
-          mathNodes.push({
-            textOffset,
-            docStart,
-            docEnd: docStart + child.nodeSize
-          })
+          mathNodes.push({ textOffset, docStart, docEnd: docStart + child.nodeSize })
         }
-
-        const childTextLength = child.isText
-          ? child.text?.length ?? 0
-          : child.textContent.length
-
-        textOffset += childTextLength
+        textOffset += child.isText ? (child.text?.length ?? 0) : child.textContent.length
       })
-      
-      // Check if this paragraph was recently modified
-      const wasModified = Array.from(modifiedPositions).some(modPos => 
-        modPos >= from && modPos <= to
-      )
-      
+
+      const wasModified = Array.from(modifiedPositions).some(p => p >= from && p <= to)
+
       paragraphs.push({
-        node,
-        text,
-        offset: globalOffset,
-        from,
-        to,
+        node, text, offset: globalOffset, from, to,
         lastModified: wasModified ? now : 0,
         mathNodes
       })
-      
-      globalOffset += text.length + 2
+
+      globalOffset += text.length + 2 // +2 matches the '\n\n' join used in checkWithLT
     }
     return true
   })
@@ -102,114 +82,77 @@ function extractParagraphs(view: EditorView, modifiedPositions: Set<number>): Pa
   return paragraphs
 }
 
-/**
- * Map a paragraph-local character range to ProseMirror document positions.
- */
+// Maps a paragraph-local character range to ProseMirror document positions.
+// localStart and length are relative to paragraph.text — do NOT add paragraph.offset.
 function mapOffsetsToPositions(
   localStart: number,
   length: number,
   paragraph: ParagraphInfo
 ): { from: number; to: number } | null {
   const localEnd = localStart + length
-  
-  // Ensure the match is within this paragraph
-  if (localStart < 0 || localEnd > paragraph.text.length) {
-    return null
-  }
-  
+
+  if (localStart < 0 || localEnd > paragraph.text.length) return null
+
   let fromPos: number | null = null
   let toPos: number | null = null
   let textCursor = 0
 
   paragraph.node.forEach((child, childOffset) => {
-    if (fromPos !== null && toPos !== null) {
-      return
-    }
+    if (fromPos !== null && toPos !== null) return
 
     const childText = child.isText ? child.text ?? '' : child.textContent
     const childLength = childText.length
+    if (childLength === 0) return
 
-    if (childLength === 0) {
-      return
-    }
+    const childEnd = textCursor + childLength
 
-    const childTextStart = textCursor
-    const childTextEnd = textCursor + childLength
+    if (fromPos === null && localStart >= textCursor && localStart <= childEnd)
+      fromPos = paragraph.from + childOffset + (localStart - textCursor)
 
-    if (fromPos === null && localStart >= childTextStart && localStart <= childTextEnd) {
-      const innerOffset = localStart - childTextStart
-      fromPos = paragraph.from + childOffset + innerOffset
-    }
+    if (localEnd >= textCursor && localEnd <= childEnd)
+      toPos = paragraph.from + childOffset + (localEnd - textCursor)
 
-    if (localEnd >= childTextStart && localEnd <= childTextEnd) {
-      const innerOffset = localEnd - childTextStart
-      toPos = paragraph.from + childOffset + innerOffset
-    }
-
-    textCursor = childTextEnd
+    textCursor = childEnd
   })
 
-  if (fromPos === null) {
-    fromPos = paragraph.from
-  }
-
-  if (toPos === null) {
-    toPos = paragraph.to
-  }
-
-  if (fromPos >= toPos) {
-    return null
-  }
+  if (fromPos === null) fromPos = paragraph.from
+  if (toPos === null) toPos = paragraph.to
+  if (fromPos >= toPos) return null
 
   return { from: fromPos, to: toPos }
 }
 
 function matchesNearMathNode(paragraph: ParagraphInfo, from: number, to: number): boolean {
-  if (paragraph.mathNodes.length === 0) {
-    return false
-  }
-
-  const buffer = 1
   return paragraph.mathNodes.some(({ docStart, docEnd }) => {
-    const bufferedStart = Math.max(paragraph.from, docStart - buffer)
-    const bufferedEnd = Math.min(paragraph.to, docEnd + buffer)
-    return from <= bufferedEnd && to >= bufferedStart
+    const start = Math.max(paragraph.from, docStart - 1)
+    const end = Math.min(paragraph.to, docEnd + 1)
+    return from <= end && to >= start
   })
 }
 
 async function checkWithLT(
-  endpoint: string, 
-  text: string, 
-  language: string, 
+  endpoint: string,
+  text: string,
+  language: string,
   level?: 'default' | 'picky'
 ): Promise<LTMatch[]> {
-  // Respect the 20k character limit
-  if (text.length > 20000) {
-    text = text.substring(0, 20000)
-  }
-  
+  if (text.length > 20000) text = text.substring(0, 20000)
+
   const body = new URLSearchParams()
   body.set('text', text)
   body.set('language', language)
-  if (level && level !== 'default') {
-    body.set('level', level)
-  }
-  
+  if (level && level !== 'default') body.set('level', level)
+
   try {
     const res = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body,
     })
-    
-    if (!res.ok) {
-      throw new Error(`LanguageTool error: ${res.status}`)
-    }
-    
+    if (!res.ok) throw new Error(`LanguageTool error: ${res.status}`)
     const json = await res.json()
     return json.matches as LTMatch[]
   } catch (error) {
-    // Silently fail for free API rate limits
     console.warn('LanguageTool API error:', error)
     return []
   }
@@ -217,19 +160,19 @@ async function checkWithLT(
 
 export const GrammarCheck = Extension.create<GrammarCheckOptions>({
   name: 'grammarCheck',
-  
+
   addOptions() {
     return {
       endpoint: 'https://api.languagetool.org/v2/check',
       language: 'fr',
       level: 'picky',
       debounceMs: 1000,
-      modificationThreshold: 60000, // 1 minute
-      isEnabled: () => true, // Default to enabled
-      onShowSuggestion: undefined, // Callback for showing suggestions
+      modificationThreshold: 60000,
+      isEnabled: () => true,
+      onShowSuggestion: undefined,
     }
   },
-  
+
   addProseMirrorPlugins() {
     const { endpoint, language, level, debounceMs, modificationThreshold, isEnabled, onShowSuggestion } = this.options
     const { isAllowed } = useVocabulary()
@@ -239,228 +182,146 @@ export const GrammarCheck = Extension.create<GrammarCheckOptions>({
     return [
       new Plugin({
         key: LT_PLUGIN_KEY,
-        
+
         state: {
           init: () => DecorationSet.empty,
           apply(tr, old) {
-            // Track modified positions
             if (tr.docChanged) {
-              tr.steps.forEach((step) => {
-                // Track document changes by examining the transaction mapping
-                tr.mapping.maps.forEach(map => {
-                  map.forEach((oldStart, oldEnd) => {
-                    modifiedPositions.add(oldStart)
-                    modifiedPositions.add(oldEnd)
-                  })
+              tr.mapping.maps.forEach(map => {
+                map.forEach((oldStart, oldEnd) => {
+                  modifiedPositions.add(oldStart)
+                  modifiedPositions.add(oldEnd)
                 })
               })
             }
-            
-            // Apply decoration mapping
+
             let decorations = old.map(tr.mapping, tr.doc)
-            
-            // Check if we're setting new decorations or clearing them
             const meta = tr.getMeta(LT_PLUGIN_KEY)
-            if (meta?.set !== undefined) {
-              decorations = meta.set || DecorationSet.empty
-            }
-            
+            if (meta?.set !== undefined) decorations = meta.set || DecorationSet.empty
             return decorations
           },
         },
-        
+
         view: (view) => {
           let destroyed = false
-          
+
           const runGrammarCheck = async (forceFullCheck = false) => {
             if (destroyed || !isEnabled?.()) return
-            
+
             const now = Date.now()
             const paragraphs = extractParagraphs(view, modifiedPositions)
-            
-            let paragraphsToCheck: ParagraphInfo[]
-            
-            if (forceFullCheck) {
-              // Check all paragraphs
-              paragraphsToCheck = paragraphs.filter(p => p.text.trim().length > 0)
-            } else {
-              // Only check paragraphs modified within the threshold
-              paragraphsToCheck = paragraphs.filter(p => 
-                p.lastModified > 0 && 
-                (now - p.lastModified) < modificationThreshold!
-              )
-            }
-            
-            if (paragraphsToCheck.length === 0) {
-              return
-            }
-            
-            // Respect rate limits: max 20 requests per minute
-            if (!forceFullCheck && now - lastCheckTime < 3000) { // 3 seconds between requests
-              return
-            }
-            
+
+            const paragraphsToCheck = forceFullCheck
+              ? paragraphs.filter(p => p.text.trim().length > 0)
+              : paragraphs.filter(p => p.lastModified > 0 && (now - p.lastModified) < modificationThreshold!)
+
+            if (paragraphsToCheck.length === 0) return
+            if (!forceFullCheck && now - lastCheckTime < 3000) return
+
             lastCheckTime = now
-            
-            // Combine paragraphs for checking
+
             const textToCheck = paragraphsToCheck.map(p => p.text).join('\n\n')
-            
-            if (!textToCheck.trim()) {
-              return
-            }
-            
+            if (!textToCheck.trim()) return
+
             try {
               const matches = await checkWithLT(endpoint, textToCheck, language, level)
               const decos: Decoration[] = []
-              
-              // Create a combined offset mapping
+
               let combinedOffset = 0
-              const offsetMappings: { paragraph: ParagraphInfo; startOffset: number; endOffset: number }[] = []
-              
-              paragraphsToCheck.forEach(paragraph => {
-                offsetMappings.push({
-                  paragraph,
-                  startOffset: combinedOffset,
-                  endOffset: combinedOffset + paragraph.text.length
-                })
-                combinedOffset += paragraph.text.length + 2 // +2 for \n\n separator
+              const offsetMappings = paragraphsToCheck.map(paragraph => {
+                const mapping = { paragraph, startOffset: combinedOffset, endOffset: combinedOffset + paragraph.text.length }
+                combinedOffset += paragraph.text.length + 2
+                return mapping
               })
-              
-              // Map matches back to ProseMirror positions
+
               for (const match of matches) {
-                // Find which paragraph this match belongs to
-                const mapping = offsetMappings.find(m => 
-                  match.offset >= m.startOffset && match.offset < m.endOffset
-                )
-                
+                const mapping = offsetMappings.find(m => match.offset >= m.startOffset && match.offset < m.endOffset)
                 if (!mapping) continue
-                
+
                 const localStart = match.offset - mapping.startOffset
                 const positions = mapOffsetsToPositions(localStart, match.length, mapping.paragraph)
                 if (!positions || positions.to <= positions.from) continue
+                if (matchesNearMathNode(mapping.paragraph, positions.from, positions.to)) continue
 
-                if (matchesNearMathNode(mapping.paragraph, positions.from, positions.to)) {
-                  continue
-                }
-
-                // Extract the exact word/phrase that was flagged so we can
-                // offer "add to vocabulary" and filter it later.
-                const matchedWord = mapping.paragraph.text.slice(localStart, localStart + match.length)
-
-                // Skip matches whose flagged word is in the user's vocabulary.
-                if (isAllowed(matchedWord)) continue
+                const word = mapping.paragraph.text.slice(localStart, localStart + match.length)
+                if (isAllowed(word)) continue
 
                 const severity = match.rule?.issueType || 'misspelling'
-                const className = severity === 'misspelling' ? 'lt-spelling' : 'lt-grammar'
-                
+                const ltData = {
+                  message: match.message,
+                  replacements: (match.replacements || []).map(r => r.value).slice(0, 5),
+                  ruleId: match.rule?.id,
+                  word,
+                }
+
                 decos.push(
                   Decoration.inline(positions.from, positions.to, {
-                    class: `lt-underline ${className}`,
+                    class: `lt-underline ${severity === 'misspelling' ? 'lt-spelling' : 'lt-grammar'}`,
                     title: match.shortMessage || match.message || 'Problème détecté',
-                    'data-lt': JSON.stringify({
-                      message: match.message,
-                      replacements: (match.replacements || []).map(r => r.value).slice(0, 5),
-                      ruleId: match.rule?.id,
-                      word: matchedWord,
-                    }),
-                  })
+                  }, { ltData })
                 )
               }
-              
-              // Get existing decorations
-              const currentDecorations = LT_PLUGIN_KEY.getState(view.state) as DecorationSet
-              let newDecorations = currentDecorations
-              
+
+              let newDecorations = LT_PLUGIN_KEY.getState(view.state) as DecorationSet
+
               if (forceFullCheck) {
-                // For full check, clear all existing decorations first
                 newDecorations = DecorationSet.empty
               } else {
-                // Remove decorations from recently modified paragraphs only
-                paragraphsToCheck.forEach(paragraph => {
-                  newDecorations = newDecorations.remove(
-                    newDecorations.find(paragraph.from, paragraph.to)
-                  )
+                paragraphsToCheck.forEach(p => {
+                  newDecorations = newDecorations.remove(newDecorations.find(p.from, p.to))
                 })
               }
-              
-              // Add new decorations
-              if (decos.length > 0) {
-                newDecorations = newDecorations.add(view.state.doc, decos)
-              }
-              
-              const tr = view.state.tr.setMeta(LT_PLUGIN_KEY, { set: newDecorations })
-              view.dispatch(tr)
-              
-              // Clear modified positions for checked paragraphs
+
+              if (decos.length > 0) newDecorations = newDecorations.add(view.state.doc, decos)
+
+              view.dispatch(view.state.tr.setMeta(LT_PLUGIN_KEY, { set: newDecorations }))
+
               if (forceFullCheck) {
                 modifiedPositions.clear()
               } else {
-                paragraphsToCheck.forEach(paragraph => {
-                  for (let pos = paragraph.from; pos <= paragraph.to; pos++) {
-                    modifiedPositions.delete(pos)
-                  }
+                paragraphsToCheck.forEach(p => {
+                  for (let pos = p.from; pos <= p.to; pos++) modifiedPositions.delete(pos)
                 })
               }
-              
             } catch (error) {
               console.warn('Grammar check failed:', error)
             }
           }
 
-          const debouncedCheck = debounce(runGrammarCheck, debounceMs!)
-          
-          // Store the runFullCheck function on the view DOM for external access
-          ;(view.dom as any).__grammarCheckPlugin = {
-            runFullCheck: () => runGrammarCheck(true)
-          }
+          const debouncedCheck = debounce(runGrammarCheck, debounceMs!);
+          (view.dom as any).__grammarCheckPlugin = { runFullCheck: () => runGrammarCheck(true) }
 
           return {
             update(view, prevState) {
-              const docChanged = !prevState.doc.eq(view.state.doc)
-              if (docChanged) {
-                debouncedCheck()
-              }
+              if (!prevState.doc.eq(view.state.doc)) debouncedCheck()
             },
-            
             destroy() {
               destroyed = true
               delete (view.dom as any).__grammarCheckPlugin
             },
           }
         },
-        
+
         props: {
           decorations(state) {
             return LT_PLUGIN_KEY.getState(state) as DecorationSet
           },
-          
-          // Handle clicks on grammar suggestions
+
           handleClick(view, pos, event) {
             const target = event.target as HTMLElement
-            if (!target.classList.contains('lt-underline')) return false
-
-            const ltData = target.getAttribute('data-lt')
-            if (!ltData || !onShowSuggestion) return false
+            if (!target.classList.contains('lt-underline') || !onShowSuggestion) return false
 
             const decoState = LT_PLUGIN_KEY.getState(view.state) as DecorationSet
-            const decos = decoState.find(pos, pos)
-            const deco = decos.find(d => (d.spec as any)?.class?.includes('lt-underline'))
-
+            const deco = decoState.find(Math.max(0, pos - 1), pos + 2).find(d => (d.spec as any)?.ltData)
             if (!deco) return false
 
-            try {
-              const data = JSON.parse(ltData)
-              const rect = target.getBoundingClientRect()
-              onShowSuggestion(
-                { x: rect.left + rect.width / 2, y: rect.bottom + 8 },
-                data,
-                { from: deco.from, to: deco.to }
-              )
-              return true
-            } catch (e) {
-              console.warn('Failed to parse grammar data:', e)
-            }
-            return false
+            const rect = target.getBoundingClientRect()
+            onShowSuggestion(
+              { x: rect.left + rect.width / 2, y: rect.bottom + 8 },
+              (deco.spec as any).ltData,
+              { from: deco.from, to: deco.to }
+            )
+            return true
           },
         },
       }),
@@ -468,7 +329,6 @@ export const GrammarCheck = Extension.create<GrammarCheckOptions>({
   },
 })
 
-// Utility function to trigger full grammar check
 export function triggerFullGrammarCheck(view: EditorView) {
   if ((view.dom as any).__grammarCheckPlugin) {
     ;(view.dom as any).__grammarCheckPlugin.runFullCheck()

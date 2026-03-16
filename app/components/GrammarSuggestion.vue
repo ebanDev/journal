@@ -1,14 +1,13 @@
 <template>
-  <UPopover v-model:open="isOpen" mode="hover" :open-delay="200" :close-delay="300">
-    <!-- Invisible trigger positioned at the clicked location -->
-    <div 
-      ref="triggerRef" 
-      class="absolute pointer-events-none" 
-      :style="{ left: position.x + 'px', top: position.y + 'px', width: '1px', height: '1px' }" 
-    />
-    
-    <template #content>
-      <div class="p-4 space-y-3 w-80" v-if="grammarData" @click.stop @mousedown.stop>
+  <Teleport to="body">
+    <div
+      v-if="isOpen && grammarData"
+      class="fixed z-[9999] w-80 rounded-lg border border-gray-200 bg-white shadow-lg"
+      :style="{ left: panelX + 'px', top: panelY + 'px' }"
+      @click.stop
+      @mousedown.stop
+    >
+      <div class="p-4 space-y-3">
         <div class="flex items-center justify-between">
           <h3 class="text-sm font-medium text-red-600">
             <Icon name="i-mingcute-magic-2-line" class="mr-1" />
@@ -16,111 +15,59 @@
           </h3>
           <UButton icon="i-mingcute-close-line" size="xs" variant="ghost" @click="close" />
         </div>
-        
-        <!-- Error message -->
+
         <div class="text-sm text-gray-700 bg-gray-50 p-2 rounded">
           {{ grammarData.message }}
         </div>
-        
-        <!-- Suggestions -->
-        <div v-if="grammarData.replacements && grammarData.replacements.length > 0" class="space-y-2">
-          <div class="text-xs font-medium text-gray-600 uppercase tracking-wide">
-            Recommandations
+
+        <div class="space-y-2">
+          <div v-if="grammarData.replacements && grammarData.replacements.length > 0">
+            <div class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Recommandations</div>
+            <div class="space-y-1">
+              <UButton
+                v-for="(replacement, index) in grammarData.replacements.slice(0, 5)"
+                :key="index"
+                @click="applyReplacement(replacement)"
+                variant="outline" color="neutral" size="sm" block class="justify-start"
+              >
+                <Icon name="i-mingcute-arrow-right-line" class="mr-1" />
+                "{{ replacement }}"
+              </UButton>
+            </div>
           </div>
+
           <div class="space-y-1">
-            <UButton
-              v-for="(replacement, index) in grammarData.replacements.slice(0, 5)"
-              :key="index"
-              @click="applyReplacement(replacement)"
-              variant="outline"
-              color="neutral"
-              size="sm"
-              block
-              class="justify-start"
-            >
-              <Icon name="i-mingcute-arrow-right-line" class="mr-1" />
-              "{{ replacement }}"
-            </UButton>
-            
-            <!-- Ignore -->
-            <UButton
-              @click="ignoreError"
-              variant="outline"
-              color="neutral"
-              size="sm"
-              block
-              class="justify-start"
-            >
+            <div class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Actions</div>
+            <UButton @click="ignoreError" variant="outline" color="neutral" size="sm" block class="justify-start">
               <Icon name="i-mingcute-close-line" class="mr-1" />
               Ignorer
             </UButton>
-
-            <!-- Add to vocabulary (only shown for spelling errors that have an actual word) -->
             <UButton
               v-if="grammarData.word"
               @click="addToVocabulary"
-              variant="outline"
-              color="neutral"
-              size="sm"
-              block
-              class="justify-start"
+              variant="outline" color="neutral" size="sm" block class="justify-start"
             >
               <Icon name="i-mingcute-book-2-line" class="mr-1" />
               Ajouter « {{ grammarData.word }} » au vocabulaire
             </UButton>
           </div>
         </div>
-        
-        <!-- If no suggestions, show ignore + add to vocabulary -->
-        <div v-else class="space-y-2">
-          <div class="text-xs font-medium text-gray-600 uppercase tracking-wide">
-            Actions
-          </div>
-          <div class="space-y-1">
-            <UButton
-              @click="ignoreError"
-              variant="outline"
-              color="neutral"
-              size="sm"
-              block
-              class="justify-start"
-            >
-              <Icon name="i-mingcute-close-line" class="mr-1" />
-              Ignorer
-            </UButton>
 
-            <UButton
-              v-if="grammarData.word"
-              @click="addToVocabulary"
-              variant="outline"
-              color="neutral"
-              size="sm"
-              block
-              class="justify-start"
-            >
-              <Icon name="i-mingcute-book-2-line" class="mr-1" />
-              Ajouter « {{ grammarData.word }} » au vocabulaire
-            </UButton>
-          </div>
-        </div>
-        
-        <!-- LanguageTool attribution -->
         <div class="text-xs text-gray-500 border-t pt-2">
           Propulsé par <a href="https://languagetool.org" target="_blank" class="text-amber-600 underline">LanguageTool</a>
         </div>
       </div>
-    </template>
-  </UPopover>
+    </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick } from 'vue'
+import { ref, computed, nextTick, onUnmounted } from 'vue'
 
 export interface GrammarData {
   message: string
   replacements: string[]
   ruleId?: string
-  /** The literal text that was flagged, used for "add to vocabulary". */
   word?: string
 }
 
@@ -133,44 +80,36 @@ export interface GrammarSuggestionProps {
 }
 
 const props = defineProps<GrammarSuggestionProps>()
-const emit = defineEmits<{
-  close: []
-}>()
+const emit = defineEmits<{ close: [] }>()
 
 const isOpen = ref(false)
-const triggerRef = ref<HTMLElement | null>(null)
 
-// Methods
+const panelX = computed(() => {
+  const x = props.position.x - 160 // 160 = half of w-80 (320px)
+  return Math.max(8, Math.min(x, window.innerWidth - 328))
+})
+const panelY = computed(() => props.position.y + 8)
+
+function onOutsideClick() { close() }
+
 const show = async () => {
   isOpen.value = true
   await nextTick()
+  // Defer binding so the originating click doesn't immediately close the panel
+  setTimeout(() => document.addEventListener('click', onOutsideClick), 0)
 }
 
 const close = () => {
   isOpen.value = false
+  document.removeEventListener('click', onOutsideClick)
   emit('close')
 }
 
-const applyReplacement = (replacement: string) => {
-  props.onApplyReplacement(replacement)
-  close()
-}
+onUnmounted(() => document.removeEventListener('click', onOutsideClick))
 
-const ignoreError = () => {
-  props.onIgnore()
-  close()
-}
+const applyReplacement = (replacement: string) => { props.onApplyReplacement(replacement); close() }
+const ignoreError = () => { props.onIgnore(); close() }
+const addToVocabulary = () => { if (props.grammarData?.word) props.onAddToVocabulary(props.grammarData.word); close() }
 
-const addToVocabulary = () => {
-  if (props.grammarData?.word) {
-    props.onAddToVocabulary(props.grammarData.word)
-  }
-  close()
-}
-
-// Expose methods for parent component
-defineExpose({
-  show,
-  close
-})
+defineExpose({ show, close })
 </script>
