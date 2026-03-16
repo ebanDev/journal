@@ -99,7 +99,7 @@
           <!-- Content -->
           <EditorContent 
             :editor="editor"
-            class="prose prose-headings:text-stone-700 prose-h1:text-3xl prose-h2:font-extrabold max-w-full w-[800px] min-h-full"
+            class="prose prose-headings:text-stone-700 prose-h1:text-3xl prose-h2:font-extrabold w-full max-w-[800px] min-h-full"
             autocomplete="off" 
             autocorrect="off" 
             autocapitalize="off" 
