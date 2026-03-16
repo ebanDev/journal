@@ -41,7 +41,7 @@
       </template>
       <template #footer>
         <UButton label="Enregistrer" @click="saveCategory" :loading="submitting" />
-        <UButton v-if="editingId" label="Supprimer" color="error" icon="tabler-trash" @click="deleteCategory" :loading="deleting" />
+        <UButton v-if="editingId" label="Supprimer" color="error" variant="soft" icon="tabler-trash" @click="deleteCategory" :loading="deleting" />
       </template>
     </UModal>
   </div>
