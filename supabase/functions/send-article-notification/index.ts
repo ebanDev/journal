@@ -1,14 +1,13 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
 
-interface Issue {
+interface Article {
   id: string
   title: string
-  slug: string
+  slug: string | null
   description: string | null
   cover: string | null
-  published_at: string
+  published_at: string | null
 }
 
 interface OneSignalNotificationPayload {
@@ -19,81 +18,78 @@ interface OneSignalNotificationPayload {
   url?: string
   large_icon?: string
   big_picture?: string
-  data?: { [key: string]: any }
+  data?: { [key: string]: unknown }
 }
 
 serve(async (req) => {
-  // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { issue } = await req.json() as { issue: Issue }
-    
-    if (!issue) {
+    const { article } = await req.json() as { article?: Article }
+
+    if (!article) {
       return new Response(
-        JSON.stringify({ error: 'Issue data is required' }),
-        { 
+        JSON.stringify({ error: 'Article data is required' }),
+        {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       )
     }
 
-    // Get OneSignal configuration from environment
     const oneSignalAppId = Deno.env.get('ONESIGNAL_APP_ID')
     const oneSignalRestApiKey = Deno.env.get('ONESIGNAL_REST_API_KEY')
-    
+
     if (!oneSignalAppId || !oneSignalRestApiKey) {
       return new Response(
         JSON.stringify({ error: 'OneSignal configuration missing' }),
-        { 
+        {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       )
     }
 
-    // Prepare notification payload
     const siteUrl = Deno.env.get('SITE_URL') || 'https://sursaut-revue.fr'
-    const issueUrl = `${siteUrl}/issues/${issue.id}`
-    
+    const articleUrl = article.slug
+      ? `${siteUrl}/articles/${article.slug}`
+      : `${siteUrl}/articles`
+
     const notificationPayload: OneSignalNotificationPayload = {
       app_id: oneSignalAppId,
-      included_segments: ['All'], // Send to all subscribers
+      included_segments: ['All'],
       headings: {
-        'fr': `📰 Nouveau numéro: ${issue.title}`,
-        'en': `📰 New Issue: ${issue.title}`
+        fr: `Nouvel article: ${article.title}`,
+        en: `New article: ${article.title}`
       },
       contents: {
-        'fr': issue.description || 'Un nouveau numéro de la Revue Sursaut! est disponible.',
-        'en': issue.description || 'A new issue of Revue Sursaut! is available.'
+        fr: article.description || 'Un nouvel article de Sursaut! est disponible.',
+        en: article.description || 'A new Sursaut! article is available.'
       },
-      url: issueUrl,
+      url: articleUrl,
       data: {
-        issue_id: issue.id,
-        issue_slug: issue.slug,
-        type: 'new_issue'
+        article_id: article.id,
+        article_slug: article.slug,
+        type: 'new_article'
       }
     }
 
-    // Add large icon and big picture if cover is available
-    if (issue.cover) {
-      const coverUrl = issue.cover.startsWith('http') 
-        ? issue.cover 
-        : `${Deno.env.get('SUPABASE_URL')}/storage/v1/object/public/covers/${issue.cover}`
-      
+    if (article.cover) {
+      const coverUrl = article.cover.startsWith('http')
+        ? article.cover
+        : `${Deno.env.get('SUPABASE_URL')}/storage/v1/object/public/covers/${article.cover}`
+
       notificationPayload.large_icon = coverUrl
       notificationPayload.big_picture = coverUrl
     }
 
-    // Send notification via OneSignal REST API
     const response = await fetch('https://onesignal.com/api/v1/notifications', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Basic ${oneSignalRestApiKey}`
+        Authorization: `Basic ${oneSignalRestApiKey}`
       },
       body: JSON.stringify(notificationPayload)
     })
@@ -102,11 +98,11 @@ serve(async (req) => {
       const errorText = await response.text()
       console.error('OneSignal API error:', errorText)
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           error: 'Failed to send notification',
           details: errorText
         }),
-        { 
+        {
           status: response.status,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
@@ -117,25 +113,24 @@ serve(async (req) => {
     console.log('Notification sent successfully:', result)
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         notification_id: result.id,
         recipients: result.recipients
       }),
-      { 
+      {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     )
-
   } catch (error) {
     console.error('Error sending notification:', error)
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         error: 'Internal server error',
-        details: error.message
+        details: error instanceof Error ? error.message : String(error)
       }),
-      { 
+      {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }

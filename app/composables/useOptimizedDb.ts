@@ -7,13 +7,12 @@ import { useAsyncData, clearNuxtData } from '#imports'
  * Provides instant navigation by pre-caching data and using stale-while-revalidate strategy
  */
 export function useOptimizedDb() {
-  const { getArticles, getCategories, getCategoriesWithArticles, getIssues, getVeilleEntries, getUserVeilleVotes } = useDb()
+  const { getArticles, getCategories, getCategoriesWithArticles, getVeilleEntries, getUserVeilleVotes } = useDb()
 
   // Cache keys for consistent data management
   const CACHE_KEYS = {
     articles: 'optimized-articles',
     categories: 'optimized-categories', 
-    issues: 'optimized-issues',
     veille: 'optimized-veille'
   }
 
@@ -80,23 +79,6 @@ export function useOptimizedDb() {
   }
 
   /**
-   * Get issues with medium-term caching
-   */
-  async function getOptimizedIssues() {
-    const { data, refresh } = await useAsyncData(CACHE_KEYS.issues,
-      () => getIssues(),
-      {
-        default: () => [],
-        server: true,
-        lazy: false,
-        transform: (data: any[]) => data || []
-      }
-    )
-
-    return { data, refresh }
-  }
-
-  /**
    * Get veille entries with short-term caching (more dynamic)
    */
   async function getOptimizedVeille() {
@@ -138,7 +120,6 @@ export function useOptimizedDb() {
       // Prefetch in background without blocking UI
       Promise.all([
         getOptimizedCategories(),
-        getOptimizedIssues(),
         getOptimizedArticles()
       ]).catch(error => {
         console.warn('Background prefetch failed:', error)
@@ -174,34 +155,13 @@ export function useOptimizedDb() {
     return { data, refresh }
   }
 
-  /**
-   * Get latest edition with caching
-   */
-  async function getLatestEdition() {
-    const { data, refresh } = await useAsyncData('latest-edition',
-      async () => {
-        const issues = await getIssues()
-        return issues.find(i => i.status === 'published') || null
-      },
-      {
-        default: () => null,
-        server: true,
-        lazy: false
-      }
-    )
-
-    return { data, refresh }
-  }
-
   return {
     getOptimizedArticles,
     getOptimizedCategories,
     getOptimizedCategoriesWithArticles,
-    getOptimizedIssues,
     getOptimizedVeille,
     getOptimizedVeilleVotes,
     getFeaturedArticles,
-    getLatestEdition,
     prefetchEssentialData,
     clearAllCache
   }

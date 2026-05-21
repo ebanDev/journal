@@ -38,23 +38,36 @@ export function useDb() {
     return 'anon_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
   }
 
-  // Create a new issue
-  async function createNewIssue(data: { title: string; description?: string; status?: string }) {
-    const { data: issue, error } = await supabase
+  async function getMainIssueId() {
+    const { data: existing, error: selectError } = await supabase
+      .from('issues')
+      .select('id')
+      .eq('slug', 'main')
+      .maybeSingle()
+
+    if (selectError) throw selectError
+    if (existing) return existing.id
+
+    const { data: created, error: insertError } = await supabase
       .from('issues')
       .insert({
-        title: data.title,
-        description: data.description || '',
-        status: data.status || 'draft',
+        title: 'MAIN',
+        slug: 'main',
+        description: '',
+        status: 'published',
+        published_at: new Date().toISOString()
       })
       .select('id')
       .single()
-    if (error) throw error
-    return issue
+
+    if (insertError) throw insertError
+    return created.id
   }
 
   // Create a new article
-  async function createNewArticle(data: { title?: string; content?: string; author_id: string; issue_id?: string }) {
+  async function createNewArticle(data: { title?: string; content?: string; author_id: string }) {
+    const mainIssueId = await getMainIssueId()
+
     const { data: article, error } = await supabase
       .from('articles')
       .insert({
@@ -62,22 +75,12 @@ export function useDb() {
         content: data.content || '',
         author_id: data.author_id,
         draft: true,
-        issue_id: data.issue_id || null,
+        issue_id: mainIssueId,
       })
       .select('id')
       .single()
     if (error) throw error
     return article
-  }
-
-  // Get all issues
-  async function getIssues() {
-    const { data, error } = await supabase
-      .from('issues')
-      .select('*')
-      .order('published_at', { ascending: false })
-    if (error) throw error
-    return data
   }
 
   // Get all articles (optionally filtered) with categories
@@ -87,7 +90,6 @@ export function useDb() {
       .select('*, article_categories:article_categories(category_id, categories(name, icon))')
 
     if (filters && filters.length) {
-      const issueFilter = filters.filter(f => f.type === 'issue').map(f => f.id)
       const categoryFilter = filters.filter(f => f.type === 'category').map(f => f.id)
       let articleIds: string[] | undefined = undefined
       if (categoryFilter.length) {
@@ -100,12 +102,7 @@ export function useDb() {
         articleIds = (articleCatRows || []).map((row: any) => row.article_id)
         if (!articleIds.length) return []
       }
-      if (issueFilter.length && articleIds) {
-        // AND logic between types: articles in (category1 OR category2) AND (issue3 OR issue4)
-        query = query.in('id', articleIds).in('issue_id', issueFilter)
-      } else if (issueFilter.length) {
-        query = query.in('issue_id', issueFilter)
-      } else if (articleIds) {
+      if (articleIds) {
         query = query.in('id', articleIds)
       } else {
         // No matching articles
@@ -121,17 +118,6 @@ export function useDb() {
         .map((ac: any) => ac.categories && { name: ac.categories.name, icon: ac.categories.icon })
         .filter(Boolean)
     }))
-  }
-
-  // Get a single issue by id
-  async function getIssueById(id: string) {
-    const { data, error } = await supabase
-      .from('issues')
-      .select('*')
-      .eq('id', id)
-      .single()
-    if (error) throw error
-    return data
   }
 
   // Get a single article by id
@@ -194,16 +180,6 @@ export function useDb() {
         }
       })() : []
     }
-  }
-
-  // Delete an issue by id
-  async function deleteIssueById(id: string) {
-    const { error } = await supabase
-      .from('issues')
-      .delete()
-      .eq('id', id)
-    if (error) throw error
-    return true
   }
 
   // Delete an article by id
@@ -388,15 +364,11 @@ export function useDb() {
   }
 
   return {
-    createNewIssue,
     createNewArticle,
-    getIssues,
     getArticles,
-    getIssueById,
     getArticleById,
     getArticleBySlug,
     getArticleByIdForPreview,
-    deleteIssueById,
     deleteArticleById,
     getCategories,
     getCategoriesWithArticles,

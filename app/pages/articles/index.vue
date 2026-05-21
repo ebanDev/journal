@@ -9,8 +9,7 @@
       <!-- Desktop: Sidebar filters -->
       <div class="hidden md:block w-86 shrink-0 bg-secondary-200 rounded-lg p-4 h-full">
         <h2 class="text-xl font-bold mb-4">Filtrer</h2>
-        <UTabs v-model="activeTab" :items="tabs" class="w-full" :content="false" />
-        <div class="mt-4" v-if="activeTab === '0'">
+        <div class="mt-4">
           <ul class="grid grid-cols-2 gap-2">
             <li v-for="category in categories" :key="category.id" class="group relative w-full h-full aspect-square"
               @click="toggleFilter({ type: 'category', id: category.id, label: category.name })">
@@ -24,31 +23,13 @@
             </li>
           </ul>
         </div>
-        <div class="mt-4" v-else>
-          <ul class="space-y-2">
-            <li v-for="issue in issues" :key="issue.id" class="flex items-center"
-              @click="toggleFilter({ type: 'issue', id: issue.id, label: issue.title })">
-              <div
-                class="flex items-center gap-2 p-2 bg-white rounded-lg shadow hover:bg-secondary-100 w-full cursor-pointer transition-all duration-150"
-                :class="{ '!bg-primary-500 !text-white': filters.some(f => f.type === 'issue' && f.id === issue.id) }">
-                <img v-if="issue.cover" :src="issue.cover" class="w-16 h-16 object-cover rounded-md"
-                  :alt="issue.title" />
-                <div>
-                  <h3 class="font-bold">{{ issue.title }}</h3>
-                  <p class="text-sm text-gray-600" :class=" {'!text-gray-200' : filters.some(f => f.type ==='issue' && f.id === issue.id)}">{{ formatDate(issue.published_at) }}</p>
-                </div>
-              </div>
-            </li>
-          </ul>
-        </div>
       </div>
       <!-- Mobile: UDrawer for filters -->
       <UDrawer v-model:open="drawerOpen" class="md:hidden">
         <template #content>
           <div class="p-4">
             <h2 class="text-xl font-bold mb-4">Filtrer</h2>
-            <UTabs v-model="activeTab" :items="tabs" class="w-full" :content="false" />
-            <div class="mt-4" v-if="activeTab === '0'">
+            <div class="mt-4">
               <ul class="grid grid-cols-2 gap-2">
                 <li v-for="category in categories" :key="category.id" class="group relative w-full h-full aspect-square"
                   @click="toggleFilter({ type: 'category', id: category.id, label: category.name })">
@@ -59,23 +40,6 @@
                   <h3
                     class="absolute bottom-0 left-0 right-0 flex flex-col items-center justify-center h-full z-10 font-bold text-xl text-white cursor-pointer">
                     {{ category.name }}</h3>
-                </li>
-              </ul>
-            </div>
-            <div class="mt-4" v-else>
-              <ul class="space-y-2">
-                <li v-for="issue in issues" :key="issue.id" class="flex items-center"
-                  @click="toggleFilter({ type: 'issue', id: issue.id, label: issue.title })">
-                  <div
-                    class="flex items-center gap-2 p-2 bg-white rounded-lg shadow hover:bg-secondary-100 w-full cursor-pointer transition-all duration-150"
-                    :class="{ '!bg-primary-500 !text-white': filters.some(f => f.type === 'issue' && f.id === issue.id) }">
-                    <img v-if="issue.cover" :src="issue.cover" class="w-16 h-16 object-cover rounded-md"
-                      :alt="issue.title" />
-                    <div>
-                      <h3 class="font-bold">{{ issue.title }}</h3>
-                      <p class="text-sm text-gray-600" :class=" {'!text-gray-200' : filters.some(f => f.type ==='issue' && f.id === issue.id)}">{{ formatDate(issue.published_at) }}</p>
-                    </div>
-                  </div>
                 </li>
               </ul>
             </div>
@@ -90,7 +54,7 @@
           </span>
           <UBadge v-for="filter in filters" :key="filter.id" class="cursor-pointer group relative hover:bg-primary-600"
             color="primary" :label="filter.label"  @click="filters.splice(filters.indexOf(filter), 1)"
-            :icon="filter.type === 'category' ? 'mingcute-folder-2-line' : 'mingcute-calendar-2-line'" >
+            icon="mingcute-folder-2-line" >
             <template #trailing>
               <Icon name="tabler-x" class="text-white transition-colors" />
             </template>
@@ -110,42 +74,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useOptimizedDb } from '~/composables/useOptimizedDb'
 
-const { getOptimizedArticles, getOptimizedCategories, getOptimizedIssues } = useOptimizedDb()
+const { getOptimizedArticles, getOptimizedCategories } = useOptimizedDb()
 
 // Use optimized data fetching with SSR and caching
 const { data: ssrCategories } = await getOptimizedCategories()
-const { data: ssrIssues } = await getOptimizedIssues()
 const { data: ssrArticles } = await getOptimizedArticles()
 
 // UI state
-const activeTab = ref('0')
 const filters = ref<Array<{ type: string; id: string; label: string }>>([])
 const drawerOpen = ref(false)
 
-// Responsive detection
-const isMobile = computed(() => {
-  if (process.client) {
-    return window.innerWidth < 768
-  }
-  return false
-})
-
-// Filter tabs
-const tabs = [{
-  key: '0',
-  label: 'Catégories',
-  icon: 'mingcute-tag-line'
-}, {
-  key: '1', 
-  label: 'Éditions',
-  icon: 'mingcute-book-line'
-}]
-
 // Initialize reactive data from SSR
-const issues = ref<any[]>(ssrIssues.value || [])
 const categories = ref<any[]>(ssrCategories.value || [])
 const articles = ref<any[]>(ssrArticles.value || [])
 
@@ -155,15 +97,6 @@ function toggleFilter(filter: any) {
   } else {
     filters.value = filters.value.filter(f => f.type !== filter.type || f.id !== filter.id)
   }
-}
-
-function formatDate(dateString: string) {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('fr-FR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
 }
 
 // Fetch articles with current filters using optimized composable
