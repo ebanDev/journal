@@ -293,7 +293,7 @@ const setupSEO = (articleData: ArticleWithCategories) => {
   
   const categories = articleData.categories?.map(cat => cat.name).join(', ') || ''
   const imageUrl = articleData.cover || 'https://sursaut-revue.fr/icon-512x512.png'
-  const articleUrl = `https://sursaut-revue.fr/articles/${articleData.slug}`
+  const articleUrl = `https://sursaut-revue.fr/${articleData.slug}`
   
   useSeoMeta({
     title,

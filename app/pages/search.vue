@@ -12,7 +12,7 @@
     />
     <div v-if="articles.length" class="space-y-2">
       <div v-for="item in articles" :key="item.slug">
-        <NuxtLink :to="`/articles/${item.slug}`">
+        <NuxtLink :to="`/${item.slug}`">
           <div class="group overflow-hidden hover:bg-[var(--color-amber-150)] rounded-lg flex flex-col p-2 items-center sm:flex-row gap-4">
             <img v-if="item.cover" :src="item.cover" alt="" class="w-32 h-32 object-cover rounded-lg"/>
             <div class="flex-1">

@@ -6,7 +6,7 @@
 
       <div class="flex gap-4 flex-col justify-start pt-2">
         <div v-if="latestArticle" class="group">
-          <NuxtLink :to="`/articles/${latestArticle.slug}`">
+          <NuxtLink :to="`/${latestArticle.slug}`">
             <div
               class="overflow-hidden flex flex-col md:flex-row md:gap-12 items-center bg-[var(--color-amber-150)] md:bg-transparent md:hover:bg-[var(--color-amber-150)] rounded-lg">
               <img v-if="latestArticle.cover" :src="latestArticle.cover"

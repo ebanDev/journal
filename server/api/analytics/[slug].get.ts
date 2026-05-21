@@ -51,7 +51,7 @@ export default defineEventHandler(async (event) => {
     const { ok, data, error } = await client.getWebsiteStats(websiteId, {
       startAt: startDate.getTime(),
       endAt: endDate.getTime(),
-      url: `/articles/${slug}`
+      url: `/${slug}`
     })
 
     if (!ok) {

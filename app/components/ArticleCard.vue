@@ -1,5 +1,5 @@
 <template>
-  <NuxtLink :to="`/articles/${article.slug}`" class="group">
+  <NuxtLink :to="`/${article.slug}`" class="group">
     <div class="bg-[var(--color-amber-150)] rounded-lg hover:bg-secondary-200 transition-colors flex flex-col">
       <img v-if="showCover && article.cover" :src="article.cover" class="object-cover w-full h-32 rounded-t-lg" :alt="article.title" />
       <div class="p-3">

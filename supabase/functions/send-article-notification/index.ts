@@ -54,7 +54,7 @@ serve(async (req) => {
 
     const siteUrl = Deno.env.get('SITE_URL') || 'https://sursaut-revue.fr'
     const articleUrl = article.slug
-      ? `${siteUrl}/articles/${article.slug}`
+      ? `${siteUrl}/${article.slug}`
       : `${siteUrl}/articles`
 
     const notificationPayload: OneSignalNotificationPayload = {
