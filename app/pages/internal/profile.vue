@@ -6,8 +6,25 @@ const user = useSupabaseUser()
 const toast = useToast()
 const profile = ref<Tables<'members'>>({} as Tables<'members'>)
 const originalProfile = ref<Tables<'members'>>({} as Tables<'members'>)
+const form = ref({
+  full_name: '',
+  uni_year: '',
+  phone: ''
+})
 const isEditing = ref(false)
 const isSaving = ref(false)
+
+function setFormFromProfile(member: Tables<'members'>) {
+  form.value = {
+    full_name: member.full_name ?? '',
+    uni_year: member.uni_year ?? '',
+    phone: member.phone ?? ''
+  }
+}
+
+function nullableString(value: string) {
+  return value.trim() || null
+}
 
 async function loadProfile() {
   if (!user.value?.email) {
@@ -29,6 +46,7 @@ async function loadProfile() {
   } else if (data) {
     profile.value = data
     originalProfile.value = data
+    setFormFromProfile(data)
   }
 }
 
@@ -70,9 +88,9 @@ async function saveProfile() {
   const { error } = await supabase
     .from('members')
     .update({
-      full_name: profile.value.full_name,
-      uni_year: profile.value.uni_year,
-      phone: profile.value.phone
+      full_name: nullableString(form.value.full_name),
+      uni_year: nullableString(form.value.uni_year),
+      phone: nullableString(form.value.phone)
     })
     .eq('email', user.value.email)
   
@@ -90,6 +108,12 @@ async function saveProfile() {
       color: 'success',
       icon: 'tabler:check'
     })
+    profile.value = {
+      ...profile.value,
+      full_name: nullableString(form.value.full_name),
+      uni_year: nullableString(form.value.uni_year),
+      phone: nullableString(form.value.phone)
+    }
     originalProfile.value = { ...profile.value }
     isEditing.value = false
   }
@@ -98,11 +122,13 @@ async function saveProfile() {
 
 function cancelEdit() {
   profile.value = { ...originalProfile.value }
+  setFormFromProfile(originalProfile.value)
   isEditing.value = false
 }
 
 function enableEdit() {
   originalProfile.value = { ...profile.value }
+  setFormFromProfile(profile.value)
   isEditing.value = true
 }
 
@@ -161,7 +187,7 @@ onMounted(loadProfile)
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <UFormField name="full_name" label="Nom complet">
             <UInput 
-              v-model="profile.full_name" 
+              v-model="form.full_name"
               placeholder="Entrez votre nom complet" 
               :disabled="!isEditing"
             >
@@ -181,7 +207,7 @@ onMounted(loadProfile)
 
           <UFormField name="uni_year" label="Année universitaire">
             <UInput 
-              v-model="profile.uni_year" 
+              v-model="form.uni_year"
               placeholder="ex. Deuxième année" 
               :disabled="!isEditing"
             >
@@ -193,7 +219,7 @@ onMounted(loadProfile)
 
           <UFormField name="phone" label="Numéro de téléphone">
             <UInput 
-              v-model="profile.phone" 
+              v-model="form.phone"
               placeholder="Votre numéro de téléphone" 
               :disabled="!isEditing"
             >

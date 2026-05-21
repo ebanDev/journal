@@ -27,9 +27,9 @@
           <tbody>
             <tr v-for="member in members" :key="member.email" class="border-b border-secondary-300">
               <td class="px-4 py-2">{{ member.email }}</td>
-              <td class="px-4 py-2"><UInput v-model="member.full_name" class="w-full"/></td>
-              <td class="px-4 py-2"><UInput v-model="member.uni_year" class="w-full"/></td>
-              <td class="px-4 py-2"><UInput v-model="member.phone" class="w-full"/></td>
+              <td class="px-4 py-2"><UInput v-model="member.full_name" class="w-full" /></td>
+              <td class="px-4 py-2"><UInput v-model="member.uni_year" class="w-full" /></td>
+              <td class="px-4 py-2"><UInput v-model="member.phone" class="w-full" /></td>
               <td class="px-4 py-2">
                 <USelect
                   v-model="member.role"
@@ -61,11 +61,21 @@ import type { RealtimeChannel } from '@supabase/supabase-js'
 import { useSupabaseClient, useToast } from '#imports'
 import type { Tables } from '~/types/database.types'
 
+type EditableMember = Omit<Tables<'members'>, 'full_name' | 'uni_year' | 'phone'> & {
+  full_name: string
+  uni_year: string
+  phone: string
+}
+
 const supabase = useSupabaseClient()
 const toast = useToast()
-const members = ref<Tables<'members'>[]>([])
+const members = ref<EditableMember[]>([])
 const loading = ref(true)
 let membersChannel: RealtimeChannel | null = null
+
+function nullableString(value: string) {
+  return value.trim() || null
+}
 
 async function fetchMembers() {
   loading.value = true
@@ -81,7 +91,12 @@ async function fetchMembers() {
       description: 'Impossible de charger la liste des utilisateurs.'
     })
   } else {
-    members.value = data ?? []
+    members.value = (data ?? []).map(member => ({
+      ...member,
+      full_name: member.full_name ?? '',
+      uni_year: member.uni_year ?? '',
+      phone: member.phone ?? ''
+    }))
   }
   loading.value = false
 }
@@ -92,7 +107,12 @@ async function saveMember(email: string) {
   
   const { error } = await supabase
     .from('members')
-    .update({ full_name: member.full_name, uni_year: member.uni_year, phone: member.phone, role: member.role })
+    .update({
+      full_name: nullableString(member.full_name),
+      uni_year: nullableString(member.uni_year),
+      phone: nullableString(member.phone),
+      role: member.role
+    })
     .eq('email', email)
   
   if (error) {

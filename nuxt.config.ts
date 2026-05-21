@@ -1,5 +1,6 @@
 // @ts-ignore
 import tailwindcss from "@tailwindcss/vite";
+import { defineNuxtConfig } from 'nuxt/config'
 
 const sensitiveRouteHeaders = {
   'cache-control': 'private, no-store, max-age=0, must-revalidate',
@@ -24,12 +25,6 @@ export default defineNuxtConfig({
 
   // Enable SSR and prerendering for better performance
   ssr: true,
-
-  nitro: {
-    prerender: {
-      routes: ['/sitemap.xml', '/robots.txt']
-    }
-  },
 
   sitemap: {
     exclude: ['/internal/**', '/confirm', '/login'],

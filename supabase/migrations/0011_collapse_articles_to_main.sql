@@ -1,3 +1,7 @@
+DROP TRIGGER IF EXISTS trigger_notify_issue_published ON public.issues;
+DROP FUNCTION IF EXISTS public.notify_issue_published();
+DROP FUNCTION IF EXISTS public.send_issue_notification(UUID);
+
 INSERT INTO public.issues (title, slug, description, status, published_at)
 VALUES ('MAIN', 'main', '', 'published', now())
 ON CONFLICT (slug) DO UPDATE
@@ -9,10 +13,6 @@ SET
 UPDATE public.articles
 SET issue_id = (SELECT id FROM public.issues WHERE slug = 'main')
 WHERE issue_id IS DISTINCT FROM (SELECT id FROM public.issues WHERE slug = 'main');
-
-DROP TRIGGER IF EXISTS trigger_notify_issue_published ON public.issues;
-DROP FUNCTION IF EXISTS public.notify_issue_published();
-DROP FUNCTION IF EXISTS public.send_issue_notification(UUID);
 
 CREATE OR REPLACE FUNCTION public.notify_article_published()
 RETURNS TRIGGER AS $$
