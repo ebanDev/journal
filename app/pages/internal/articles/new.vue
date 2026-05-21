@@ -79,19 +79,17 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useSupabaseUser, useToast } from '#imports'
 import { useDb } from '~/composables/useDb'
 import { useDocumentProcessor } from '~/composables/useDocumentProcessor'
 
 const user = useSupabaseUser()
 const router = useRouter()
-const route = useRoute()
 const toast = useToast()
 const { createNewArticle } = useDb()
 const { processDocument, isProcessing, error } = useDocumentProcessor()
 
-const editionId = route.query.issue as string | undefined
 const isCreating = ref(false)
 const uploadedFile = ref<File | null>(null)
 const fileInput = ref<HTMLInputElement>()
@@ -113,7 +111,6 @@ const createBlankArticle = async () => {
       title: '',
       content: '',
       author_id: user.value.id,
-      issue_id: editionId,
     })
     
     toast.add({
@@ -169,7 +166,6 @@ const createArticle = async () => {
       title: formState.title,
       content: formState.content,
       author_id: user.value.id,
-      issue_id: editionId,
     })
     
     toast.add({

@@ -3,8 +3,6 @@
     <!-- À la une section -->
     <section class="flex-[3] w-full lg:w-auto">
       <h2 class="font-serif text-3xl md:text-4xl mb-1 md:mb-2">À la une</h2>
-      <p v-if="latestEdition" class="text-gray-600 mb-3">Dernière édition : {{ latestEdition.title }}</p>
-      <p v-else class="text-gray-600 mb-3">Aucune édition publiée</p>
 
       <div class="flex gap-4 flex-col justify-start pt-2">
         <div v-for="(article, index) in featuredArticles" :key="article.id" class="group">
@@ -32,18 +30,6 @@
                 <div class="text-xs text-gray-600" v-if="article.published_at">{{ formatDate(article.published_at) }}
                 </div>
               </div>
-            </div>
-          </NuxtLink>
-        </div>
-        <!-- Special card for the issue (mobile only, after 'à la une') -->
-        <div class="block md:hidden mb-4">
-          <NuxtLink v-if="latestEdition" :to="`/issues/${latestEdition.slug}`"
-            class="flex items-center gap-3 bg-primary-600 rounded-lg p-4 shadow transition-colors text-white">
-            <img v-if="latestEdition.cover" :src="latestEdition.cover" class="w-16 h-16 object-cover rounded-md"
-              :alt="latestEdition.title" />
-            <div>
-              <div class="font-bold text-lg">Voir l’édition complète</div>
-              <div class="text-sm text-gray-100 line-clamp-2">{{ latestEdition.title }}</div>
             </div>
           </NuxtLink>
         </div>
@@ -111,23 +97,6 @@
     </div>
   </section>
 
-  <section class="w-screen mt-10 pt-4 pb-12">
-    <h2 class="font-serif text-3xl md:text-4xl mb-8 md:text-center px-4">Éditions</h2>
-    <!-- A swiper --->
-    <ClientOnly>
-      <swiper-container :slidesPerView="'auto'" :centeredSlides="true" :grabCursor="true" :effect="'coverflow'"
-        :initialSlide="1" :mousewheel="{ enabled: true }" :autoplay="{ delay: 2000, pauseOnMouseEnter: true }"
-        :coverflowEffect="{ rotate: 0, stretch: 0, depth: 100, modifier: 1, scale: .9, slideShadows: true }">
-        <swiper-slide v-for="issue in issues" :key="issue.id" class="flex justify-center w-auto max-w-[70%] h-auto">
-          <NuxtLink :to="`/issues/${issue.slug}`"
-            class="bg-secondary-100 hover:bg-[var(--color-amber-200)] transition-colors rounded-lg p-3 h-auto">
-            <img v-if="issue.cover" :src="issue.cover"
-              class="object-contain w-auto h-auto max-w-full max-h-128 rounded-t-lg" :alt="issue.title" />
-          </NuxtLink>
-        </swiper-slide>
-      </swiper-container>
-    </ClientOnly>
-  </section>
 </template>
 
 <script setup lang="ts">
@@ -136,14 +105,12 @@ import { useSupabaseClient, useAsyncData } from '#imports'
 import { useOptimizedDb } from '~/composables/useOptimizedDb'
 import type { ArticleWithCategories } from '~/composables/useDb'
 
-const { getOptimizedIssues, getOptimizedCategoriesWithArticles, getFeaturedArticles, getLatestEdition } = useOptimizedDb()
+const { getOptimizedCategoriesWithArticles, getFeaturedArticles } = useOptimizedDb()
 const client = useSupabaseClient()
 
 // Use optimized data fetching with SSR and caching
-const { data: issues } = await getOptimizedIssues()
 const { data: categories } = await getOptimizedCategoriesWithArticles()
 const { data: featuredArticles } = await getFeaturedArticles()
-const { data: latestEdition } = await getLatestEdition()
 
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString()
@@ -151,7 +118,6 @@ function formatDate(date: string) {
 
 // Computed properties for article display
 const limitedOtherArticles = computed(() => {
-  // Get non-featured articles from the latest edition
   const allArticles = featuredArticles.value || []
   return allArticles.slice(0, articleLimit.value)
 })
@@ -188,7 +154,7 @@ const { data: veille } = await useAsyncData('homepage-veille', async () => {
 
 useSeoMeta({
   title: 'Sursaut!, le journal des luttes de Bordeaux',
-  description: 'Le journal des luttes de Bordeaux, un espace pour partager et documenter les luttes sociales et politiques. Découvrez nos derniers articles et éditions.',
+  description: 'Le journal des luttes de Bordeaux, un espace pour partager et documenter les luttes sociales et politiques. Découvrez nos derniers articles.',
   keywords: 'Bordeaux, luttes sociales, politique, journal, actualité, analyses, Sursaut!',
   
   // Open Graph

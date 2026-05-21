@@ -385,8 +385,8 @@ export type Database = {
         Args: { mem_email: string; new_role: string; uid: string }
         Returns: boolean
       }
-      send_issue_notification: {
-        Args: { issue_uuid: string }
+      send_article_notification: {
+        Args: { article_uuid: string }
         Returns: Json
       }
       sparsevec_out: {
