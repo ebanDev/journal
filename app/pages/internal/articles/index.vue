@@ -19,11 +19,11 @@
     </div>
 
     <div class="flex-1 overflow-y-auto p-6">
-      <div v-if="pending || loadingArticles" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div v-if="pending || loadingArticles" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
         <USkeleton v-for="i in 6" :key="i" class="h-56" />
       </div>
 
-      <div v-else-if="articles.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 items-stretch">
+      <div v-else-if="articles.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 items-stretch">
         <UCard
           v-for="article in articles"
           :key="article.id"
