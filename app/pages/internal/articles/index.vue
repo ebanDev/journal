@@ -43,14 +43,6 @@
                     {{ article.draft ? 'Brouillon' : 'Prêt' }}
                   </UBadge>
                   <UBadge
-                    v-if="article.featured"
-                    color="warning"
-                    size="sm"
-                    variant="soft"
-                  >
-                    À la une
-                  </UBadge>
-                  <UBadge
                     v-if="article.slug && analyticsData.has(article.slug)"
                     color="info"
                     size="sm"

@@ -54,7 +54,6 @@ export type Database = {
           description: string | null
           draft: boolean
           embedding: string | null
-          featured: boolean
           id: string
           issue_id: string | null
           published_at: string | null
@@ -71,7 +70,6 @@ export type Database = {
           description?: string | null
           draft?: boolean
           embedding?: string | null
-          featured?: boolean
           id?: string
           issue_id?: string | null
           published_at?: string | null
@@ -88,7 +86,6 @@ export type Database = {
           description?: string | null
           draft?: boolean
           embedding?: string | null
-          featured?: boolean
           id?: string
           issue_id?: string | null
           published_at?: string | null
@@ -292,7 +289,6 @@ export type Database = {
           description: string
           draft: boolean
           embedding: string
-          featured: boolean
           id: string
           issue_id: string
           published_at: string
@@ -372,7 +368,6 @@ export type Database = {
           description: string | null
           draft: boolean
           embedding: string | null
-          featured: boolean
           id: string
           issue_id: string | null
           published_at: string | null

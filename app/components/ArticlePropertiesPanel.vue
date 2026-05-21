@@ -89,10 +89,6 @@
             />
           </UFormField>
 
-          <UFormField label="Article à la une">
-            <USwitch v-model="meta.featured" />
-          </UFormField>
-
           <UFormField label="Vérification grammaticale (session)">
             <USwitch v-model="meta.grammarCheckEnabled" />
           </UFormField>
@@ -211,7 +207,6 @@ interface ArticleMeta {
   coverLabel: string
   coverCrop: 'top' | 'middle' | 'bottom'
   description: string
-  featured: boolean
   publishedAt: string | null
   sources: SourceType[]
   grammarCheckEnabled: boolean

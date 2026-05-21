@@ -5,29 +5,28 @@
       <h2 class="font-serif text-3xl md:text-4xl mb-1 md:mb-2">À la une</h2>
 
       <div class="flex gap-4 flex-col justify-start pt-2">
-        <div v-for="(article, index) in featuredArticles" :key="article.id" class="group">
-          <!-- Featured article card -->
-          <NuxtLink :to="`/articles/${article.slug}`">
+        <div v-if="latestArticle" class="group">
+          <NuxtLink :to="`/articles/${latestArticle.slug}`">
             <div
-              :class="['overflow-hidden flex flex-col md:flex-row md:gap-12 items-center bg-[var(--color-amber-150)] md:bg-transparent md:hover:bg-[var(--color-amber-150)] rounded-lg', index % 2 === 1 ? 'md:flex-row-reverse' : '']">
-              <img v-if="article.cover" :src="article.cover"
+              class="overflow-hidden flex flex-col md:flex-row md:gap-12 items-center bg-[var(--color-amber-150)] md:bg-transparent md:hover:bg-[var(--color-amber-150)] rounded-lg">
+              <img v-if="latestArticle.cover" :src="latestArticle.cover"
                 class="object-cover flex-none h-32 w-full md:h-auto md:w-1/3 aspect-square rounded-sm"
-                :alt="article.title" />
+                :alt="latestArticle.title" />
               <div v-else class="w-full h-full bg-gray-100 flex items-center justify-center">
                 <span class="text-gray-400">No image</span>
               </div>
 
               <div class="p-4">
-                <div v-if="article.categories && article.categories.length" class="flex flex-wrap gap-2 mb-2">
-                  <UBadge v-for="cat in article.categories" :key="cat.name" color="secondary" :label="cat.name"
+                <div v-if="latestArticle.categories && latestArticle.categories.length" class="flex flex-wrap gap-2 mb-2">
+                  <UBadge v-for="cat in latestArticle.categories" :key="cat.name" color="secondary" :label="cat.name"
                     :icon="cat.icon ? 'mingcute:' + cat.icon : undefined" />
                 </div>
                 <h2 class="font-serif text-base md:text-2xl font-medium mb-1 md:mb-3 text-black">
-                  {{ article.title }}
+                  {{ latestArticle.title }}
                 </h2>
-                <p class="hidden md:block text-gray-600 mb-4 text-sm leading-[1.3] !line-clamp-5">{{ article.description
+                <p class="hidden md:block text-gray-600 mb-4 text-sm leading-[1.3] !line-clamp-5">{{ latestArticle.description
                   }}</p>
-                <div class="text-xs text-gray-600" v-if="article.published_at">{{ formatDate(article.published_at) }}
+                <div class="text-xs text-gray-600" v-if="latestArticle.published_at">{{ formatDate(latestArticle.published_at) }}
                 </div>
               </div>
             </div>
@@ -103,23 +102,24 @@
 import { onMounted, onUnmounted, computed, ref } from 'vue'
 import { useSupabaseClient, useAsyncData } from '#imports'
 import { useOptimizedDb } from '~/composables/useOptimizedDb'
-import type { ArticleWithCategories } from '~/composables/useDb'
 
-const { getOptimizedCategoriesWithArticles, getFeaturedArticles } = useOptimizedDb()
+const { getOptimizedCategoriesWithArticles, getLatestArticles } = useOptimizedDb()
 const client = useSupabaseClient()
 
 // Use optimized data fetching with SSR and caching
 const { data: categories } = await getOptimizedCategoriesWithArticles()
-const { data: featuredArticles } = await getFeaturedArticles()
+const { data: latestArticles } = await getLatestArticles()
 
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString()
 }
 
 // Computed properties for article display
+const latestArticle = computed(() => latestArticles.value?.[0] || null)
+
 const limitedOtherArticles = computed(() => {
-  const allArticles = featuredArticles.value || []
-  return allArticles.slice(0, articleLimit.value)
+  const allArticles = latestArticles.value || []
+  return allArticles.slice(1, articleLimit.value + 1)
 })
 
 // Reactive variables for responsive behavior

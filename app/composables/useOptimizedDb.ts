@@ -137,13 +137,15 @@ export function useOptimizedDb() {
   }
 
   /**
-   * Get featured articles with caching
+   * Get latest published articles with caching
    */
-  async function getFeaturedArticles() {
-    const { data, refresh } = await useAsyncData('featured-articles',
+  async function getLatestArticles() {
+    const { data, refresh } = await useAsyncData('latest-articles',
       async () => {
         const articles = await getArticles()
-        return articles.filter(a => a.featured && !a.draft).slice(0, 3)
+        return articles
+          .filter(a => !a.draft && a.published_at)
+          .sort((a, b) => new Date(b.published_at || 0).getTime() - new Date(a.published_at || 0).getTime())
       },
       {
         default: () => [],
@@ -161,7 +163,7 @@ export function useOptimizedDb() {
     getOptimizedCategoriesWithArticles,
     getOptimizedVeille,
     getOptimizedVeilleVotes,
-    getFeaturedArticles,
+    getLatestArticles,
     prefetchEssentialData,
     clearAllCache
   }

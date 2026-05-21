@@ -199,7 +199,6 @@ const meta = reactive({
   coverLabel: '',
   coverCrop: 'middle',
   description: '',
-  featured: false,
   publishedAt: null as string | null,
   sources: [] as SourceType[],
   grammarCheckEnabled: true
@@ -334,7 +333,6 @@ const save = async (opts: { silent?: boolean } = {}) => {
     cover_label: meta.coverLabel || null,
     cover_crop: meta.coverCrop || 'middle',
     description: meta.description,
-    featured: meta.featured,
     sources: JSON.stringify(meta.sources)
   }
   
@@ -379,7 +377,7 @@ const fetchData = async () => {
   
   // Fetch article data
   const { data, error } = await supabase.from('articles')
-    .select('title,content,draft,published_at,slug,cover,cover_label,cover_crop,description,featured,sources')
+    .select('title,content,draft,published_at,slug,cover,cover_label,cover_crop,description,sources')
     .eq('id', id)
     .single()
     
@@ -399,7 +397,6 @@ const fetchData = async () => {
   meta.coverLabel = data.cover_label || ''
   meta.coverCrop = data.cover_crop || 'middle'
   meta.description = data.description || ''
-  meta.featured = data.featured || false
   meta.publishedAt = data.published_at
 
   // Load sources
