@@ -8,6 +8,7 @@
           size="xs" 
           variant="ghost" 
           color="neutral"
+          :disabled="isSidenoteActive"
           :class="button.active() ? 'bg-amber-100 text-amber-700' : ''" 
           @click="button.command" 
         />
@@ -25,6 +26,7 @@
           size="xs" 
           variant="ghost" 
           color="neutral"
+          :disabled="isSidenoteActive && !button.allowedInSidenote"
           :class="button.active() ? 'bg-amber-100 text-amber-700' : ''" 
           @click="button.command" 
         />
@@ -42,6 +44,7 @@
           size="xs" 
           variant="ghost" 
           color="neutral"
+          :disabled="isSidenoteActive"
           :class="button.active() ? 'bg-amber-100 text-amber-700' : ''" 
           @click="button.command" 
         />
@@ -59,6 +62,7 @@
           size="xs" 
           variant="ghost" 
           color="neutral"
+          :disabled="isSidenoteActive"
           :class="button.active() ? 'bg-amber-100 text-amber-700' : ''" 
           @click="button.command" 
         />
@@ -79,7 +83,20 @@
           variant="ghost" 
           color="neutral"
           :loading="isUploading"
+          :disabled="isSidenoteActive"
           @click="triggerImageUpload" 
+        />
+      </UTooltip>
+
+      <!-- Sidenote button -->
+      <UTooltip text="Note de marge">
+        <UButton
+          icon="i-mingcute-comment-line"
+          size="xs"
+          variant="ghost"
+          color="neutral"
+          :disabled="isSidenoteActive"
+          @click.stop="$emit('insert-sidenote')"
         />
       </UTooltip>
 
@@ -91,6 +108,7 @@
           variant="ghost" 
           color="neutral"
           :class="editor && editor.isActive('source') ? 'bg-amber-100 text-amber-700' : ''"
+          :disabled="isSidenoteActive"
           @click.stop="$emit('open-source-popover', $event)" 
         />
       </UTooltip>
@@ -103,6 +121,7 @@
           variant="ghost" 
           color="neutral"
           :class="editor && editor.isActive('chart') ? 'bg-amber-100 text-amber-700' : ''"
+          :disabled="isSidenoteActive"
           @click.stop="$emit('open-chart-popover', $event)" 
         />
       </UTooltip>
@@ -122,7 +141,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-import { ref, computed } from 'vue'
+import { ref, computed, onBeforeUnmount, watch } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { useImageUpload } from '~/composables/useImageUpload'
 
@@ -135,14 +154,42 @@ const props = defineProps<Props>()
 const emit = defineEmits<{
   'open-source-popover': [event: MouseEvent]
   'open-chart-popover': [event: MouseEvent]
+  'insert-sidenote': []
 }>()
 
 const { uploadImage, isUploading } = useImageUpload()
 const fileInput = ref<HTMLInputElement | null>(null)
+const selectionVersion = ref(0)
 const isMathActive = computed(() => {
+  selectionVersion.value
   const editorInstance = props.editor
   if (!editorInstance) return false
   return editorInstance.isActive('blockMath') || editorInstance.isActive('inlineMath')
+})
+const isSidenoteActive = computed(() => {
+  selectionVersion.value
+  return props.editor?.isActive('sidenoteNote') ?? false
+})
+
+const syncSelectionState = () => {
+  selectionVersion.value += 1
+}
+
+watch(
+  () => props.editor,
+  (editor, previousEditor) => {
+    previousEditor?.off('selectionUpdate', syncSelectionState)
+    previousEditor?.off('update', syncSelectionState)
+    editor?.on('selectionUpdate', syncSelectionState)
+    editor?.on('update', syncSelectionState)
+    syncSelectionState()
+  },
+  { immediate: true }
+)
+
+onBeforeUnmount(() => {
+  props.editor?.off('selectionUpdate', syncSelectionState)
+  props.editor?.off('update', syncSelectionState)
 })
 
 // Format buttons configuration organized by groups
@@ -176,6 +223,7 @@ const textStyleButtons = computed(() => [
     // @ts-ignore
     command: () => props.editor?.chain().focus().toggleBold().run(),
     active: () => props.editor?.isActive('bold') ?? false,
+    allowedInSidenote: true,
     title: 'Gras'
   },
   {
@@ -183,7 +231,16 @@ const textStyleButtons = computed(() => [
     // @ts-ignore
     command: () => props.editor?.chain().focus().toggleItalic().run(),
     active: () => props.editor?.isActive('italic') ?? false,
+    allowedInSidenote: true,
     title: 'Italique'
+  },
+  {
+    icon: 'i-mingcute-underline-line',
+    // @ts-ignore
+    command: () => props.editor?.chain().focus().toggleUnderline().run(),
+    active: () => props.editor?.isActive('underline') ?? false,
+    allowedInSidenote: true,
+    title: 'Souligné'
   },
   {
     icon: 'i-mingcute-strikethrough-line',

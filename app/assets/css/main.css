@@ -71,3 +71,103 @@
     @apply bg-amber-300 px-1 rounded text-base;
   }
 }
+
+.sidenote-layout {
+  --sidenote-width: 12rem;
+  --sidenote-gap: 2rem;
+  overflow: visible;
+}
+
+.sidenote-ref {
+  color: #906937;
+  cursor: pointer;
+  font-size: 0.72em;
+  font-weight: 700;
+  line-height: 0;
+  margin: 0 0.12rem;
+  vertical-align: super;
+}
+
+.sidenote-layout .sidenote-row {
+  margin: 1.25rem 0;
+}
+
+.sidenote-layout .sidenote-note {
+  display: flex;
+  gap: 0.35rem;
+  flex: 0 0 var(--sidenote-width);
+  width: var(--sidenote-width);
+  padding-top: 0.2rem;
+  color: #604624;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: left;
+}
+
+.sidenote-layout .sidenote-note__number {
+  flex: 0 0 auto;
+  font-weight: 700;
+}
+
+.sidenote-layout .sidenote-note__content {
+  min-width: 0;
+}
+
+.sidenote-layout .sidenote-body {
+  min-width: 0;
+}
+
+.sidenote-layout .sidenote-body__content {
+  min-width: 0;
+}
+
+.sidenote-layout .sidenote-body__content > :first-child {
+  margin-top: 0;
+}
+
+@media (min-width: 1024px) {
+  .sidenote-layout .sidenote-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sidenote-gap);
+    width: calc(100% + var(--sidenote-width) + var(--sidenote-gap));
+    margin-left: calc(-1 * (var(--sidenote-width) + var(--sidenote-gap)));
+  }
+
+  .sidenote-layout .sidenote-body {
+    flex: 1 1 auto;
+  }
+
+  .sidenote-layout .sidenote-ref {
+    cursor: default;
+  }
+}
+
+@media (max-width: 1023px) {
+  .article-content__html .sidenote-note {
+    display: none;
+  }
+}
+
+.sidenote-layout .tiptap .sidenote-note__content {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 1.75rem;
+  padding: 0.35rem 0.45rem;
+  border-left: 2px solid #cda97a;
+  background: #fcfaf8;
+  outline: none;
+}
+
+.sidenote-layout .tiptap .sidenote-note__content:focus {
+  border-left-color: #906937;
+  box-shadow: 0 0 0 2px rgba(205, 169, 122, 0.18);
+}
+
+.sidenote-layout .tiptap .sidenote-note__content:empty::before {
+  color: #9a8062;
+  content: 'Écrire la note…';
+  pointer-events: none;
+}

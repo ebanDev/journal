@@ -1,5 +1,5 @@
 <template>
-  <div class="prose max-w-none">
+  <div class="prose max-w-none sidenote-layout" @click="handleContentClick">
     <template v-for="segment in renderedSegments" :key="segment.key">
       <div
         v-if="segment.type === 'html'"
@@ -20,11 +20,34 @@
         :icons="segment.chart.icons"
       />
     </template>
+
+    <UDrawer v-model:open="sidenoteDrawerOpen" class="lg:hidden">
+      <template #content>
+        <div class="p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-semibold text-gray-900">
+              Note {{ selectedSidenote?.number }}
+            </p>
+            <UButton
+              icon="i-mingcute-close-line"
+              size="xs"
+              variant="ghost"
+              color="neutral"
+              @click="sidenoteDrawerOpen = false"
+            />
+          </div>
+          <div
+            class="sidenote-drawer-content text-sm leading-relaxed text-gray-700"
+            v-html="selectedSidenote?.content"
+          ></div>
+        </div>
+      </template>
+    </UDrawer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
 import ChartNodePublic from '~/components/ChartNodePublic.vue'
@@ -34,6 +57,8 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const sidenoteDrawerOpen = ref(false)
+const selectedSidenote = ref<{ number: number; content: string } | null>(null)
 
 type ChartType = 'bar' | 'line' | 'pie' | 'stackedArea'
 
@@ -147,6 +172,26 @@ const renderMath = (html: string) => {
 }
 
 const enhanceContent = (html: string) => renderMath(enhanceSources(html))
+
+const handleContentClick = (event: MouseEvent) => {
+  const target = event.target as HTMLElement
+  const refElement = target.closest('.sidenote-ref') as HTMLElement | null
+  if (!refElement) return
+
+  const isCompact = window.matchMedia('(max-width: 1023px)').matches
+  if (!isCompact) return
+
+  const number = Number(refElement.getAttribute('data-sidenote-ref'))
+  if (!number) return
+
+  const row = refElement.closest('[data-sidenote-row]')
+  const content = row?.querySelector('.sidenote-note__content')?.innerHTML
+  if (!content) return
+
+  event.preventDefault()
+  selectedSidenote.value = { number, content }
+  sidenoteDrawerOpen.value = true
+}
 
 const renderedSegments = computed<Segment[]>(() => {
   if (!props.content) return []

@@ -1,7 +1,7 @@
 <template>
-  <div class="flex h-screen">
+  <div class="article-editor flex h-screen">
     <!-- Editor Area -->
-    <div :class="['flex-1 transition-all', isPanelOpen ? 'mr-80' : 'mx-auto']">
+    <div class="min-w-0 flex-1">
       <div class="h-full overflow-auto">
         <div class="px-8 py-6">
           <!-- Back Button -->
@@ -53,7 +53,7 @@
           </div>
 
           <!-- Title -->
-          <textarea 
+          <textarea
             v-model="title" 
             placeholder="Titre de l´article..." 
             ref="titleRef" 
@@ -63,16 +63,17 @@
             autocorrect="off" 
             autocapitalize="off" 
             spellcheck="false"
-            class="w-full text-4xl font-extrabold bg-transparent border-none focus:outline-none my-4 resize-none overflow-hidden whitespace-pre-line break-words" 
+            class="editor-main-column w-full text-4xl font-extrabold bg-transparent border-none focus:outline-none my-4 resize-none overflow-hidden whitespace-pre-line break-words"
           />
 
           <!-- Sticky Toolbar -->
-          <div class="sticky top-2 z-50 mb-4">
+          <div class="editor-main-column sticky top-2 z-50 mb-4">
             <EditorToolbar 
               v-if="editor" 
               :editor="editor" 
               @open-source-popover="openSourcePopover"
               @open-chart-popover="openChartPopover"
+              @insert-sidenote="insertSidenote"
             />
           </div>
 
@@ -99,7 +100,7 @@
           <!-- Content -->
           <EditorContent 
             :editor="editor"
-            class="prose prose-headings:text-stone-700 prose-h1:text-3xl prose-h2:font-extrabold w-full max-w-[800px] min-h-full"
+            class="editor-main-column prose prose-headings:text-stone-700 prose-h1:text-3xl prose-h2:font-extrabold w-full min-h-full sidenote-layout"
             autocomplete="off" 
             autocorrect="off" 
             autocapitalize="off" 
@@ -160,6 +161,7 @@ import { DragHandle } from '@tiptap/extension-drag-handle'
 import { Mathematics } from '@tiptap/extension-mathematics'
 import { CustomImage } from '~/extensions/custom-image'
 import { Source } from '~/extensions/source'
+import { Sidenote, SidenoteBody, SidenoteNote, SidenoteRef } from '~/extensions/sidenote'
 import { Chart } from '~/extensions/chart'
 import { GrammarCheck, LT_PLUGIN_KEY, triggerFullGrammarCheck } from '~/extensions/grammar-check'
 import { useVocabulary } from '~/composables/useVocabulary'
@@ -290,6 +292,10 @@ const editor = useEditor({
       }
     }),
     Source,
+    SidenoteNote,
+    SidenoteRef,
+    SidenoteBody,
+    Sidenote,
     Chart,
     grammarCheckExtension,
     Typography.configure({
@@ -391,7 +397,7 @@ const fetchData = async () => {
   }
   
   title.value = data.title
-  editor.value?.commands.setContent(data.content)
+  editor.value?.commands.setContent(data.content || '')
   meta.slug = data.slug || ''
   meta.cover = data.cover || ''
   meta.coverLabel = data.cover_label || ''
@@ -576,6 +582,10 @@ const cancelSourcePopover = () => {
   showSourcePopover.value = false
 }
 
+const insertSidenote = () => {
+  editor.value?.chain().focus().insertSidenote().run()
+}
+
 // Chart popover handlers
 const openChartPopover = (event: MouseEvent) => {
   const button = event.target as HTMLElement
@@ -655,6 +665,16 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.article-editor {
+  --sidenote-width: 12rem;
+  --sidenote-gap: 2rem;
+  width: min(100%, 1312px);
+}
+
+.editor-main-column {
+  max-width: 800px;
+}
+
 :deep(.tiptap) {
   border: 0;
   outline: none !important;
@@ -666,5 +686,24 @@ onUnmounted(() => {
   height: auto;
   border-radius: 0.5rem;
   margin: 1rem 0;
+}
+
+@media (min-width: 1536px) {
+  .editor-main-column {
+    margin-left: calc(var(--sidenote-width) + var(--sidenote-gap));
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1535px) {
+  :deep(.ProseMirror .sidenote-row) {
+    display: block;
+    width: 100%;
+    margin-left: 0;
+  }
+
+  :deep(.ProseMirror [data-sidenote-note]) {
+    width: 100%;
+    margin-bottom: 0.75rem;
+  }
 }
 </style>
